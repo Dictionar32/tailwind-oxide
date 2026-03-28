@@ -1,0 +1,56 @@
+{
+  "name": "@tailwind-styled/svelte",
+  "version": "5.0.4",
+  "description": "Svelte 4/5 adapter for tailwind-styled-v4 — cv(), tw(), and use:styled action",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "check": "tsc --noEmit",
+    "test": "node --test test/svelte-adapter.test.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/svelte"
+  },
+  "peerDependencies": {
+    "svelte": ">=4.0.0",
+    "tailwind-merge": ">=2.0.0"
+  },
+  "devDependencies": {
+    "svelte": "^5.0.0",
+    "tailwind-merge": "^3.5.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "tailwind",
+    "svelte",
+    "svelte5",
+    "styled-components",
+    "variants",
+    "css"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  }
+}

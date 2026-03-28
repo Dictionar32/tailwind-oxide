@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "compiler": {
+    "engine": "rust"
+  },
+  "css": {
+    "entry": "src/tailwind.css"
+  }
+}

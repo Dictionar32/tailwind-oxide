@@ -1,0 +1,65 @@
+name: Publish Benchmark Snapshot
+
+on:
+  schedule:
+    - cron: '0 1 * * 0'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: true
+          cache-dependency-paths: native/Cargo.lock
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Rust native bindings
+        run: npm run build:rust
+
+      - name: Build packages
+        run: npm run build
+      
+      - name: Generate massive fixture
+        run: node scripts/generate-massive-fixture.mjs --files=1000 --out=test/fixtures/massive-ci
+      
+      - name: Run massive benchmark
+        run: node scripts/benchmark/massive.mjs --root=test/fixtures/massive-ci --out=artifacts/benchmark/massive-${{ matrix.os }}-node${{ matrix.node }}.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-${{ matrix.os }}-node${{ matrix.node }}
+          path: artifacts/benchmark/*.json
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: benchmark
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts/benchmark
+      - run: node scripts/benchmark/aggregate-results.mjs --input=artifacts/benchmark --out=docs/benchmark/cross-platform.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-cross-platform
+          path: docs/benchmark/cross-platform.json

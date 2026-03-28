@@ -1,0 +1,42 @@
+{
+  "name": "@tailwind-styled/preset",
+  "version": "5.0.4",
+  "description": "Default Tailwind preset for tailwind-styled-v5 — v5 with Tailwind v4 CSS-first support",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./default": {
+      "types": "./dist/defaultPreset.d.ts",
+      "import": "./dist/defaultPreset.js",
+      "require": "./dist/defaultPreset.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/defaultPreset.ts --format cjs,esm --dts --out-dir dist --clean",
+    "dev": "tsup src/index.ts src/defaultPreset.ts --format cjs,esm --dts --out-dir dist --watch",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/preset"
+  },
+  "dependencies": {
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@tailwind-styled/theme",
+  "version": "5.0.4",
+  "description": "Theme engine and live token engine for tailwind-styled-v5",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./live-tokens": {
+      "types": "./dist/liveTokens.d.ts",
+      "import": "./dist/liveTokens.js",
+      "require": "./dist/liveTokens.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --clean",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "test:watch": "node --test --watch test/*.test.mjs",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --watch",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/theme"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  }
+}

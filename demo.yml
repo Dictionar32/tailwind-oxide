@@ -1,0 +1,23 @@
+# Demo configuration for terminalizer
+command:
+  - bash
+  - -c
+  - |
+    cd examples/demo-subcomponents
+    bash ../demo-script.sh
+
+# Frame settings
+frameHeight: 35
+frameWidth: 100
+framePadding: 20
+
+# Colors - Catppuccin Mocha theme
+background: "#1e1e2e"
+foreground: "#cdd6f4"
+
+# Typing speed
+typeSpeed: 30
+delay: 1500
+
+# Output
+output: demo.gif

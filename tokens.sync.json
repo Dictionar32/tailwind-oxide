@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "updatedAt": "2026-03-18T06:18:38.477Z",
+  "tokens": {
+    "color": {
+      "primary": {
+        "$value": "#3b82f6",
+        "$type": "color"
+      },
+      "secondary": {
+        "$value": "#8b5cf6",
+        "$type": "color"
+      },
+      "danger": {
+        "$value": "#ef4444",
+        "$type": "color"
+      },
+      "success": {
+        "$value": "#22c55e",
+        "$type": "color"
+      }
+    },
+    "spacing": {
+      "xs": {
+        "$value": "0.25rem",
+        "$type": "dimension"
+      },
+      "sm": {
+        "$value": "0.5rem",
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": "1rem",
+        "$type": "dimension"
+      },
+      "lg": {
+        "$value": "1.5rem",
+        "$type": "dimension"
+      }
+    },
+    "radius": {
+      "sm": {
+        "$value": "0.25rem",
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": "0.375rem",
+        "$type": "dimension"
+      },
+      "lg": {
+        "$value": "0.5rem",
+        "$type": "dimension"
+      },
+      "full": {
+        "$value": "9999px",
+        "$type": "dimension"
+      }
+    }
+  }
+}

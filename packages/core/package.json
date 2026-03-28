@@ -1,0 +1,127 @@
+{
+  "name": "@tailwind-styled/core",
+  "version": "5.0.4",
+  "description": "Zero-config, zero-runtime, compiler-driven Tailwind styling — tw.div, variants, RSC-aware",
+  "author": "Dictionar32",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "require": "./dist/next.cjs"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.js",
+      "require": "./dist/vite.cjs"
+    },
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./dist/compiler.js",
+      "require": "./dist/compiler.cjs"
+    },
+    "./preset": {
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js",
+      "require": "./dist/preset.cjs"
+    },
+    "./css": {
+      "types": "./dist/css.d.ts",
+      "import": "./dist/css.js",
+      "require": "./dist/css.cjs"
+    },
+    "./plugins": {
+      "types": "./dist/plugins.d.ts",
+      "import": "./dist/plugins.js",
+      "require": "./dist/plugins.cjs"
+    },
+    "./devtools": {
+      "types": "./dist/devtools.d.ts",
+      "import": "./dist/devtools.js",
+      "require": "./dist/devtools.cjs"
+    },
+    "./animate": {
+      "types": "./dist/animate.d.ts",
+      "import": "./dist/animate.js",
+      "require": "./dist/animate.cjs"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "import": "./dist/theme.js",
+      "require": "./dist/theme.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@tailwind-styled/animate": "^5.0.4",
+    "@tailwind-styled/compiler": "^5.0.4",
+    "@tailwind-styled/devtools": "^5.0.4",
+    "@tailwind-styled/next": "^5.0.4",
+    "@tailwind-styled/plugin": "^5.0.4",
+    "@tailwind-styled/preset": "^5.0.4",
+    "@tailwind-styled/runtime-css": "^5.0.4",
+    "@tailwind-styled/theme": "^5.0.4",
+    "@tailwind-styled/vite": "^5.0.4",
+    "inversify": "^8.1.0",
+    "postcss": "^8",
+    "reflect-metadata": "^0.2.2",
+    "tailwind-merge": "^3",
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "tailwindcss": {
+      "optional": true
+    },
+    "@tailwindcss/postcss": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:dev": "tsup --watch",
+    "build:release": "tsup",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "tsup --watch",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/core",
+    "test": "node --test test/*.test.mjs"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "@tailwind-styled/runtime",
+  "version": "5.0.4",
+  "description": "Runtime helpers for tailwind-styled-v5 compound components",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --out-dir dist --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --out-dir dist --watch",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/runtime"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@tailwind-styled/theme": "^5.0.4",
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "sideEffects": false
+}

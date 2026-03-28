@@ -1,0 +1,36 @@
+{
+  "name": "@tailwind-styled/syntax",
+  "version": "5.0.4",
+  "description": "Internal syntax extraction helpers for tailwind-styled-v4",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --clean",
+    "check": "tsc --noEmit",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --watch",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/syntax",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "tsup": "^8",
+    "typescript": "^5"
+  }
+}

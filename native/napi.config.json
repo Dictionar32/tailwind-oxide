@@ -1,0 +1,6 @@
+{
+  "binaryName": "tailwind_styled_parser",
+  "packageName": "@tailwind-styled/native",
+  "typedefHeader": true,
+  "dtsHeader": "/* Auto-generated from Rust — do not edit manually */"
+}

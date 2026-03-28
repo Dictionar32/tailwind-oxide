@@ -1,0 +1,60 @@
+{
+  "version": "5.0.0",
+  "updatedAt": "2026-03-23",
+  "official": [
+    {
+      "name": "@tailwind-styled/plugin-animation",
+      "description": "Animation presets and keyframes — enter/exit transitions, spring physics, scroll-triggered",
+      "version": "5.0.0",
+      "tags": ["animation", "motion", "transition", "keyframes"],
+      "docs": "https://github.com/tailwind-styled/tailwind-styled-v5/tree/main/packages/animate",
+      "install": "npm install @tailwind-styled/plugin-animation@5.0.0",
+      "integrity": "sha256-abc123"
+    },
+    {
+      "name": "@tailwind-styled/plugin-typography",
+      "description": "Prose and typography utilities — headings, body, code blocks, with dark mode",
+      "version": "5.0.0",
+      "tags": ["typography", "prose", "markdown", "content"],
+      "docs": "https://github.com/tailwind-styled/tailwind-styled-v5/tree/main/docs/plugins",
+      "install": "npm install @tailwind-styled/plugin-typography@5.0.0",
+      "integrity": "sha256-def456"
+    },
+    {
+      "name": "@tailwind-styled/plugin-forms",
+      "description": "Form input styling helpers — reset, validation states, custom checkboxes/radios",
+      "version": "5.0.0",
+      "tags": ["forms", "inputs", "validation", "checkbox", "radio"],
+      "docs": "https://github.com/tailwind-styled/tailwind-styled-v5/tree/main/docs/plugins",
+      "install": "npm install @tailwind-styled/plugin-forms@5.0.0",
+      "integrity": "sha256-ghi789"
+    },
+    {
+      "name": "@tailwind-styled/plugin-container-queries",
+      "description": "Container query utilities — @container breakpoints for component-level responsiveness",
+      "version": "5.0.0",
+      "tags": ["container-queries", "responsive", "layout"],
+      "docs": "https://github.com/tailwind-styled/tailwind-styled-v5/tree/main/docs/plugins",
+      "install": "npm install @tailwind-styled/plugin-container-queries@5.0.0",
+      "integrity": "sha256-jkl012"
+    }
+  ],
+  "community": [
+    {
+      "name": "tailwind-styled-animate",
+      "description": "Community animation variants — bounce, pulse, wiggle, and more",
+      "version": "0.1.0",
+      "tags": ["animation", "community"],
+      "author": "community",
+      "install": "npm install tailwind-styled-animate"
+    },
+    {
+      "name": "tailwind-styled-icons",
+      "description": "SVG icon system integrated with tw() variant API",
+      "version": "0.1.0",
+      "tags": ["icons", "svg", "community"],
+      "author": "community",
+      "install": "npm install tailwind-styled-icons"
+    }
+  ]
+}

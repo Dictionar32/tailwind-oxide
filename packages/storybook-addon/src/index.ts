@@ -1,0 +1,213 @@
+/**
+ * tailwind-styled-v4 — Storybook Addon
+ *
+ * Integrasi Storybook untuk komponen tw().
+ * Fitur:
+ *   - withTailwindStyled decorator: inject className ke story
+ *   - generateArgTypes: auto-generate controls dari ComponentConfig
+ *   - enumerateVariantProps: buat semua kombinasi variant untuk testing
+ *
+ * @example
+ * // .storybook/preview.ts
+ * import { withTailwindStyled } from '@tailwind-styled/storybook-addon'
+ * export const decorators = [withTailwindStyled]
+ *
+ * // Button.stories.ts
+ * import { generateArgTypes } from '@tailwind-styled/storybook-addon'
+ * import { buttonConfig } from './Button'
+ *
+ * export default {
+ *   title: 'Components/Button',
+ *   component: Button,
+ *   argTypes: generateArgTypes(buttonConfig),
+ * }
+ */
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type VariantMatrix = Record<string, Array<string | number | boolean>>
+
+export interface ComponentConfig {
+  base?: string
+  variants?: Record<string, Record<string, string>>
+  defaultVariants?: Record<string, string>
+  compoundVariants?: Array<{ class: string; [key: string]: string }>
+}
+
+// ─── Variant enumeration (core utility) ──────────────────────────────────────
+
+/**
+ * Enumerate semua kombinasi variant dari matrix.
+ *
+ * @example
+ * enumerateVariantProps({ size: ['sm','lg'], intent: ['primary','danger'] })
+ * // → [{ size:'sm', intent:'primary' }, { size:'sm', intent:'danger' }, ...]
+ */
+export function enumerateVariantProps(
+  matrix: VariantMatrix
+): Array<Record<string, string | number | boolean>> {
+  const keys = Object.keys(matrix)
+  if (keys.length === 0) return [{}]
+
+  const result: Array<Record<string, string | number | boolean>> = []
+
+  function walk(index: number, current: Record<string, string | number | boolean>) {
+    if (index >= keys.length) {
+      result.push({ ...current })
+      return
+    }
+    const key = keys[index]!
+    for (const value of matrix[key] ?? []) {
+      current[key] = value
+      walk(index + 1, current)
+    }
+  }
+
+  walk(0, {})
+  return result
+}
+
+// ─── Storybook argTypes generator ─────────────────────────────────────────────
+
+/**
+ * Generate Storybook argTypes dari ComponentConfig.
+ * Otomatis membuat kontrol dropdown untuk setiap variant.
+ *
+ * @example
+ * export default {
+ *   title: 'Components/Button',
+ *   argTypes: generateArgTypes({
+ *     variants: {
+ *       intent: { primary: '...', danger: '...' },
+ *       size: { sm: '...', md: '...', lg: '...' },
+ *     },
+ *     defaultVariants: { intent: 'primary', size: 'md' },
+ *   })
+ * }
+ */
+export function generateArgTypes(config: ComponentConfig): Record<string, unknown> {
+  if (!config.variants) return {}
+
+  const argTypes: Record<string, unknown> = {}
+
+  for (const [variantKey, variantValues] of Object.entries(config.variants)) {
+    const options = Object.keys(variantValues)
+    const defaultValue = config.defaultVariants?.[variantKey]
+
+    argTypes[variantKey] = {
+      control: { type: "select" },
+      options,
+      defaultValue,
+      description: `Variant: **${variantKey}**`,
+      table: {
+        type: { summary: options.join(" | ") },
+        defaultValue: defaultValue ? { summary: defaultValue } : undefined,
+        category: "Variants",
+      },
+    }
+  }
+
+  return argTypes
+}
+
+/**
+ * Generate default args dari ComponentConfig.
+ *
+ * @example
+ * export default {
+ *   args: generateDefaultArgs(buttonConfig),
+ * }
+ */
+export function generateDefaultArgs(config: ComponentConfig): Record<string, string> {
+  return { ...(config.defaultVariants ?? undefined) }
+}
+
+// ─── Storybook decorator ───────────────────────────────────────────────────────
+
+/**
+ * Storybook decorator yang inject className dari args ke story.
+ * Compatible dengan Storybook 7+ (CSF3).
+ *
+ * @example
+ * // .storybook/preview.ts
+ * import { withTailwindStyled } from '@tailwind-styled/storybook-addon'
+ * export const decorators = [withTailwindStyled]
+ */
+export function withTailwindStyled(
+  StoryFn: () => unknown,
+  context: {
+    args?: Record<string, unknown>
+    parameters?: { tailwindStyled?: { wrapperClass?: string; padding?: string } }
+  }
+): unknown {
+  const wrapperClass = context.parameters?.tailwindStyled?.wrapperClass ?? ""
+  const padding = context.parameters?.tailwindStyled?.padding ?? "p-8"
+
+  // Wrap story dalam div dengan class dari parameters
+  // Ini memungkinkan dark mode testing, custom backgrounds, dll
+  if (typeof document !== "undefined") {
+    const wrapper = document.createElement("div")
+    wrapper.className = [padding, wrapperClass].filter(Boolean).join(" ")
+    return wrapper
+  }
+
+  return StoryFn()
+}
+
+// ─── Story template helpers ────────────────────────────────────────────────────
+
+/**
+ * Buat "All Variants" story yang menampilkan semua kombinasi variant.
+ * Berguna untuk visual regression testing.
+ *
+ * @example
+ * export const AllVariants = createAllVariantsStory(Button, buttonConfig)
+ */
+export function createVariantStoryArgs(config: ComponentConfig): {
+  combinations: Array<Record<string, string | number | boolean>>
+  matrix: VariantMatrix
+} {
+  if (!config.variants) return { combinations: [{}], matrix: {} }
+
+  const matrix: VariantMatrix = {}
+  for (const [key, values] of Object.entries(config.variants)) {
+    matrix[key] = Object.keys(values)
+  }
+
+  return {
+    combinations: enumerateVariantProps(matrix),
+    matrix,
+  }
+}
+
+/**
+ * Extract class string untuk variant props dari config.
+ * Berguna untuk manual class lookup di stories.
+ *
+ * @example
+ * const cls = getVariantClass(buttonConfig, { intent: 'primary', size: 'lg' })
+ * // → 'bg-blue-500 text-white h-12 text-lg'
+ */
+export function getVariantClass(config: ComponentConfig, props: Record<string, string>): string {
+  const classes: string[] = []
+
+  if (config.base) classes.push(config.base)
+
+  if (config.variants) {
+    for (const [key, values] of Object.entries(config.variants)) {
+      const val = props[key] ?? config.defaultVariants?.[key]
+      if (val && values[val]) classes.push(values[val])
+    }
+  }
+
+  if (config.compoundVariants) {
+    for (const compound of config.compoundVariants) {
+      const { class: cls, ...conditions } = compound
+      if (Object.entries(conditions).every(([k, v]) => props[k] === v)) {
+        classes.push(cls)
+      }
+    }
+  }
+
+  return classes.join(" ")
+}

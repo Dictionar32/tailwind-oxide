@@ -1,0 +1,63 @@
+{
+  "name": "@tailwind-styled/runtime-css",
+  "version": "5.0.4",
+  "description": "RSC-aware CSS injector for tailwind-styled-v5 — streaming-friendly, zero client JS",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/CssInjector.d.ts",
+      "import": "./dist/CssInjector.js",
+      "require": "./dist/CssInjector.cjs"
+    },
+    "./client": {
+      "types": "./dist/batchedInjector.d.ts",
+      "import": "./dist/batchedInjector.js",
+      "require": "./dist/batchedInjector.cjs"
+    },
+    "./server": {
+      "types": "./dist/CssInjector.d.ts",
+      "import": "./dist/CssInjector.js",
+      "require": "./dist/CssInjector.cjs"
+    },
+    "./batched": {
+      "types": "./dist/batchedInjector.d.ts",
+      "import": "./dist/batchedInjector.js",
+      "require": "./dist/batchedInjector.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/CssInjector.tsx src/batchedInjector.ts --format cjs,esm --out-dir dist --clean",
+    "build:dts": "tsup src/CssInjector.tsx src/batchedInjector.ts --format cjs,esm --dts --out-dir dist --clean",
+    "dev": "tsup src/CssInjector.tsx src/batchedInjector.ts --format cjs,esm --dts --out-dir dist --watch",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/runtime-css"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  }
+}

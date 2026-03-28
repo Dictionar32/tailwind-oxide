@@ -1,0 +1,81 @@
+{
+  "name": "@tailwind-styled/vite",
+  "version": "5.0.4",
+  "description": "PRO Engine: styled-components + Tailwind CSS v4, zero-runtime compile, variant system, responsive props, plugin ecosystem",
+  "author": "Dictionar32",
+  "license": "MIT",
+  "keywords": [
+    "tailwind",
+    "tailwindcss",
+    "styled-components",
+    "css-in-js",
+    "variants",
+    "cva",
+    "stitches",
+    "panda-css",
+    "twin.macro",
+    "react",
+    "next.js",
+    "vite",
+    "zero-runtime",
+    "typescript",
+    "shadcn",
+    "radix",
+    "headless-ui"
+  ],
+  "homepage": "https://github.com/Dictionar32/tailwind-styled-v4",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dictionar32/tailwind-styled-v4.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dictionar32/tailwind-styled-v4/issues"
+  },
+  "readme": "README.md",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/plugin.cjs",
+  "module": "./dist/plugin.js",
+  "types": "./dist/plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js",
+      "require": "./dist/plugin.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:release": "tsup",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "tsup --watch",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/vite",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@tailwind-styled/compiler": "^5.0.4",
+    "@tailwind-styled/engine": "^5.0.4",
+    "@tailwind-styled/scanner": "^5.0.4",
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "vite": ">=6.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsup": "^8",
+    "typescript": "^5"
+  }
+}

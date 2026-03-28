@@ -1,0 +1,10 @@
+command: bash
+cwd: /workspace/tailwind-styled-v4.2
+cols: 100
+rows: 30
+commands:
+  - echo "🚀 tailwind-styled v4.1 Demo"
+  - npm run health:summary
+  - npm run validate:pr5:gaps
+  - npm run bench:massive -- --root=test/fixtures/large-project
+  - echo "✅ Demo complete"

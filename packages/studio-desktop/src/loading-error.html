@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>tailwind-styled Studio — Starting…</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a; color: #e2e8f0;
+      height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .card {
+      text-align: center; max-width: 420px; padding: 2rem;
+    }
+    .logo {
+      width: 48px; height: 48px; background: #3b82f6; border-radius: 12px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 1.5rem;
+    }
+    h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    p  { font-size: 0.875rem; color: #94a3b8; line-height: 1.6; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid #1e3a5f;
+      border-top-color: #3b82f6; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 1.5rem auto 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error { display: none; }
+    .error p { color: #f87171; }
+    .btn {
+      margin-top: 1rem; padding: 0.5rem 1.25rem;
+      background: #3b82f6; color: white; border: none;
+      border-radius: 6px; font-size: 0.875rem; cursor: pointer;
+    }
+    .btn:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">⚡</div>
+    <h1>tailwind-styled Studio</h1>
+    <p>Starting the studio server…</p>
+    <div class="spinner" id="spinner"></div>
+
+    <div class="error" id="error-state">
+      <p id="error-msg">Studio server failed to start.</p>
+      <button class="btn" onclick="location.reload()">Retry</button>
+    </div>
+  </div>
+
+  <script>
+    const state = { attempts: 0 }
+    const maxAttempts = 20
+
+    function poll() {
+      state.attempts++
+      fetch('http://localhost:3030/health')
+        .then(r => r.ok ? location.replace('http://localhost:3030') : retry())
+        .catch(() => retry())
+    }
+
+    function retry() {
+      if (state.attempts >= maxAttempts) {
+        document.getElementById('spinner').style.display = 'none'
+        document.getElementById('error-state').style.display = 'block'
+        document.getElementById('error-msg').textContent =
+          `Studio server did not respond after ${maxAttempts} attempts. ` +
+          'Check that Node.js is installed and scripts/v45/studio.mjs exists.'
+        return
+      }
+      setTimeout(poll, 500)
+    }
+
+    setTimeout(poll, 800)
+  </script>
+</body>
+</html>

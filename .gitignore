@@ -1,0 +1,50 @@
+node_modules
+dist
+.tw-cache
+.next
+native/target
+build.log
+.cache
+.turbo
+.kilo
+
+# IDE
+.vscode/
+.idea/
+
+# Lock files (monorepo)
+package-lock.json
+Cargo.lock
+
+# npm config
+.npmrc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.eslintcache
+
+# Environment & secrets (preventive)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Electron build output
+dist-electron/
+
+# Compiled native addons
+*.node
+*.dll
+
+# Compiled executables
+*.exe
+
+# TS build info
+*.tsbuildinfo

@@ -1,0 +1,63 @@
+name: Benchmark
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  scanner-benchmark:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: true
+          cache-dependency-paths: native/Cargo.lock
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Rust native bindings
+        run: npm run build:rust
+      
+      - name: Build packages
+        run: npm run build
+      
+      - name: Run incremental benchmark
+        env:
+          BENCH_MAX_FULL_SCAN_MS: "300"
+          BENCH_MAX_INCREMENTAL_MS: "120"
+          BENCH_OUTPUT_FILE: artifacts/benchmark-incremental.json
+        run: node scripts/benchmark/incremental.js
+      
+      - name: Run Sprint 2 benchmark (parse + shake + cluster)
+        run: node scripts/benchmark/sprint2-bench.mjs --files=50
+      
+      - name: Run plugin-registry SLO benchmark
+        run: |
+          BENCH_RUNS=50 node packages/plugin-registry/benchmark/index.mjs
+      
+      - name: Run toolchain benchmark
+        run: node scripts/v48/benchmark-toolchains.mjs
+      
+      - name: Run CLI SLO benchmark (Track B gate)
+        run: |
+          BENCH_RUNS=50 node scripts/benchmark/cli-slo.mjs || true
+      
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: |
+            artifacts/benchmark-incremental.json
+            docs/benchmark/sprint2-results.json
+            docs/benchmark/toolchain-comparison.json

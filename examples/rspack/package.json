@@ -1,0 +1,18 @@
+{
+  "name": "example-rspack",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build",
+    "test": "node -e \"const fs=require('fs');['rspack.config.mjs','src/index.ts'].forEach(p=>{if(!fs.existsSync(p)) throw new Error('missing '+p)});console.log('rspack example files ok')\""
+  },
+  "dependencies": {
+    "tailwind-styled-v4": "*"
+  },
+  "devDependencies": {
+    "@rspack/cli": "^1.0.0",
+    "@rspack/core": "^1.0.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "@tailwind-styled/engine",
+  "version": "5.0.4",
+  "description": "Unified build engine for tailwind-styled-v4",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js",
+      "require": "./dist/internal.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@tailwind-styled/analyzer": "^5.0.4",
+    "@tailwind-styled/compiler": "^5.0.4",
+    "@tailwind-styled/scanner": "^5.0.4",
+    "@tailwind-styled/shared": "^5.0.4",
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "build:dev": "tsup --config tsup.config.ts --sourcemap --watch",
+    "build:release": "tsup --config tsup.config.ts --no-sourcemap",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "tsup --config tsup.config.ts --watch",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/engine",
+    "test": "node --test --test-concurrency=1 test/engine.test.mjs test/engine.behavior.test.mjs",
+    "test:watch": "node --test --watch --test-concurrency=1 test/engine.test.mjs test/engine.behavior.test.mjs"
+  }
+}

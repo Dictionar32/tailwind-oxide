@@ -1,0 +1,79 @@
+# .npmignore
+# Development files
+artifacts/
+benchmarks/
+bindings/
+docs/
+examples/
+plans/
+scripts/
+test/
+native/
+
+# Source files (should be compiled)
+packages/*/src/
+packages/*/test/
+packages/*/tsconfig.json
+packages/*/vitest.config.ts
+packages/*/tsup.config.ts
+
+# Build artifacts (keep only dist)
+**/dist/**/*.map
+**/*.tsbuildinfo
+
+# Configuration files
+*.config.js
+*.config.ts
+*.config.mjs
+*.config.json
+!tailwind-styled.config.json
+.oxlintrc.json
+biome.json
+demo-cli-config.yml
+tokens.sync.json
+
+# Git and IDE
+.git/
+.github/
+.vscode/
+.gitignore
+.gitattributes
+
+# CI/CD
+.circleci/
+.travis.yml
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Package manager locks (optional, depending on your strategy)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+node_modules
+SUPPORT.md
+SETUP.md
+RELEASE.md
+.cache
+.kilo
+ANNOUNCEMENT.md
+CHANGELOG.md
+CONTRIBUTING.md

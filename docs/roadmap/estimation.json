@@ -1,0 +1,25 @@
+{
+  "title": "Estimasi Pengembangan Ekosistem Tailwind v4",
+  "items": [
+    {
+      "label": "Peningkatan Performa (Oxide Engine)",
+      "value": 40
+    },
+    {
+      "label": "Adopsi CSS-First Configuration",
+      "value": 25
+    },
+    {
+      "label": "Integrasi Bundler Modern (Vite)",
+      "value": 20
+    },
+    {
+      "label": "Otomatisasi & DX (Content Detection)",
+      "value": 10
+    },
+    {
+      "label": "Migrasi & Tooling Pendukung",
+      "value": 5
+    }
+  ]
+}

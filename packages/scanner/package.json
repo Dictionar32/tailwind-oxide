@@ -1,0 +1,45 @@
+{
+  "name": "@tailwind-styled/scanner",
+  "version": "5.0.4",
+  "description": "Standalone class scanner for tailwind-styled-v4",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@tailwind-styled/shared": "^5.0.4",
+    "@tailwind-styled/syntax": "^5.0.4",
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/worker.ts --format cjs,esm --dts --out-dir dist --clean --external typescript",
+    "build:dev": "tsup src/index.ts src/worker.ts --format cjs,esm --dts --sourcemap --out-dir dist --watch --external typescript",
+    "build:release": "tsup src/index.ts src/worker.ts --format cjs,esm --dts --no-sourcemap --out-dir dist --clean --external typescript",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "dev": "tsup src/index.ts src/worker.ts --format cjs,esm --dts --out-dir dist --watch --external typescript",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/scanner",
+    "test": "node --test test/*.test.mjs"
+  }
+}

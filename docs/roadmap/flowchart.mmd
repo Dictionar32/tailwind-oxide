@@ -1,0 +1,18 @@
+flowchart TD
+  A[Input: File Project\nJS/TS/HTML] --> B[Scanner Otomatis\nTailwind v4 Detection]
+  B --> C[Ekstraksi Kelas\nClass Set]
+
+  C --> D[Vite Plugin\n@tailwindcss/vite]
+  C --> E[PostCSS Plugin\n@tailwindcss/postcss]
+  C --> F[Rspack Plugin\n@tailwind-styled/rspack]
+
+  D --> G[Engine Layer\nOrkestrasi Build]
+  E --> G
+  F --> G
+
+  H[CSS-First Config\n@theme/@utility/@variant] --> G
+  I[Fitur Modern CSS\nOKLCH/Container Query/3D] --> G
+
+  G --> J[Oxide/Tailwind Compiler\nGenerate CSS]
+  J --> K[Optimasi\ntailwind-merge + incremental]
+  K --> L[Output\nTailwind-Styled Components + CSS Final]

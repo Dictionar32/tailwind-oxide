@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "compiler": {
+    "engine": "rust"
+  },
+  "css": {
+    "entry": "src/app/globals.css"
+  }
+}

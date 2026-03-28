@@ -1,0 +1,76 @@
+{
+  "name": "tailwind-styled-vscode",
+  "version": "5.0.4",
+  "displayName": "Tailwind Styled VS Code",
+  "description": "VS Code extension for Tailwind Styled - trace, doctor, and why commands",
+  "publisher": "tailwind-styled",
+  "engines": {
+    "node": ">=20",
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "IntelliSense"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:vue",
+    "onLanguage:svelte"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tailwind-styled.trace",
+        "title": "Tailwind Styled: Trace Class"
+      },
+      {
+        "command": "tailwind-styled.why",
+        "title": "Tailwind Styled: Why in Bundle"
+      },
+      {
+        "command": "tailwind-styled.doctor",
+        "title": "Tailwind Styled: Run Doctor"
+      }
+    ],
+    "configuration": {
+      "title": "Tailwind Styled",
+      "properties": {
+        "tailwindStyled.enableTraceHover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable hover trace for Tailwind classes"
+        },
+        "tailwindStyled.enableAutocomplete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable autocomplete for Tailwind classes"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup src/extension.ts --format cjs --out-dir dist --external vscode",
+    "dev": "tsup src/extension.ts --format cjs --out-dir dist --watch --external vscode",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/vscode"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/vscode": "^1.75.0",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@tailwind-styled/engine": "^5.0.4",
+    "inversify": "^8.1.0",
+    "reflect-metadata": "^0.2.2",
+    "zod": "^4.3.6"
+  }
+}

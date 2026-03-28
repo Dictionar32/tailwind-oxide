@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-03-21T03:18:03.051Z",
+  "system": {
+    "platform": "win32",
+    "cpus": 8,
+    "nodeVersion": "v22.18.0"
+  },
+  "sampleFile": "packages/scanner/src/index.ts",
+  "runs": 20,
+  "oxc": {
+    "parser": true,
+    "transform": true
+  },
+  "results": [
+    {
+      "label": "tw parse",
+      "runs": 20,
+      "avgMs": 162,
+      "p50Ms": 157,
+      "p95Ms": 273,
+      "minMs": 109,
+      "maxMs": 273,
+      "errorRate": "0.000"
+    },
+    {
+      "label": "tw transform",
+      "runs": 20,
+      "avgMs": 218,
+      "p50Ms": 225,
+      "p95Ms": 252,
+      "minMs": 171,
+      "maxMs": 252,
+      "errorRate": "0.000"
+    },
+    {
+      "label": "tw minify",
+      "runs": 20,
+      "avgMs": 229,
+      "p50Ms": 215,
+      "p95Ms": 348,
+      "minMs": 150,
+      "maxMs": 348,
+      "errorRate": "0.000"
+    },
+    {
+      "label": "tw format",
+      "runs": 20,
+      "avgMs": 246,
+      "p50Ms": 259,
+      "p95Ms": 327,
+      "minMs": 142,
+      "maxMs": 327,
+      "errorRate": "0.000"
+    },
+    {
+      "label": "tw lint (1w)",
+      "runs": 20,
+      "avgMs": 976,
+      "p50Ms": 925,
+      "p95Ms": 1543,
+      "minMs": 656,
+      "maxMs": 1543,
+      "errorRate": "0.000"
+    }
+  ],
+  "memoryMb": {
+    "rss": 48,
+    "heapUsed": 5
+  }
+}

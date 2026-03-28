@@ -1,0 +1,60 @@
+{
+  "name": "@tailwind-styled/compiler",
+  "version": "5.0.4",
+  "description": "Compiler pipeline for tailwind-styled-v4",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.js",
+      "require": "./dist/internal.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "@tailwind-styled/plugin-api": "^5.0.4",
+    "@tailwind-styled/shared": "^5.0.4",
+    "@tailwind-styled/syntax": "^5.0.4",
+    "inversify": "^8.1.0",
+    "postcss": "^8",
+    "reflect-metadata": "^0.2.2",
+    "tailwind-merge": "^3",
+    "zod": "^4.3.6"
+  },
+  "optionalDependencies": {
+    "oxc-parser": "^0.118.0"
+  },
+  "peerDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/internal.ts --format cjs,esm --dts --out-dir dist --clean",
+    "dev": "tsup src/index.ts src/internal.ts --format cjs,esm --dts --out-dir dist --watch",
+    "check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "pack:check": "node ../../scripts/check-pack-artifacts.mjs packages/compiler"
+  }
+}

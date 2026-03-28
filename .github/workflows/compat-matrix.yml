@@ -1,0 +1,55 @@
+name: Compatibility Matrix
+
+on:
+  pull_request:
+  push:
+    branches: [main, work, alpha]
+
+jobs:
+  matrix-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          cache: true
+          cache-dependency-paths: native/Cargo.lock
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      
+      - name: Install
+        run: npm ci
+      
+      - name: Build Rust native bindings
+        run: npm run build:rust
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Test
+        run: npm run test
+      
+      - name: Create matrix summary
+        run: |
+          mkdir -p artifacts
+          cat > artifacts/compat-${{ matrix.node }}.json <<JSON
+          {
+            "node": "${{ matrix.node }}",
+            "status": "pass"
+          }
+          JSON
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compat-node-${{ matrix.node }}
+          path: artifacts/compat-${{ matrix.node }}.json

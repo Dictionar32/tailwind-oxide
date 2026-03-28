@@ -1,0 +1,5 @@
+node_modules
+.next
+native
+tailwind_styled_parser.node
+tsconfig.tsbuildinfo
