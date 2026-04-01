@@ -9,7 +9,7 @@ import {
   getModeColor,
   getMemoryColor,
   getPipelinePercentages,
-} from "../dist/trace-utils.js"
+} from "../dist/index.js"
 
 test("trace utilities provide reusable formatting functions", () => {
   // Format memory
@@ -63,7 +63,7 @@ test("trace utilities calculate pipeline percentages", () => {
   }
 
   const { scanPct, analyzePct, compilePct } = getPipelinePercentages(metrics)
-  assert.equal(scanPct, 25) // 200/1000
+  assert.equal(scanPct, 20) // 200/1000
   assert.equal(analyzePct, 30) // 300/1000
   assert.equal(compilePct, 50) // 500/1000
 

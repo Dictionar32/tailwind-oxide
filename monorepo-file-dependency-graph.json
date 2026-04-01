@@ -45,10 +45,10 @@
     ]
   },
   "summary": {
-    "fileCount": 399,
-    "directEdgeCount": 520,
-    "transitiveEdgeCount": 2474,
-    "orphanCount": 235,
+    "fileCount": 401,
+    "directEdgeCount": 523,
+    "transitiveEdgeCount": 2621,
+    "orphanCount": 236,
     "cycleCount": 1
   },
   "files": {
@@ -200,13 +200,13 @@
           "packages/next/src/withTailwindStyled.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/rspack/src/schemas.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts",
           "packages/vite/src/schemas.ts"
         ]
@@ -276,11 +276,11 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -556,11 +556,11 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -681,12 +681,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts",
           "packages/vite/src/schemas.ts"
         ]
@@ -752,7 +752,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -790,6 +791,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -819,7 +821,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
-          "packages/scanner/src/schemas.ts"
+          "packages/scanner/src/schemas.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -859,6 +862,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -889,7 +893,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -927,6 +932,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -960,7 +966,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -999,6 +1006,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -1023,7 +1031,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1066,6 +1075,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -1095,7 +1105,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1134,6 +1145,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -1161,7 +1173,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1203,6 +1216,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -1225,7 +1239,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -1266,6 +1282,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -1313,7 +1330,9 @@
           "packages/animate/src/types.ts",
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -1355,7 +1374,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1394,7 +1414,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
-          "packages/scanner/src/schemas.ts"
+          "packages/scanner/src/schemas.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1433,7 +1454,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
-          "packages/scanner/src/schemas.ts"
+          "packages/scanner/src/schemas.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1539,7 +1561,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -1580,7 +1603,8 @@
           "packages/cli/src/utils/runtime.ts",
           "packages/cli/src/utils/traceService.ts",
           "packages/cli/src/utils/traceTargetService.ts",
-          "packages/cli/src/utils/whyService.ts"
+          "packages/cli/src/utils/whyService.ts",
+          "packages/shared/src/index.ts"
         ],
         "transitive": [
           "packages/analyzer/src/analyzeWorkspace.ts",
@@ -1658,12 +1682,11 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -1755,12 +1778,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -1883,7 +1906,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -2138,12 +2162,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -2456,12 +2480,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -2623,12 +2647,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -2700,12 +2724,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -2800,7 +2824,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -2919,12 +2944,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -3056,7 +3081,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -3153,7 +3179,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -3190,7 +3217,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -3257,7 +3285,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -3675,10 +3704,10 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -3734,11 +3763,11 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -3816,11 +3845,11 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -3912,6 +3941,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -3946,7 +3976,8 @@
           "packages/compiler/src/astParser.ts",
           "packages/compiler/src/nativeBridge.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -3977,6 +4008,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4026,6 +4058,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4055,7 +4088,8 @@
         "transitive": [
           "packages/compiler/src/nativeBridge.ts",
           "packages/compiler/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -4084,6 +4118,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4139,6 +4174,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4206,6 +4242,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4241,7 +4278,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -4271,6 +4309,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4308,7 +4347,8 @@
           "packages/compiler/src/twDetector.ts",
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
-          "packages/plugin-api/src/schemas.ts"
+          "packages/plugin-api/src/schemas.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -4337,6 +4377,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4387,6 +4428,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4436,6 +4478,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4460,7 +4503,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -4489,6 +4534,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4539,8 +4585,8 @@
           "packages/compiler/src/schemas.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -4598,8 +4644,8 @@
           "packages/compiler/src/classExtractor.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -4627,6 +4673,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -4662,7 +4709,8 @@
           "packages/compiler/src/twDetector.ts",
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
-          "packages/plugin-api/src/schemas.ts"
+          "packages/plugin-api/src/schemas.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -4690,6 +4738,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4711,9 +4760,7 @@
       "kind": "package-source",
       "workspace": "packages/compiler",
       "imports": {
-        "direct": [
-          "packages/preset/src/defaultPreset.ts"
-        ],
+        "direct": [],
         "transitive": []
       },
       "dependents": {
@@ -4741,6 +4788,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4766,7 +4814,9 @@
           "packages/compiler/src/schemas.ts",
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -4800,6 +4850,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4851,6 +4902,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4902,6 +4954,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4955,6 +5008,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -4980,7 +5034,9 @@
           "packages/compiler/src/schemas.ts",
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -5007,6 +5063,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5037,6 +5094,7 @@
           "packages/compiler/src/nativeBridge.ts",
           "packages/compiler/src/twDetector.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -5065,6 +5123,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5123,6 +5182,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5169,6 +5229,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5191,7 +5252,8 @@
           "packages/compiler/src/incrementalEngine.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -5220,6 +5282,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5266,6 +5329,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5315,6 +5379,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5341,7 +5406,8 @@
         ],
         "transitive": [
           "packages/compiler/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -5375,6 +5441,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5431,6 +5498,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -5556,7 +5624,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -5598,8 +5667,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -5660,7 +5729,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -5729,7 +5799,10 @@
         "direct": [
           "packages/devtools/src/index.tsx"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [],
@@ -5777,6 +5850,7 @@
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/index.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/liveTokens.ts",
@@ -5801,6 +5875,7 @@
         ],
         "transitive": [
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/native-bridge.ts",
           "packages/theme/src/schemas.ts"
@@ -5880,7 +5955,8 @@
         "transitive": [
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -5993,7 +6069,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -6014,6 +6091,7 @@
         ],
         "transitive": [
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/native-bridge.ts",
           "packages/theme/src/schemas.ts"
@@ -6076,7 +6154,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -6186,12 +6265,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts",
           "packages/vite/src/schemas.ts"
         ]
@@ -6288,8 +6367,12 @@
       "kind": "package-source",
       "workspace": "packages/devtools",
       "imports": {
-        "direct": [],
-        "transitive": []
+        "direct": [
+          "packages/shared/src/index.ts"
+        ],
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -6300,6 +6383,18 @@
       }
     },
     "packages/devtools/test/devtools.test.mjs": {
+      "kind": "package-test",
+      "workspace": "packages/devtools",
+      "imports": {
+        "direct": [],
+        "transitive": []
+      },
+      "dependents": {
+        "direct": [],
+        "transitive": []
+      }
+    },
+    "packages/devtools/test/trace-utils.test.mjs": {
       "kind": "package-test",
       "workspace": "packages/devtools",
       "imports": {
@@ -6335,7 +6430,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -6359,6 +6455,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/index.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6397,7 +6494,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -6420,6 +6518,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/index.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6443,7 +6542,8 @@
         "transitive": [
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
-          "packages/scanner/src/schemas.ts"
+          "packages/scanner/src/schemas.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -6466,6 +6566,7 @@
           "packages/cli/src/utils/whyService.ts",
           "packages/core/src/vite.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6536,10 +6637,10 @@
           "packages/engine/src/watch-native.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -6566,6 +6667,7 @@
           "packages/cli/src/utils/whyService.ts",
           "packages/core/src/vite.ts",
           "packages/engine/src/internal.ts",
+          "packages/engine/src/schemas.ts",
           "packages/vite/src/index.ts",
           "src/umbrella/cli.ts",
           "src/umbrella/tw.ts",
@@ -6631,11 +6733,11 @@
           "packages/engine/src/schemas.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -6658,6 +6760,7 @@
           "packages/cli/src/index.ts",
           "packages/core/src/vite.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6702,6 +6805,7 @@
           "packages/engine/src/impactTracker.ts",
           "packages/engine/src/index.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6740,6 +6844,7 @@
           "packages/cli/src/utils/whyService.ts",
           "packages/core/src/vite.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6758,7 +6863,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -6780,6 +6887,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6798,7 +6906,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -6821,6 +6931,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -6890,18 +7001,19 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
       "dependents": {
         "direct": [
           "packages/engine/src/index.ts",
-          "packages/engine/src/internal.ts"
+          "packages/engine/src/internal.ts",
+          "packages/engine/src/schemas.ts"
         ],
         "transitive": [
           "examples/integration-test/adapter-check.mjs",
@@ -6973,6 +7085,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/index.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -7000,8 +7113,67 @@
       "kind": "package-source",
       "workspace": "packages/engine",
       "imports": {
-        "direct": [],
-        "transitive": []
+        "direct": [
+          "packages/engine/src/plugin-api.ts"
+        ],
+        "transitive": [
+          "packages/analyzer/src/analyzeWorkspace.ts",
+          "packages/analyzer/src/binding.ts",
+          "packages/analyzer/src/classToCss.ts",
+          "packages/analyzer/src/index.ts",
+          "packages/analyzer/src/schemas.ts",
+          "packages/analyzer/src/semantic.ts",
+          "packages/analyzer/src/types.ts",
+          "packages/analyzer/src/utils.ts",
+          "packages/compiler/src/astParser.ts",
+          "packages/compiler/src/astTransform.ts",
+          "packages/compiler/src/atomicCss.ts",
+          "packages/compiler/src/classExtractor.ts",
+          "packages/compiler/src/classMerger.ts",
+          "packages/compiler/src/componentHoister.ts",
+          "packages/compiler/src/context.ts",
+          "packages/compiler/src/coreCompiler.ts",
+          "packages/compiler/src/cssCompiler.ts",
+          "packages/compiler/src/deadStyleEliminator.ts",
+          "packages/compiler/src/incrementalEngine.ts",
+          "packages/compiler/src/internal.ts",
+          "packages/compiler/src/loaderCore.ts",
+          "packages/compiler/src/loadTailwindConfig.ts",
+          "packages/compiler/src/nativeBridge.ts",
+          "packages/compiler/src/pipeline.ts",
+          "packages/compiler/src/routeCssCollector.ts",
+          "packages/compiler/src/rscAnalyzer.ts",
+          "packages/compiler/src/rustCssCompiler.ts",
+          "packages/compiler/src/safelistGenerator.ts",
+          "packages/compiler/src/schemas.ts",
+          "packages/compiler/src/staticVariantCompiler.ts",
+          "packages/compiler/src/styleBucketSystem.ts",
+          "packages/compiler/src/styleRegistry.ts",
+          "packages/compiler/src/tailwindEngine.ts",
+          "packages/compiler/src/twDetector.ts",
+          "packages/compiler/src/variantCompiler.ts",
+          "packages/engine/src/bundleAnalyzer.ts",
+          "packages/engine/src/impactTracker.ts",
+          "packages/engine/src/incremental.ts",
+          "packages/engine/src/index.ts",
+          "packages/engine/src/internal.ts",
+          "packages/engine/src/ir.ts",
+          "packages/engine/src/metrics.ts",
+          "packages/engine/src/metricsWriter.ts",
+          "packages/engine/src/native-bridge.ts",
+          "packages/engine/src/reverseLookup.ts",
+          "packages/engine/src/watch-native.ts",
+          "packages/engine/src/watch.ts",
+          "packages/plugin-api/src/index.ts",
+          "packages/plugin-api/src/schemas.ts",
+          "packages/scanner/src/cache-native.ts",
+          "packages/scanner/src/index.ts",
+          "packages/scanner/src/native-bridge.ts",
+          "packages/scanner/src/schemas.ts",
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
+          "packages/syntax/src/index.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -7056,7 +7228,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -7078,6 +7252,7 @@
           "packages/core/src/vite.ts",
           "packages/engine/src/index.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -7116,6 +7291,7 @@
           "packages/cli/src/utils/whyService.ts",
           "packages/core/src/vite.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -7264,8 +7440,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -7310,8 +7486,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -7372,7 +7548,9 @@
           "packages/plugin-api/src/schemas.ts",
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -7408,6 +7586,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/plugin/src/internal.ts",
@@ -7480,6 +7659,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/plugin/src/index.ts",
@@ -7577,7 +7757,8 @@
         ],
         "transitive": [
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -7599,7 +7780,8 @@
         "transitive": [
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -7616,7 +7798,8 @@
         ],
         "transitive": [
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -7633,7 +7816,8 @@
         ],
         "transitive": [
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -7674,47 +7858,11 @@
       },
       "dependents": {
         "direct": [
-          "packages/compiler/src/loadTailwindConfig.ts",
           "packages/preset/src/index.ts"
         ],
         "transitive": [
-          "examples/integration-test/adapter-check.mjs",
-          "examples/integration-test/pipeline-check.mjs",
-          "examples/rspack/src/index.ts",
-          "examples/vite-react/vite.config.ts",
-          "packages/cli/src/api.ts",
-          "packages/cli/src/commands/core.ts",
-          "packages/cli/src/commands/program.ts",
-          "packages/cli/src/commands/trace.ts",
-          "packages/cli/src/commands/unified.ts",
-          "packages/cli/src/commands/why.ts",
-          "packages/cli/src/index.ts",
-          "packages/cli/src/utils/traceService.ts",
-          "packages/cli/src/utils/traceTargetService.ts",
-          "packages/cli/src/utils/whyService.ts",
-          "packages/compiler/src/index.ts",
-          "packages/compiler/src/internal.ts",
-          "packages/core/src/compiler.ts",
           "packages/core/src/preset.ts",
-          "packages/core/src/vite.ts",
-          "packages/engine/src/index.ts",
-          "packages/engine/src/internal.ts",
-          "packages/engine/src/plugin-api.ts",
-          "packages/next/src/turbopackLoader.ts",
-          "packages/next/src/webpackLoader.ts",
-          "packages/rspack/src/loader.ts",
-          "packages/studio-desktop/src/main.js",
-          "packages/vite/src/index.ts",
-          "packages/vite/src/plugin.ts",
-          "scripts/benchmark/watch-stability.mjs",
-          "scripts/v46/transform.mjs",
-          "scripts/v50/cluster.mjs",
-          "src/umbrella/cli.ts",
-          "src/umbrella/compiler.ts",
-          "src/umbrella/engine.ts",
-          "src/umbrella/preset.ts",
-          "src/umbrella/tw.ts",
-          "src/umbrella/vite.ts"
+          "src/umbrella/preset.ts"
         ]
       }
     },
@@ -7801,8 +7949,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -7956,6 +8104,7 @@
         ],
         "transitive": [
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/native-bridge.ts",
           "packages/theme/src/schemas.ts"
@@ -7979,6 +8128,7 @@
         "transitive": [
           "packages/runtime/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/index.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/liveTokens.ts",
@@ -8052,7 +8202,8 @@
           "packages/scanner/src/native-bridge.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -8103,6 +8254,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/scanner/src/worker.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
@@ -8167,7 +8319,9 @@
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -8225,6 +8379,7 @@
           "packages/core/src/styledSystem.ts",
           "packages/core/src/twProxy.ts",
           "packages/core/src/vite.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -8253,7 +8408,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -8304,6 +8461,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/scanner/src/worker.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
@@ -8402,6 +8560,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/studio-desktop/src/main.js",
           "packages/vite/src/index.ts",
           "packages/vite/src/plugin.ts",
@@ -8442,7 +8601,8 @@
         "transitive": [
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -8514,7 +8674,9 @@
       "kind": "package-source",
       "workspace": "packages/shared",
       "imports": {
-        "direct": [],
+        "direct": [
+          "packages/shared/src/trace.ts"
+        ],
         "transitive": []
       },
       "dependents": {
@@ -8524,12 +8686,14 @@
           "packages/animate/src/binding.ts",
           "packages/animate/src/preset.ts",
           "packages/animate/src/registry.ts",
+          "packages/cli/src/api.ts",
           "packages/cli/src/utils/traceService.ts",
           "packages/compiler/src/coreCompiler.ts",
           "packages/compiler/src/incrementalEngine.ts",
           "packages/compiler/src/loaderCore.ts",
           "packages/compiler/src/nativeBridge.ts",
           "packages/compiler/src/rustCssCompiler.ts",
+          "packages/devtools/src/index.tsx",
           "packages/engine/src/incremental.ts",
           "packages/engine/src/index.ts",
           "packages/engine/src/metricsWriter.ts",
@@ -8557,7 +8721,6 @@
           "packages/analyzer/src/types.ts",
           "packages/animate/src/index.ts",
           "packages/cli/src/analyze.ts",
-          "packages/cli/src/api.ts",
           "packages/cli/src/commands/core.ts",
           "packages/cli/src/commands/doctor.ts",
           "packages/cli/src/commands/program.ts",
@@ -8583,6 +8746,7 @@
           "packages/core/src/animate.ts",
           "packages/core/src/compiler.ts",
           "packages/core/src/createComponent.ts",
+          "packages/core/src/devtools.ts",
           "packages/core/src/index.ts",
           "packages/core/src/liveTokenEngine.ts",
           "packages/core/src/plugins.ts",
@@ -8594,6 +8758,7 @@
           "packages/engine/src/impactTracker.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/plugin/src/index.ts",
@@ -8632,6 +8797,7 @@
           "src/umbrella/animate.ts",
           "src/umbrella/cli.ts",
           "src/umbrella/compiler.ts",
+          "src/umbrella/devtools.ts",
           "src/umbrella/engine.ts",
           "src/umbrella/index.ts",
           "src/umbrella/plugin-api.ts",
@@ -8720,6 +8886,147 @@
       "dependents": {
         "direct": [],
         "transitive": []
+      }
+    },
+    "packages/shared/src/trace.ts": {
+      "kind": "package-source",
+      "workspace": "packages/shared",
+      "imports": {
+        "direct": [],
+        "transitive": []
+      },
+      "dependents": {
+        "direct": [
+          "packages/shared/src/index.ts"
+        ],
+        "transitive": [
+          "examples/integration-test/adapter-check.mjs",
+          "examples/integration-test/pipeline-check.mjs",
+          "examples/rspack/src/index.ts",
+          "examples/vite-react/vite.config.ts",
+          "packages/analyzer/src/analyzeWorkspace.ts",
+          "packages/analyzer/src/binding.ts",
+          "packages/analyzer/src/classToCss.ts",
+          "packages/analyzer/src/index.ts",
+          "packages/analyzer/src/schemas.ts",
+          "packages/analyzer/src/semantic.ts",
+          "packages/analyzer/src/types.ts",
+          "packages/analyzer/src/utils.ts",
+          "packages/animate/src/binding.ts",
+          "packages/animate/src/index.ts",
+          "packages/animate/src/preset.ts",
+          "packages/animate/src/registry.ts",
+          "packages/cli/src/analyze.ts",
+          "packages/cli/src/api.ts",
+          "packages/cli/src/commands/core.ts",
+          "packages/cli/src/commands/doctor.ts",
+          "packages/cli/src/commands/program.ts",
+          "packages/cli/src/commands/trace.ts",
+          "packages/cli/src/commands/unified.ts",
+          "packages/cli/src/commands/why.ts",
+          "packages/cli/src/extract.ts",
+          "packages/cli/src/index.ts",
+          "packages/cli/src/scan.ts",
+          "packages/cli/src/stats.ts",
+          "packages/cli/src/utils/analyzer.ts",
+          "packages/cli/src/utils/doctorService.ts",
+          "packages/cli/src/utils/traceService.ts",
+          "packages/cli/src/utils/traceTargetService.ts",
+          "packages/cli/src/utils/whyService.ts",
+          "packages/compiler/src/astTransform.ts",
+          "packages/compiler/src/classExtractor.ts",
+          "packages/compiler/src/context.ts",
+          "packages/compiler/src/coreCompiler.ts",
+          "packages/compiler/src/incrementalEngine.ts",
+          "packages/compiler/src/index.ts",
+          "packages/compiler/src/internal.ts",
+          "packages/compiler/src/loaderCore.ts",
+          "packages/compiler/src/nativeBridge.ts",
+          "packages/compiler/src/rustCssCompiler.ts",
+          "packages/compiler/src/safelistGenerator.ts",
+          "packages/compiler/src/styleBucketSystem.ts",
+          "packages/compiler/src/twDetector.ts",
+          "packages/core/src/animate.ts",
+          "packages/core/src/compiler.ts",
+          "packages/core/src/createComponent.ts",
+          "packages/core/src/devtools.ts",
+          "packages/core/src/index.ts",
+          "packages/core/src/liveTokenEngine.ts",
+          "packages/core/src/plugins.ts",
+          "packages/core/src/styledSystem.ts",
+          "packages/core/src/theme.ts",
+          "packages/core/src/twProxy.ts",
+          "packages/core/src/vite.ts",
+          "packages/devtools/src/index.tsx",
+          "packages/engine/src/bundleAnalyzer.ts",
+          "packages/engine/src/impactTracker.ts",
+          "packages/engine/src/incremental.ts",
+          "packages/engine/src/index.ts",
+          "packages/engine/src/internal.ts",
+          "packages/engine/src/metricsWriter.ts",
+          "packages/engine/src/native-bridge.ts",
+          "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
+          "packages/engine/src/watch-native.ts",
+          "packages/next/src/turbopackLoader.ts",
+          "packages/next/src/webpackLoader.ts",
+          "packages/plugin-api/src/index.ts",
+          "packages/plugin/src/index.ts",
+          "packages/plugin/src/internal.ts",
+          "packages/plugin/src/plugins.ts",
+          "packages/plugin/src/presets.ts",
+          "packages/rspack/src/loader.ts",
+          "packages/runtime/src/index.ts",
+          "packages/runtime/src/index.ts.test.ts",
+          "packages/scanner/src/cache-native.ts",
+          "packages/scanner/src/index.ts",
+          "packages/scanner/src/native-bridge.ts",
+          "packages/scanner/src/worker.ts",
+          "packages/studio-desktop/src/main.js",
+          "packages/svelte/src/index.ts",
+          "packages/svelte/test/svelte-adapter.test.mjs",
+          "packages/theme/src/index.ts",
+          "packages/theme/src/liveTokenEngine.ts",
+          "packages/theme/src/liveTokens.ts",
+          "packages/theme/src/native-bridge.ts",
+          "packages/vite/src/index.ts",
+          "packages/vite/src/plugin.ts",
+          "packages/vscode/src/commands/doctorCommand.ts",
+          "packages/vscode/src/commands/traceCommand.ts",
+          "packages/vscode/src/commands/whyCommand.ts",
+          "packages/vscode/src/extension.ts",
+          "packages/vscode/src/providers/completionProvider.ts",
+          "packages/vscode/src/providers/hoverProvider.ts",
+          "packages/vscode/src/providers/inlineDecorationProvider.ts",
+          "packages/vscode/src/services/engineService.ts",
+          "packages/vue/src/index.ts",
+          "packages/vue/test/vue-adapter.test.mjs",
+          "scripts/benchmark/memory-profile.mjs",
+          "scripts/benchmark/watch-stability.mjs",
+          "scripts/v46/transform.mjs",
+          "scripts/v47/shake-css.mjs",
+          "scripts/v48/lint-parallel.mjs",
+          "scripts/v49/split-routes.mjs",
+          "scripts/v50/cluster.mjs",
+          "scripts/v50/metrics.mjs",
+          "src/umbrella/analyzer.ts",
+          "src/umbrella/animate.ts",
+          "src/umbrella/cli.ts",
+          "src/umbrella/compiler.ts",
+          "src/umbrella/devtools.ts",
+          "src/umbrella/engine.ts",
+          "src/umbrella/index.ts",
+          "src/umbrella/plugin-api.ts",
+          "src/umbrella/plugin.ts",
+          "src/umbrella/runtime.ts",
+          "src/umbrella/scanner.ts",
+          "src/umbrella/shared.ts",
+          "src/umbrella/svelte.ts",
+          "src/umbrella/theme.ts",
+          "src/umbrella/tw.ts",
+          "src/umbrella/vite.ts",
+          "src/umbrella/vue.ts"
+        ]
       }
     },
     "packages/shared/src/version.ts": {
@@ -8819,12 +9126,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -8866,7 +9173,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -8884,7 +9193,8 @@
           "packages/svelte/src/index.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -8927,6 +9237,7 @@
           "packages/engine/src/index.ts",
           "packages/engine/src/internal.ts",
           "packages/engine/src/plugin-api.ts",
+          "packages/engine/src/schemas.ts",
           "packages/next/src/turbopackLoader.ts",
           "packages/next/src/webpackLoader.ts",
           "packages/rspack/src/loader.ts",
@@ -9103,7 +9414,8 @@
           "packages/theme/src/schemas.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9128,7 +9440,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -9155,7 +9469,8 @@
           "packages/theme/src/liveTokenEngine.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9178,7 +9493,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -9304,12 +9621,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -9378,12 +9695,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -9481,7 +9798,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9503,7 +9821,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9525,7 +9844,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9566,7 +9886,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9601,7 +9922,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9621,7 +9943,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9641,7 +9964,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9660,7 +9984,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9725,7 +10050,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -9743,7 +10070,8 @@
           "packages/vue/src/index.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9846,7 +10174,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -9948,12 +10277,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -10296,8 +10625,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -10329,7 +10658,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -10372,7 +10702,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -10427,7 +10758,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -10506,11 +10838,11 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -10538,7 +10870,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -10625,7 +10958,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -10657,7 +10991,8 @@
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -10782,12 +11117,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -10830,8 +11165,8 @@
           "packages/compiler/src/variantCompiler.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -10863,7 +11198,10 @@
         "direct": [
           "packages/devtools/src/index.tsx"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [],
@@ -10928,12 +11266,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -10984,6 +11322,7 @@
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/index.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/liveTokens.ts",
@@ -11022,7 +11361,8 @@
         ],
         "transitive": [
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -11054,7 +11394,8 @@
         "transitive": [
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -11118,6 +11459,7 @@
         "transitive": [
           "packages/runtime/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/index.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/liveTokens.ts",
@@ -11141,7 +11483,8 @@
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -11156,7 +11499,9 @@
         "direct": [
           "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [],
@@ -11185,7 +11530,8 @@
           "packages/svelte/src/index.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
@@ -11230,6 +11576,7 @@
         ],
         "transitive": [
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/theme/src/liveTokenEngine.ts",
           "packages/theme/src/native-bridge.ts",
           "packages/theme/src/schemas.ts"
@@ -11343,12 +11690,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts"
         ]
       },
@@ -11417,12 +11764,12 @@
           "packages/engine/src/watch.ts",
           "packages/plugin-api/src/index.ts",
           "packages/plugin-api/src/schemas.ts",
-          "packages/preset/src/defaultPreset.ts",
           "packages/scanner/src/cache-native.ts",
           "packages/scanner/src/index.ts",
           "packages/scanner/src/native-bridge.ts",
           "packages/scanner/src/schemas.ts",
           "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts",
           "packages/syntax/src/index.ts",
           "packages/vite/src/schemas.ts"
         ]
@@ -11440,7 +11787,8 @@
           "packages/vue/src/index.ts"
         ],
         "transitive": [
-          "packages/shared/src/index.ts"
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
