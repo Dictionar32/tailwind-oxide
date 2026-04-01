@@ -281,3 +281,20 @@ export class LRUCache<K, V> {
     return this.cache.size
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Trace Utilities
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type { TraceSnapshot, TraceSummary } from "./trace"
+export {
+  getHealthColor,
+  getModeColor,
+  formatMemory,
+  formatDuration,
+  calculateHealth,
+  getBuildTimeColor,
+  getMemoryColor,
+  createTraceSnapshot,
+  getPipelinePercentages,
+} from "./trace"

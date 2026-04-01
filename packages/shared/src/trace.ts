@@ -1,8 +1,8 @@
 /**
- * Shared trace utilities for devtools, CLI, and dashboard
+ * Shared trace utilities for CLI, devtools, and dashboard
  * 
- * This module provides reusable trace snapshot handling, formatting, and analysis
- * across the tailwind-styled-v4 ecosystem.
+ * Provides reusable trace snapshot handling, formatting, and analysis
+ * across the tailwind-styled-v4 ecosystem without introducing coupling.
  */
 
 export interface TraceSnapshot {
@@ -105,7 +105,10 @@ export function formatDuration(ms: number | null): string {
 /**
  * Calculate health status from metrics
  */
-export function calculateHealth(metrics: TraceSnapshot, summary?: TraceSummary): "healthy" | "degraded" | "unhealthy" {
+export function calculateHealth(
+  metrics: TraceSnapshot,
+  summary?: TraceSummary
+): "healthy" | "degraded" | "unhealthy" {
   if (summary?.health?.status) return summary.health.status
 
   // Fallback to simple heuristics

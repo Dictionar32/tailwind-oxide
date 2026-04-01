@@ -28,7 +28,7 @@ import {
   getPipelinePercentages,
   type TraceSnapshot,
   type TraceSummary,
-} from "./trace-utils"
+} from "@tailwind-styled/shared"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -1892,9 +1892,8 @@ export function DevToolsProvider(): React.ReactElement | null {
 }
 
 // Export shared trace utilities for reuse across CLI, dashboard, and devtools
+export type { TraceSnapshot, TraceSummary } from "@tailwind-styled/shared"
 export {
-  type TraceSnapshot,
-  type TraceSummary,
   getHealthColor,
   getModeColor,
   formatMemory,

@@ -31,3 +31,17 @@ export {
   traceTarget,
 } from "./utils/traceTargetService"
 export { type WhyResult, whyClass } from "./utils/whyService"
+
+// Re-export shared trace utilities for consumption by CLI users
+export type { TraceSnapshot, TraceSummary } from "@tailwind-styled/shared"
+export {
+  getHealthColor,
+  getModeColor,
+  formatMemory,
+  formatDuration,
+  calculateHealth,
+  getBuildTimeColor,
+  getMemoryColor,
+  createTraceSnapshot,
+  getPipelinePercentages,
+} from "@tailwind-styled/shared"
