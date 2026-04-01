@@ -46,8 +46,8 @@
   },
   "summary": {
     "fileCount": 401,
-    "directEdgeCount": 523,
-    "transitiveEdgeCount": 2621,
+    "directEdgeCount": 524,
+    "transitiveEdgeCount": 2624,
     "orphanCount": 236,
     "cycleCount": 1
   },
@@ -6309,9 +6309,12 @@
       "workspace": "packages/dashboard",
       "imports": {
         "direct": [
-          "packages/dashboard/src/state.js"
+          "packages/dashboard/src/state.js",
+          "packages/shared/src/index.ts"
         ],
-        "transitive": []
+        "transitive": [
+          "packages/shared/src/trace.ts"
+        ]
       },
       "dependents": {
         "direct": [
@@ -8693,6 +8696,7 @@
           "packages/compiler/src/loaderCore.ts",
           "packages/compiler/src/nativeBridge.ts",
           "packages/compiler/src/rustCssCompiler.ts",
+          "packages/dashboard/src/index.ts",
           "packages/devtools/src/index.tsx",
           "packages/engine/src/incremental.ts",
           "packages/engine/src/index.ts",
@@ -8797,6 +8801,7 @@
           "src/umbrella/animate.ts",
           "src/umbrella/cli.ts",
           "src/umbrella/compiler.ts",
+          "src/umbrella/dashboard.ts",
           "src/umbrella/devtools.ts",
           "src/umbrella/engine.ts",
           "src/umbrella/index.ts",
@@ -8957,6 +8962,7 @@
           "packages/core/src/theme.ts",
           "packages/core/src/twProxy.ts",
           "packages/core/src/vite.ts",
+          "packages/dashboard/src/index.ts",
           "packages/devtools/src/index.tsx",
           "packages/engine/src/bundleAnalyzer.ts",
           "packages/engine/src/impactTracker.ts",
@@ -9013,6 +9019,7 @@
           "src/umbrella/animate.ts",
           "src/umbrella/cli.ts",
           "src/umbrella/compiler.ts",
+          "src/umbrella/dashboard.ts",
           "src/umbrella/devtools.ts",
           "src/umbrella/engine.ts",
           "src/umbrella/index.ts",
@@ -11183,7 +11190,9 @@
           "packages/dashboard/src/index.ts"
         ],
         "transitive": [
-          "packages/dashboard/src/state.js"
+          "packages/dashboard/src/state.js",
+          "packages/shared/src/index.ts",
+          "packages/shared/src/trace.ts"
         ]
       },
       "dependents": {
