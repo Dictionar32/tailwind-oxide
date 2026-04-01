@@ -38,6 +38,7 @@ tokens.sync.json
 .vscode/
 .gitignore
 .gitattributes
+.npmrc
 
 # CI/CD
 .circleci/
