@@ -18,6 +18,17 @@
 "use client"
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import {
+  formatMemory,
+  formatDuration,
+  getBuildTimeColor,
+  getModeColor,
+  getHealthColor,
+  getMemoryColor,
+  getPipelinePercentages,
+  type TraceSnapshot,
+  type TraceSummary,
+} from "./trace-utils"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -835,49 +846,6 @@ function AnalyzerPanel() {
 // Panel: Trace — build timeline, pipeline events, memory profile
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface TraceSnapshot {
-  generatedAt: string
-  buildMs: number | null
-  scanMs: number | null
-  analyzeMs: number | null
-  compileMs: number | null
-  memoryMb: { rss: number; heapUsed: number; heapTotal: number } | null
-  classCount: number | null
-  fileCount: number | null
-  cssBytes: number | null
-  mode: string | null
-  eventsReceived?: number
-  eventsProcessed?: number
-  batchesProcessed?: number
-  incrementalUpdates?: number
-  fullRescans?: number
-}
-
-interface TraceSummary {
-  workspace: {
-    totalPackages: number
-    totalFiles: number
-    totalClasses: number
-    lastScanDurationMs: number
-    lastBuildDurationMs: number
-  }
-  cache: {
-    hitRate: number
-    totalEntries: number
-    memoryUsageMb: number
-  }
-  pipeline: {
-    scanDurationMs: number
-    analyzeDurationMs: number
-    compileDurationMs: number
-    totalDurationMs: number
-  }
-  health: {
-    status: "healthy" | "degraded" | "unhealthy"
-    issues: Array<{ severity: string; message: string }>
-  }
-}
-
 const DASHBOARD_BASE = "http://localhost:3000"
 
 function TracePanel() {
@@ -935,38 +903,6 @@ function TracePanel() {
     }
   }, [autoRefresh, fetchAll])
 
-  // Mode color
-  const modeColor = (mode: string | null | undefined): string => {
-    switch (mode) {
-      case "build":
-        return "#fbbf24"
-      case "watch":
-        return "#34d399"
-      case "jit":
-        return "#60a5fa"
-      case "error":
-        return "#f87171"
-      case "idle":
-        return "#71717a"
-      default:
-        return "#52525b"
-    }
-  }
-
-  // Health color
-  const healthColor = (status: string | undefined): string => {
-    switch (status) {
-      case "healthy":
-        return "#34d399"
-      case "degraded":
-        return "#fbbf24"
-      case "unhealthy":
-        return "#f87171"
-      default:
-        return "#52525b"
-    }
-  }
-
   // Render bar chart for build time history
   const renderHistoryChart = () => {
     const vals = history.map((h) => h.buildMs ?? 0).filter((v) => v > 0)
@@ -1006,7 +942,7 @@ function TracePanel() {
           style: {
             width: `${barWidth}px`,
             height: `${h}px`,
-            background: v > 1000 ? "#f87171" : v > 500 ? "#fbbf24" : "#34d399",
+            background: getBuildTimeColor(v),
             borderRadius: "2px 2px 0 0",
             opacity: i === vals.length - 1 ? 1 : 0.5,
             flexShrink: 0,
@@ -1020,15 +956,12 @@ function TracePanel() {
   // Render pipeline breakdown bar
   const renderPipelineBar = () => {
     if (!metrics) return null
+    const { scanPct, analyzePct, compilePct } = getPipelinePercentages(metrics)
     const scan = metrics.scanMs ?? 0
     const analyze = metrics.analyzeMs ?? 0
     const compile = metrics.compileMs ?? 0
-    const total = scan + analyze + compile
-    if (total === 0) return null
 
-    const scanPct = (scan / total) * 100
-    const analyzePct = (analyze / total) * 100
-    const compilePct = (compile / total) * 100
+    if (scanPct === 0 && analyzePct === 0 && compilePct === 0) return null
 
     return React.createElement(
       "div",
@@ -1166,15 +1099,15 @@ function TracePanel() {
               width: "8px",
               height: "8px",
               borderRadius: "50%",
-              background: modeColor(metrics.mode),
-              boxShadow: `0 0 6px ${modeColor(metrics.mode)}`,
+              background: getModeColor(metrics.mode),
+              boxShadow: `0 0 6px ${getModeColor(metrics.mode)}`,
             },
           }),
           React.createElement(
             "span",
             {
               style: {
-                color: modeColor(metrics.mode),
+                color: getModeColor(metrics.mode),
                 fontWeight: "600",
                 fontSize: "12px",
                 textTransform: "uppercase" as const,
@@ -1241,7 +1174,7 @@ function TracePanel() {
           React.createElement("span", { style: S.varKey }, "Status"),
           React.createElement(
             "span",
-            { style: { color: healthColor(summary.health?.status), fontWeight: "600" } },
+            { style: { color: getHealthColor(summary.health?.status), fontWeight: "600" } },
             summary.health?.status ?? "unknown"
           )
         ),
@@ -1290,12 +1223,7 @@ function TracePanel() {
           {
             style: {
               ...S.varValue,
-              color:
-                (metrics.buildMs ?? 0) > 1000
-                  ? "#f87171"
-                  : (metrics.buildMs ?? 0) > 500
-                    ? "#fbbf24"
-                    : "#34d399",
+              color: getBuildTimeColor(metrics.buildMs),
             },
           },
           metrics.buildMs !== null ? `${metrics.buildMs}ms` : "—"
@@ -1321,9 +1249,7 @@ function TracePanel() {
           React.createElement(
             "span",
             { style: { ...S.varValue, color: "#818cf8" } },
-            metrics.cssBytes < 1024
-              ? `${metrics.cssBytes}B`
-              : `${(metrics.cssBytes / 1024).toFixed(1)}KB`
+            formatMemory(metrics.cssBytes)
           )
         )
     ),
@@ -1412,7 +1338,7 @@ function TracePanel() {
             "span",
             {
               style: {
-                color: metrics.memoryMb.heapUsed > 500 ? "#f87171" : "#34d399",
+                color: getMemoryColor(metrics.memoryMb.heapUsed),
                 fontWeight: "600",
               },
             },
@@ -1963,4 +1889,17 @@ const S = {
 export function DevToolsProvider(): React.ReactElement | null {
   if (process.env.NODE_ENV === "production") return null
   return React.createElement(TwDevTools)
+}
+
+// Export shared trace utilities for reuse across CLI, dashboard, and devtools
+export {
+  type TraceSnapshot,
+  type TraceSummary,
+  getHealthColor,
+  getModeColor,
+  formatMemory,
+  formatDuration,
+  getBuildTimeColor,
+  getMemoryColor,
+  getPipelinePercentages,
 }
