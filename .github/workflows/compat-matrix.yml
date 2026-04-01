@@ -32,8 +32,8 @@ jobs:
       - name: Build Rust native bindings
         run: npm run build:rust
       
-      - name: Build
-        run: npm run build
+      - name: Verify root + example builds
+        run: npm run verify:builds
       
       - name: Test
         run: npm run test

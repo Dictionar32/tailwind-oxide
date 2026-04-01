@@ -5,19 +5,15 @@
  */
 
 import path from "node:path"
+import { createRequire } from "node:module"
 import { fileURLToPath } from "node:url"
 import {
   createDebugLogger,
   loadNativeBinding,
   resolveNativeBindingCandidates,
-  resolveRuntimeDir,
   TwError,
 } from "@tailwind-styled/shared"
-import {
-  parseComponentMetadataJson,
-  parseNativeRscJson,
-  type ComponentMetadata,
-} from "./schemas"
+import { type ComponentMetadata, parseComponentMetadataJson, parseNativeRscJson } from "./schemas"
 
 export type { ComponentMetadata, NativeRscResult } from "./schemas"
 
@@ -27,20 +23,27 @@ const log = createDebugLogger("compiler:native")
 
 export interface NativeBridge {
   transform?: (source: string, options?: unknown) => unknown
+  transformSourceNative?: (source: string, opts?: Record<string, string>) => NativeTransformResult | null
   extractClassesFromSourceNative?: (source: string) => string[]
-  analyzeClassesNative?: (filesJson: string, cwd: string, flags: number) => {
-    safelist?: string[]
-    [key: string]: unknown
+  hasTwUsageNative?: (source: string) => boolean
+  isAlreadyTransformedNative?: (source: string) => boolean
+  analyzeRscNative?: (source: string, filename: string) => {
+    isServer: boolean
+    needsClientDirective: boolean
+    clientReasons: string[]
   }
-  transformSourceNative?: (source: string, opts?: Record<string, string>) => {
+  analyzeClassesNative?: (
+    filesJson: string,
+    cwd: string,
+    flags: number
+  ) => {
     code: string
     classes: string[]
     changed: boolean
     rscJson?: string
     metadataJson?: string
+    safelist?: string[]
   } | null
-  hasTwUsageNative?: (source: string) => boolean
-  isAlreadyTransformedNative?: (source: string) => boolean
 }
 
 export interface NativeTransformResult {
@@ -62,6 +65,15 @@ export interface TransformResult {
   }
   metadata?: ComponentMetadata[]
 }
+
+const NATIVE_UNAVAILABLE_MESSAGE =
+  "[tailwind-styled/compiler v5] Native binding is required but not available.\n" +
+  "This package requires native Rust bindings. There is no JavaScript fallback.\n" +
+  "Please ensure:\n" +
+  "  1. The native module is properly installed\n" +
+  "  2. You have run: npm run build:rust (or use prebuilt binary)\n" +
+  "\n" +
+  "For help, see: https://tailwind-styled.dev/docs/install"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Native Bridge - Factory Pattern
@@ -86,6 +98,51 @@ const isValidCompilerBridge = (module: unknown): module is NativeBridge => {
   )
 }
 
+const isRawNativeBinding = (module: unknown): module is Record<string, unknown> => {
+  const candidate = module as Record<string, unknown> | null | undefined
+  return !!(
+    candidate &&
+    (typeof candidate["transform_source"] === "function" ||
+      typeof candidate["has_tw_usage"] === "function" ||
+      typeof candidate["extract_classes_from_source"] === "function" ||
+      typeof candidate["parse_classes"] === "function" ||
+      typeof candidate["transformSource"] === "function" ||
+      typeof candidate["hasTwUsage"] === "function" ||
+      typeof candidate["extractClassesFromSource"] === "function" ||
+      typeof candidate["parseClasses"] === "function" ||
+      typeof candidate["transformSourceNative"] === "function")
+  )
+}
+
+const adaptRawNativeBinding = (module: Record<string, unknown>): NativeBridge => {
+  const cast = module as Record<string, any>
+
+  const hasTwUsage = cast.has_tw_usage ?? cast.hasTwUsage
+  const isAlreadyTransformed = cast.is_already_transformed ?? cast.isAlreadyTransformed
+  const analyzeRsc = cast.analyze_rsc ?? cast.analyzeRsc
+  const analyzeClasses = cast.analyze_classes ?? cast.analyzeClasses
+  const transformSource = cast.transform_source ?? cast.transformSource ?? cast.transformSourceNative
+  const extractClassesFromSource =
+    cast.extract_classes_from_source ?? cast.extractClassesFromSource
+
+  return {
+    hasTwUsageNative: hasTwUsage ? (source: string) => hasTwUsage(source) : undefined,
+    isAlreadyTransformedNative: isAlreadyTransformed
+      ? (source: string) => isAlreadyTransformed(source)
+      : undefined,
+    analyzeRscNative: analyzeRsc ? (source: string, filename = "") => analyzeRsc(source, filename) : undefined,
+    analyzeClassesNative: analyzeClasses
+      ? (filesJson: string, cwd: string, flags: number) => analyzeClasses(filesJson, cwd, flags)
+      : undefined,
+    transformSourceNative: transformSource
+      ? (source: string, opts?: Record<string, string>) => transformSource(source, opts)
+      : undefined,
+    extractClassesFromSourceNative: extractClassesFromSource
+      ? (source: string) => extractClassesFromSource(source)
+      : undefined,
+  }
+}
+
 const createBridgeLoader = () => {
   const bridgeState: { current: NativeBridge | null | undefined } = {
     current: undefined,
@@ -94,19 +151,24 @@ const createBridgeLoader = () => {
   const loadBridge = (): NativeBridge => {
     if (bridgeState.current !== undefined) {
       if (bridgeState.current === null) {
-        throw new TwError(
-          "rust",
-          "NATIVE_BINDING_UNAVAILABLE",
-          "[tailwind-styled/compiler v5] Native binding is required but not available.\n" +
-            "Please ensure:\n" +
-            "  1. The native module is properly installed\n" +
-            "  2. You have run: npm run build:rust (or use prebuilt binary)\n" +
-            "  3. TWS_NO_NATIVE environment variable is not set\n" +
-            "\n" +
-            "For help, see: https://tailwind-styled.dev/docs/install"
-        )
+        throw new TwError("rust", "NATIVE_BINDING_UNAVAILABLE", NATIVE_UNAVAILABLE_MESSAGE)
       }
       return bridgeState.current
+    }
+
+    if (process.env.TWS_NO_NATIVE === "1" || process.env.TWS_NO_NATIVE === "true" ||
+        process.env.TWS_NO_RUST === "1" || process.env.TWS_NO_RUST === "true") {
+      bridgeState.current = null
+      const envVar = process.env.TWS_NO_NATIVE ? "TWS_NO_NATIVE" : "TWS_NO_RUST"
+      throw new TwError("rust", "NATIVE_BINDING_UNAVAILABLE",
+        `[tailwind-styled/compiler v5] Native binding is required but not available.\n` +
+        `The ${envVar} environment variable is set.\n` +
+        `This package requires native Rust bindings. There is no JavaScript fallback.\n` +
+        `Please ensure:\n` +
+        `  1. The native module is properly installed\n` +
+        `  2. You have run: npm run build:rust (or use prebuilt binary)\n` +
+        `\n` +
+        `For help, see: https://tailwind-styled.dev/docs/install`)
     }
 
     const runtimeDir = getDirname()
@@ -129,6 +191,29 @@ const createBridgeLoader = () => {
       log(`native bridge loaded successfully`)
       bridgeState.current = binding
       return bridgeState.current
+    }
+
+    // Fallback strategy: try to accept raw .node bindings from native folder
+    // by wrapping snake_case exported functions into the compiler native bridge API.
+    const fallbackRequire = createRequire(path.join(runtimeDir, "noop.cjs"))
+
+    for (const candidate of candidates) {
+      try {
+        const mod = fallbackRequire(candidate)
+        if (isValidCompilerBridge(mod)) {
+          log(`native bridge loaded successfully from fallback candidate ${candidate}`)
+          bridgeState.current = mod
+          return bridgeState.current
+        }
+
+        if (isRawNativeBinding(mod)) {
+          log(`adapted raw native binding from ${candidate}`)
+          bridgeState.current = adaptRawNativeBinding(mod)
+          return bridgeState.current
+        }
+      } catch {
+        // skip invalid fallback candidates
+      }
     }
 
     bridgeState.current = null
@@ -172,7 +257,9 @@ export const getNativeBridge = bridgeLoader.get
 
 export const resetNativeBridgeCache = bridgeLoader.reset
 
-export const adaptNativeResult = (raw: NativeTransformResult): TransformResult & {
+export const adaptNativeResult = (
+  raw: NativeTransformResult
+): TransformResult & {
   metadata?: ComponentMetadata[]
 } => {
   const rsc = raw.rscJson ? parseNativeRscJson(raw.rscJson) : undefined

@@ -1,6 +1,5 @@
-import { RuleIR, SourceLocation } from "./ir"
-import { BundleAnalyzer, BundleAnalysisResult } from "./bundleAnalyzer"
-import type { ScanWorkspaceResult, ScanFileResult } from "@tailwind-styled/scanner"
+import type { ScanFileResult, ScanWorkspaceResult } from "@tailwind-styled/scanner"
+import { type BundleAnalysisResult, BundleAnalyzer } from "./bundleAnalyzer"
 
 type ImpactScanFile = ScanFileResult & {
   variants?: string[]
@@ -28,6 +27,7 @@ export interface ComponentImpact {
 }
 
 export class ImpactTracker {
+  // biome-ignore lint: reserved for future bundle analysis integration
   private bundleAnalyzer: BundleAnalyzer
   private criticalPatterns = [
     "fixed",
@@ -251,7 +251,7 @@ export class ImpactTracker {
   private isCriticalClass(className: string): boolean {
     const normalized = className.startsWith(".") ? className.slice(1) : className
     return this.criticalPatterns.some(
-      (pattern) => normalized === pattern || normalized.startsWith(pattern + ":")
+      (pattern) => normalized === pattern || normalized.startsWith(`${pattern}:`)
     )
   }
 

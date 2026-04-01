@@ -3,9 +3,28 @@
  */
 
 import fs from "node:fs"
+import { createRequire } from "node:module"
 import path from "node:path"
 
+const _require = (() => {
+  try {
+    return createRequire(import.meta.url)
+  } catch {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require as NodeRequire
+  }
+})()
+
 export type TailwindConfig = Record<string, unknown>
+
+type TailwindContentObject = {
+  files?: unknown
+}
+
+const getContentObject = (content: unknown): TailwindContentObject | undefined => {
+  if (typeof content !== "object" || content === null) return undefined
+  return content as TailwindContentObject
+}
 
 const CONFIG_FILES = [
   "tailwind.config.ts",
@@ -50,7 +69,7 @@ export const loadTailwindConfig = (cwd = process.cwd()): TailwindConfig => {
     const fullPath = path.join(cwd, file)
     if (fs.existsSync(fullPath)) {
       try {
-        const mod = require(fullPath)
+        const mod = _require(fullPath)
         const config = mod.default ?? mod
         configCache.set(config, cwd)
         console.log(`[tailwind-styled-v4] Using config: ${file}`)
@@ -62,18 +81,21 @@ export const loadTailwindConfig = (cwd = process.cwd()): TailwindConfig => {
   }
 
   console.log("[tailwind-styled-v4] No tailwind config found → using built-in preset")
-  const { defaultPreset } = require("../../preset/src/defaultPreset")
+  const { defaultPreset } = _require("../../preset/src/defaultPreset")
   configCache.set(defaultPreset, cwd)
   return defaultPreset
 }
 
 export const getContentPaths = (config: TailwindConfig, cwd = process.cwd()): string[] => {
-  if (Array.isArray(config.content)) {
-    return config.content.filter((item: unknown) => typeof item === "string")
+  const content = config.content
+
+  if (Array.isArray(content)) {
+    return content.filter((item: unknown): item is string => typeof item === "string")
   }
 
-  if (config.content?.files) {
-    return config.content.files.filter((f: unknown) => typeof f === "string")
+  const contentObject = getContentObject(content)
+  if (Array.isArray(contentObject?.files)) {
+    return contentObject.files.filter((file: unknown): file is string => typeof file === "string")
   }
 
   return ["src", "app", "pages", "components"]
@@ -89,7 +111,9 @@ export const isZeroConfig = (cwd = process.cwd()): boolean => {
   return !CONFIG_FILES.some((f) => fs.existsSync(path.join(cwd, f)))
 }
 
-export const bootstrapZeroConfig = (cwd = process.cwd()): {
+export const bootstrapZeroConfig = (
+  cwd = process.cwd()
+): {
   generatedConfig: boolean
   generatedCss: boolean
 } => {
@@ -105,7 +129,7 @@ export const bootstrapZeroConfig = (cwd = process.cwd()): {
 
   const generatedCss = (() => {
     if (hasGlobalCss) return false
-    const { defaultGlobalCss } = require("../../preset/src/defaultPreset")
+    const { defaultGlobalCss } = _require("../../preset/src/defaultPreset")
     const appDir = fs.existsSync(path.join(cwd, "src/app"))
       ? "src/app"
       : fs.existsSync(path.join(cwd, "app"))

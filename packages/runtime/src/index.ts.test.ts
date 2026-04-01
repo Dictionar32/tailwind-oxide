@@ -7,7 +7,7 @@
 // These tests are type-checked via tsc but not executed in CI yet.
 // They document expected behaviour.
 
-import { cx, createComponent, type ComponentMetadata } from "./index"
+import { type ComponentMetadata, createComponent, cx } from "./index"
 
 // cx
 const a = cx("foo", "bar") // "foo bar"
@@ -45,5 +45,3 @@ const meta: ComponentMetadata = {
   },
 }
 void meta
-
-export {}

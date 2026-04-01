@@ -1,5 +1,5 @@
-import React from "react"
 import type { AnimateOptions } from "@tailwind-styled/animate"
+import React from "react"
 
 import { processContainer } from "./containerQuery"
 import { twMerge } from "./merge"
@@ -9,6 +9,7 @@ import type { ComponentConfig, TwStyledComponent } from "./types"
 const ALWAYS_BLOCKED = new Set(["base", "_ref", "state", "container", "containerName"])
 
 type RuntimeProps = Record<string, unknown> & { className?: string }
+// biome-ignore lint: exported for external consumers
 type RuntimeComponent = TwStyledComponent<RuntimeProps>
 
 function normalizeClassName(value: unknown): string | undefined {
@@ -70,10 +71,24 @@ function attachExtend<P extends object>(
   component.extend = (strings: TemplateStringsArray) => {
     const extra = strings.raw.join("").trim().replace(/\s+/g, " ")
     const merged = twMerge(base, extra)
-    return createComponent<P>(
+    const extended = createComponent<P>(
       originalTag,
       typeof config === "string" ? merged : { ...config, base: merged }
     )
+    // Carry over subcomponents from original to extended
+    for (const key of Object.keys(component)) {
+      if (
+        key !== "extend" &&
+        key !== "withVariants" &&
+        key !== "animate" &&
+        key !== "displayName"
+      ) {
+        ;(extended as unknown as Record<string, unknown>)[key] = (
+          component as unknown as Record<string, unknown>
+        )[key]
+      }
+    }
+    return extended
   }
 
   component.withVariants = (newConfig: Partial<ComponentConfig>) => {
@@ -129,11 +144,7 @@ export function createComponent<P extends object = Record<string, unknown>>(
     ? processState(typeof tag === "string" ? tag : "component", stateConfig)
     : null
   const containerResult = containerConfig
-    ? processContainer(
-        typeof tag === "string" ? tag : "component",
-        containerConfig,
-        containerName
-      )
+    ? processContainer(typeof tag === "string" ? tag : "component", containerConfig, containerName)
     : null
 
   const engineClasses = [stateResult?.stateClass, containerResult?.containerClass]

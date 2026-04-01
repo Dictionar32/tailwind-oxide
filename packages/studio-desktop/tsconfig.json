@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "target": "ES2020"
+  },
+  "include": ["src/**/*.js"],
+  "exclude": ["dist-electron", "node_modules"]
+}

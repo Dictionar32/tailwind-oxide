@@ -82,6 +82,6 @@ export class ScanCache {
 
   save(): void {
     fs.mkdirSync(path.dirname(this.cachePath), { recursive: true })
-    fs.writeFileSync(this.cachePath, JSON.stringify(this.index, null, 2) + "\n")
+    fs.writeFileSync(this.cachePath, `${JSON.stringify(this.index, null, 2)}\n`)
   }
 }

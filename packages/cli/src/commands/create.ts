@@ -1,5 +1,5 @@
-import type { CommandDefinition } from "./types"
 import { ensureFlag } from "../utils/args"
+import type { CommandDefinition } from "./types"
 
 export const createCommand: CommandDefinition = {
   name: "create",

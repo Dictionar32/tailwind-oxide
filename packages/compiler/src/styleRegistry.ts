@@ -20,13 +20,12 @@ export interface RegistryStats {
   estimatedCssKb: number
 }
 
-const BASE36_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
+const _BASE36_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 const fnv1a = (str: string): number => {
-  return str.split("").reduce(
-    (hash, char) => ((hash ^ char.charCodeAt(0)) * 16777619) >>> 0,
-    2166136261
-  )
+  return str
+    .split("")
+    .reduce((hash, char) => ((hash ^ char.charCodeAt(0)) * 16777619) >>> 0, 2166136261)
 }
 
 const toBase36 = (n: number, length = 4): string => {

@@ -1,10 +1,9 @@
 import type { Command as CommanderCommand } from "commander"
-
+import type { CommandContext } from "../commands/types"
 import { parseCliInput } from "./args"
 import { CliUsageError, errorExitCode } from "./errors"
 import { createCliOutput } from "./output"
 import { runtimeDirFromImportMeta } from "./paths"
-import type { CommandContext } from "../commands/types"
 
 interface CommanderLikeError extends Error {
   code?: string
@@ -63,7 +62,10 @@ const resolveHelpPath = (argv: string[]): string[] | null => {
   return null
 }
 
-const walkCommands = (program: CommanderCommand, visit: (command: CommanderCommand) => void): void => {
+const walkCommands = (
+  program: CommanderCommand,
+  visit: (command: CommanderCommand) => void
+): void => {
   visit(program)
   for (const command of (program.commands ?? []) as CommanderCommand[]) {
     walkCommands(command, visit)
@@ -93,7 +95,7 @@ export async function runCliMain(options: CliMainOptions): Promise<void> {
   }
 
   const program = options.buildProgram(context)
-  
+
   walkCommands(program, (command) => {
     if (input.json) {
       command.configureOutput({
@@ -108,7 +110,7 @@ export async function runCliMain(options: CliMainOptions): Promise<void> {
   try {
     const helpPath = resolveHelpPath(argv.slice(2))
     const isJsonHelp = input.json && helpPath
-    
+
     if (isJsonHelp) {
       output.jsonSuccess("help", {
         command: helpPath.length > 0 ? helpPath.join(" ") : null,
@@ -124,7 +126,7 @@ export async function runCliMain(options: CliMainOptions): Promise<void> {
 
     const normalized = normalizeCliError(error)
     const isJson = input.json
-    
+
     if (isJson) {
       output.jsonError(normalized, options.commandHint ?? input.command)
     } else if (input.debug && normalized instanceof Error && normalized.stack) {

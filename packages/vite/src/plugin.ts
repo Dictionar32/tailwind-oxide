@@ -1,5 +1,5 @@
 /**
- * tailwind-styled-v4 — Vite Plugin v5
+ * tailwind-styled-v4 - Vite Plugin v5
  *
  * Usage in vite.config.ts:
  *   import { tailwindStyledPlugin } from "@tailwind-styled/vite"
@@ -9,54 +9,84 @@
  *
  * v5 Changes:
  * - Simplified API (removed deprecated options)
- * - Uses @tailwind-styled/engine for build
+ * - Uses @tailwind-styled/engine for build orchestration
  * - Mode always zero-runtime
  */
 
 import fs from "node:fs"
 import path from "node:path"
 
-import type { LoaderOptions, TransformOptions } from "@tailwind-styled/compiler"
-import { generateSafelist, runLoaderTransform } from "@tailwind-styled/compiler"
+import { runLoaderTransform } from "@tailwind-styled/compiler"
 import { createEngine } from "@tailwind-styled/engine"
-import { scanWorkspaceAsync } from "@tailwind-styled/scanner"
-import type { Plugin, ResolvedConfig, HmrContext } from "vite"
+import type { HmrContext, Plugin, ResolvedConfig } from "vite"
+
+import { parseVitePluginOptions } from "./schemas"
 
 export interface VitePluginOptions {
-  /** File patterns to include. Default: /\.(tsx|ts|jsx|js)$/ */
   include?: RegExp
-  /** File patterns to exclude. Default: /node_modules/ */
   exclude?: RegExp
-  /** Directories to scan. Default: ["src"] */
   scanDirs?: string[]
-  /** Safelist output path. Default: ".tailwind-styled-safelist.json" */
   safelistOutput?: string
-  /** Generate safelist at build end. Default: true */
   generateSafelist?: boolean
-  /** Scan report output path. Default: ".tailwind-styled-scan-report.json" */
   scanReportOutput?: string
-  /** Run engine build at build end. Default: true */
   useEngineBuild?: boolean
-  /** Enable analyzer for semantic reports. Default: false */
   analyze?: boolean
-  /** Throw error on engine build failure. If true, error will abort Vite build (useful for CI/CD). If false (default), error only shows console.warn. Default: false */
   strict?: boolean
-
-  /** @deprecated in v5 - mode is always "zero-runtime" */
   mode?: "zero-runtime" | "runtime"
-  /** @deprecated in v5 - handled by engine */
   routeCss?: boolean
-  /** @deprecated in v5 - handled by engine with analyze: true */
   deadStyleElimination?: boolean
-  /** @deprecated in v5 - no longer used */
   addDataAttr?: boolean
-  /** @deprecated in v5 - no longer used */
   autoClientBoundary?: boolean
-  /** @deprecated in v5 - no longer used */
   hoist?: boolean
-  /** @deprecated in v5 - no longer used */
   incremental?: boolean
 }
+
+interface ViteLoaderOptions extends Record<string, unknown> {
+  mode?: "zero-runtime"
+  addDataAttr?: boolean
+  filename?: string
+  preserveImports?: boolean
+}
+
+interface ViteLoaderOutput {
+  code: string
+  changed: boolean
+  classes: string[]
+}
+
+interface ScanWorkspaceResult {
+  files: Array<{ file: string; classes: string[] }>
+  totalFiles: number
+  uniqueClasses: string[]
+}
+
+type ViteTransformRunner = (ctx: {
+  filepath: string
+  source: string
+  options: ViteLoaderOptions
+  isDev?: boolean
+}) => ViteLoaderOutput
+
+type ViteEngineFacade = {
+  scanWorkspace(): Promise<ScanWorkspaceResult>
+  build(): Promise<unknown>
+}
+
+type ViteEngineFactory = (options: {
+  root?: string
+  compileCss?: boolean
+  analyze?: boolean
+  scanner?: {
+    includeExtensions?: string[]
+  }
+}) => Promise<ViteEngineFacade>
+
+type InternalVitePluginOptions = VitePluginOptions & {
+  __internalTransformRunner?: ViteTransformRunner
+  __internalCreateEngine?: ViteEngineFactory
+}
+
+const SCAN_EXTENSIONS = [".tsx", ".ts", ".jsx", ".js"]
 
 function warnDeprecated(options: VitePluginOptions, key: keyof VitePluginOptions, message: string) {
   if (options[key] !== undefined) {
@@ -64,14 +94,50 @@ function warnDeprecated(options: VitePluginOptions, key: keyof VitePluginOptions
   }
 }
 
+function isInsideDirectory(filePath: string, directory: string): boolean {
+  const relative = path.relative(directory, filePath)
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))
+}
+
+function filterScanToDirs(
+  scan: ScanWorkspaceResult,
+  root: string,
+  scanDirs: string[]
+): ScanWorkspaceResult {
+  const resolvedDirs = scanDirs.map((dir) => path.resolve(root, dir))
+  if (resolvedDirs.length === 0) return scan
+
+  const files = scan.files.filter((file) => {
+    const absoluteFile = path.resolve(file.file)
+    return resolvedDirs.some((directory) => isInsideDirectory(absoluteFile, directory))
+  })
+
+  const uniqueClasses = Array.from(new Set(files.flatMap((file) => file.classes))).sort()
+
+  return {
+    files,
+    totalFiles: files.length,
+    uniqueClasses,
+  }
+}
+
+function writeJsonArtifact(root: string, relativePath: string, value: unknown): void {
+  const outputPath = path.resolve(root, relativePath)
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true })
+  fs.writeFileSync(outputPath, `${JSON.stringify(value, null, 2)}\n`)
+}
+
 export function tailwindStyledPlugin(opts: VitePluginOptions = {}): Plugin {
-  warnDeprecated(opts, "mode", "Only zero-runtime is supported.")
-  warnDeprecated(opts, "routeCss", "Use engine's analyzing capabilities.")
-  warnDeprecated(opts, "deadStyleElimination", "Use 'analyze: true' option instead.")
-  warnDeprecated(opts, "addDataAttr", "Handled by engine internally.")
-  warnDeprecated(opts, "autoClientBoundary", "Handled by engine internally.")
-  warnDeprecated(opts, "hoist", "Handled by engine internally.")
-  warnDeprecated(opts, "incremental", "Handled by engine internally.")
+  const rawOptions = opts as InternalVitePluginOptions
+  const parsedOptions = parseVitePluginOptions(rawOptions)
+
+  warnDeprecated(parsedOptions, "mode", "Only zero-runtime is supported.")
+  warnDeprecated(parsedOptions, "routeCss", "Use engine's analyzing capabilities.")
+  warnDeprecated(parsedOptions, "deadStyleElimination", "Use 'analyze: true' option instead.")
+  warnDeprecated(parsedOptions, "addDataAttr", "Handled by engine internally.")
+  warnDeprecated(parsedOptions, "autoClientBoundary", "Handled by engine internally.")
+  warnDeprecated(parsedOptions, "hoist", "Handled by engine internally.")
+  warnDeprecated(parsedOptions, "incremental", "Handled by engine internally.")
 
   const {
     include = /\.(tsx|ts|jsx|js)$/,
@@ -83,8 +149,10 @@ export function tailwindStyledPlugin(opts: VitePluginOptions = {}): Plugin {
     useEngineBuild = true,
     analyze = false,
     strict = false,
-  } = opts
+  } = parsedOptions
 
+  const transformRunner = rawOptions.__internalTransformRunner ?? runLoaderTransform
+  const engineFactory = rawOptions.__internalCreateEngine ?? createEngine
   const pluginState = { root: process.cwd(), isDev: true }
 
   return {
@@ -101,21 +169,26 @@ export function tailwindStyledPlugin(opts: VitePluginOptions = {}): Plugin {
       if (!include.test(filepath)) return null
       if (exclude.test(filepath)) return null
 
-      const loaderOptions: LoaderOptions = {
-        // v5: Always zero-runtime (mode is deprecated)
+      const loaderOptions: ViteLoaderOptions = {
         mode: "zero-runtime",
         addDataAttr: pluginState.isDev,
         filename: filepath,
-        // Preserve cv, cx, cn, etc — only tw.* is transformed
         preserveImports: true,
       }
 
-      const output = runLoaderTransform({
-        filepath,
-        source,
-        options: loaderOptions,
-        isDev: pluginState.isDev,
-      })
+      let output: ViteLoaderOutput
+      try {
+        output = transformRunner({
+          filepath,
+          source,
+          options: loaderOptions,
+          isDev: pluginState.isDev,
+        })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.warn(`[tailwind-styled-v4] Transform skipped for ${filepath}: ${message}`)
+        return null
+      }
 
       if (!output.changed) return null
       return { code: output.code, map: null }
@@ -124,58 +197,42 @@ export function tailwindStyledPlugin(opts: VitePluginOptions = {}): Plugin {
     async buildEnd() {
       if (pluginState.isDev) return
 
-      if (doSafelist) {
-        try {
-          generateSafelist(
-            scanDirs.map((d) => path.resolve(pluginState.root, d)),
-            path.resolve(pluginState.root, safelistOutput),
-            pluginState.root
-          )
-        } catch (e) {
-          console.warn("[tailwind-styled-v4] Safelist generation failed:", e)
-        }
-      }
+      const engine = await engineFactory({
+        root: pluginState.root,
+        compileCss: true,
+        analyze,
+        scanner: {
+          includeExtensions: SCAN_EXTENSIONS,
+        },
+      })
 
       try {
-        const report = await scanWorkspaceAsync(pluginState.root)
-        const reportPath = path.resolve(pluginState.root, scanReportOutput)
-        fs.writeFileSync(
-          reportPath,
-          JSON.stringify(
-            {
-              root: pluginState.root,
-              totalFiles: report.totalFiles,
-              uniqueClassCount: report.uniqueClasses.length,
-            },
-            null,
-            2
-          ) + "\n"
-        )
-      } catch (e) {
-        console.warn("[tailwind-styled-v4] Scan report generation failed:", e)
+        const scan = filterScanToDirs(await engine.scanWorkspace(), pluginState.root, scanDirs)
+
+        if (doSafelist) {
+          writeJsonArtifact(pluginState.root, safelistOutput, scan.uniqueClasses)
+        }
+
+        writeJsonArtifact(pluginState.root, scanReportOutput, {
+          root: pluginState.root,
+          totalFiles: scan.totalFiles,
+          uniqueClassCount: scan.uniqueClasses.length,
+        })
+      } catch (error) {
+        console.warn("[tailwind-styled-v4] Engine scan phase failed:", error)
       }
 
-      if (useEngineBuild) {
-        try {
-          const engine = await createEngine({
-              root: pluginState.root,
-              compileCss: true,
-              analyze,
-              scanner: {
-                includeExtensions: [".tsx", ".ts", ".jsx", ".js"],
-                ignoreDirectories: scanDirs,
-              },
-            })
-            await engine.build()
-            console.log("[tailwind-styled-v4] ✓ Engine build complete")
-          } catch (e) {
-          const msg = `[tailwind-styled-v4] Engine build step failed: ${e}`
-          if (strict) {
-            throw new Error(msg)
-          } else {
-            console.warn(msg)
-          }
+      if (!useEngineBuild) return
+
+      try {
+        await engine.build()
+        console.log("[tailwind-styled-v4] Engine build complete")
+      } catch (error) {
+        const msg = `[tailwind-styled-v4] Engine build step failed: ${error}`
+        if (strict) {
+          throw new Error(msg)
         }
+        console.warn(msg)
       }
     },
 

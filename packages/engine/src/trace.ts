@@ -1,16 +1,13 @@
 import {
-  RuleId,
-  PropertyId,
-  ValueId,
-  RuleIR,
-  CascadeResolutionIR,
   CascadeResolutionId,
+  type CascadeResolutionIR,
   CascadeStage,
-  ResolutionCause,
-  SourceLocation,
-  ConditionResult,
+  type PropertyId,
+  type ResolutionCause,
+  type RuleIR,
+  type SourceLocation,
 } from "./ir"
-import { CascadeResolver } from "./resolver"
+import type { CascadeResolver } from "./resolver"
 
 export interface VariantTrace {
   name: string

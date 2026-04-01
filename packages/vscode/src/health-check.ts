@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { SCRIPTS, type ScriptName } from "./constants"
+import type { ScriptName } from "./constants"
 import { findAllScripts, findLspScript } from "./utils/resolve-script"
 
 export interface HealthCheckResult {

@@ -117,10 +117,7 @@ const saveGraphCache = (graph: FileDependencyGraph): void => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const fnv1a = (str: string): number => {
-  return str.split("").reduce(
-    (h, char) => ((h ^ char.charCodeAt(0)) * 16777619) >>> 0,
-    2166136261
-  )
+  return str.split("").reduce((h, char) => ((h ^ char.charCodeAt(0)) * 16777619) >>> 0, 2166136261)
 }
 
 const toBase36 = (n: number, len = 4): string => {
@@ -148,8 +145,7 @@ const computeDiff = (oldNodes: StyleNode[], newNodes: StyleNode[]): CssDiff => {
     .filter(([cls]) => !oldMap.has(cls))
     .map(([, node]) => node)
 
-  const removed = Array.from(oldMap.keys())
-    .filter((cls) => !newMap.has(cls))
+  const removed = Array.from(oldMap.keys()).filter((cls) => !newMap.has(cls))
 
   return { added, removed, noChange: added.length === 0 && removed.length === 0 }
 }
@@ -234,7 +230,8 @@ class CssDiffWriter {
     try {
       if (fs.existsSync(this.outputPath)) {
         const css = fs.readFileSync(this.outputPath, "utf-8")
-        const ruleRe = /(\.tw-[a-z0-9]+(?::[\w-]+)?)\{([^}]+)\}|(@[^{]+)\{(\.tw-[a-z0-9]+)\{([^}]+)\}\}/g
+        const ruleRe =
+          /(\.tw-[a-z0-9]+(?::[\w-]+)?)\{([^}]+)\}|(@[^{]+)\{(\.tw-[a-z0-9]+)\{([^}]+)\}\}/g
         const matches = [...css.matchAll(ruleRe)]
         for (const match of matches) {
           if (match[1]) {
@@ -483,9 +480,10 @@ export const parseClassesToNodes = (classes: string[]): StyleNode[] => {
 
 const parseOneClass = (cls: string): StyleNode | null => {
   const colonIdx = cls.lastIndexOf(":")
-  const [modifier, utility] = colonIdx > 0
-    ? [resolveModifier(cls.slice(0, colonIdx)), cls.slice(colonIdx + 1)]
-    : [undefined, cls]
+  const [modifier, utility] =
+    colonIdx > 0
+      ? [resolveModifier(cls.slice(0, colonIdx)), cls.slice(colonIdx + 1)]
+      : [undefined, cls]
 
   const declaration = twToDeclaration(utility)
   if (!declaration) return null
@@ -605,7 +603,8 @@ const twToDeclaration = (cls: string): string | null => {
     "select-none": "user-select: none",
     "pointer-events-none": "pointer-events: none",
     truncate: "overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-    transition: "transition-property: color,background-color,border-color,opacity,box-shadow,transform; transition-duration: 150ms",
+    transition:
+      "transition-property: color,background-color,border-color,opacity,box-shadow,transform; transition-duration: 150ms",
   }
 
   return map[cls] ?? null

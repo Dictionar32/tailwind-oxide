@@ -1,8 +1,13 @@
 import React from "react"
 
+export interface SubComponentProps {
+  children?: React.ReactNode
+  className?: string
+}
+
 export interface SubComponentEntry {
   name: string
-  component: React.FC<{ children?: React.ReactNode; className?: string }>
+  component: React.FC<SubComponentProps>
   defaultClasses?: string
 }
 
@@ -23,13 +28,13 @@ export function getAllSubComponents(): SubComponentEntry[] {
 export function withSubComponents<T extends object>(
   Component: T,
   subComponentNames: string[]
-): T & Record<string, React.FC<{ children?: React.ReactNode; className?: string }>> {
-  const result = { ...Component } as T & Record<string, React.FC<{ children?: React.ReactNode; className?: string }>>
+): T & Record<string, React.FC<SubComponentProps>> {
+  const result = { ...Component } as Record<string, unknown>
   for (const name of subComponentNames) {
     const entry = getSubComponent(name)
-    if (entry) (result as Record<string, React.FC<{ children?: React.ReactNode; className?: string }>>)[name] = entry.component
+    if (entry) result[name] = entry.component
   }
-  return result
+  return result as unknown as T & Record<string, React.FC<SubComponentProps>>
 }
 
 registerSubComponent({
@@ -49,7 +54,9 @@ registerSubComponent({
   component: ({ children, className }) =>
     React.createElement(
       "span",
-      { className: `ml-2 px-2 py-0.5 text-xs rounded-full bg-red-500 text-white ${className || ""}` },
+      {
+        className: `ml-2 px-2 py-0.5 text-xs rounded-full bg-red-500 text-white ${className || ""}`,
+      },
       children
     ),
   defaultClasses: "ml-2 px-2 py-0.5 text-xs rounded-full bg-red-500 text-white",
@@ -105,7 +112,6 @@ registerSubComponent({
 
 registerSubComponent({
   name: "image",
-  component: ({ children, className }) =>
-    React.createElement("img", { className, children: undefined }, null),
+  component: ({ className }) => React.createElement("img", { className }),
   defaultClasses: "",
 })

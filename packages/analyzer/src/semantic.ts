@@ -344,7 +344,10 @@ const loadTailwindConfig = async (
         }
         return { config: null, warning: "Tailwind config export function must return an object." }
       }
-      return { config: null, warning: "Tailwind config export must be an object or a function returning an object." }
+      return {
+        config: null,
+        warning: "Tailwind config export must be an object or a function returning an object.",
+      }
     } catch (error) {
       return { config: null, warning: formatErrorMessage(error) }
     }

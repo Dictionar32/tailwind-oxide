@@ -8,4 +8,4 @@
  *   import { presetVariants, presetScrollbar, presetTokens } from "@tailwind-styled/plugin/presets"
  */
 
-export { presetVariants, presetScrollbar, presetTokens } from "@tailwind-styled/plugin-api"
+export { presetScrollbar, presetTokens, presetVariants } from "@tailwind-styled/plugin-api"

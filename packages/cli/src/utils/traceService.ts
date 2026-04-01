@@ -1,19 +1,20 @@
-import { scanWorkspace } from "@tailwind-styled/scanner"
-import { compileCssFromClasses, type CssCompileResult } from "@tailwind-styled/compiler"
+import { type CssCompileResult, compileCssFromClasses } from "@tailwind-styled/compiler/internal"
 import {
-  RuleId,
-  PropertyId,
-  ValueId,
-  LayerId,
   ConditionId,
-  VariantChainId,
-  Origin,
-  Importance,
   ConditionResult,
-  RuleIR,
-  SourceLocation,
   createFingerprint,
+  Importance,
+  LayerId,
+  Origin,
+  PropertyId,
+  RuleId,
+  type RuleIR,
+  type SourceLocation,
+  ValueId,
+  VariantChainId,
 } from "@tailwind-styled/engine/internal"
+import { scanWorkspace } from "@tailwind-styled/scanner"
+import { TwError, wrapUnknownError } from "@tailwind-styled/shared"
 
 interface EngineTraceResult {
   class: string
@@ -182,12 +183,18 @@ function calculateSpecificity(selector: ParsedSelector): number {
 function parseSelector(selectorText: string): ParsedSelector {
   const mediaMatch = selectorText.match(/^@media[^{]+\{(.+)$/)
   const mediaQuery = mediaMatch ? mediaMatch[0] : null
-  const baseClass = (mediaMatch ? mediaMatch[1].trim() : selectorText)
-    .startsWith(".") ? (mediaMatch ? mediaMatch[1].trim() : selectorText).slice(1) : (mediaMatch ? mediaMatch[1].trim() : selectorText)
+  const baseClass = (mediaMatch ? mediaMatch[1].trim() : selectorText).startsWith(".")
+    ? (mediaMatch ? mediaMatch[1].trim() : selectorText).slice(1)
+    : mediaMatch
+      ? mediaMatch[1].trim()
+      : selectorText
 
   const escapedColon = /\\:/g
   const baseClassClean = baseClass.startsWith(".") ? baseClass.slice(1) : baseClass
-  const baseClassFinal = baseClassClean.replace(escapedColon, "\x00").split(":")[0].replace(/\x00/g, ":")
+  const baseClassFinal = baseClassClean
+    .replace(escapedColon, "\u200B")
+    .split(":")[0]
+    .replace(/\u200B/g, ":")
 
   const variantRegex =
     /^(hover|focus|active|visited|checked|disabled|required|optional|first|last|odd|even|before|after|placeholder|file|selection|backdrop|group|peer)/i
@@ -196,7 +203,7 @@ function parseSelector(selectorText: string): ParsedSelector {
   const parts = baseClassFinal.split(":").slice(1)
   const { variants, pseudoClasses } = parts.reduce(
     (acc, part) => {
-      const normalized = ":" + part
+      const normalized = `:${part}`
       if (variantRegex.test(part)) {
         acc.variants.push(part)
       } else if (pseudoRegex.test(normalized)) {
@@ -299,7 +306,9 @@ function parseCssToIr(
     const valueId = idGenerator.generateValueId(parsedRule.value)
 
     const conditionId = parsedRule.selector.mediaQuery ? idGenerator.generateConditionId() : null
-    const conditionResult = parsedRule.selector.mediaQuery ? ConditionResult.Unknown : ConditionResult.Unknown
+    const conditionResult = parsedRule.selector.mediaQuery
+      ? ConditionResult.Unknown
+      : ConditionResult.Unknown
 
     const fingerprint = createFingerprint([className, parsedRule.property, parsedRule.value])
 
@@ -349,7 +358,6 @@ interface ResolutionEntry {
 class CascadeResolver {
   private propertyBuckets: Map<PropertyId, PropertyBucket> = new Map()
   private rules: Map<RuleId, RuleIR> = new Map()
-  private resolutions: Map<number, ResolutionEntry> = new Map()
   private classRules: Map<string, RuleId[]> = new Map()
 
   addRule(rule: RuleIR): void {
@@ -389,7 +397,9 @@ class CascadeResolver {
     return this.classRules.get(className)
   }
 
-  resolveByClassName(className: string): { resolvedProperties: Map<PropertyId, ResolutionEntry> } | null {
+  resolveByClassName(
+    className: string
+  ): { resolvedProperties: Map<PropertyId, ResolutionEntry> } | null {
     const ruleIds = this.classRules.get(className)
     if (!ruleIds) {
       return null
@@ -582,7 +592,8 @@ export async function traceClass(className: string, options?: TraceOptions): Pro
   })
 
   if (!scanResult.uniqueClasses.includes(className)) {
-    throw new Error(
+    throw TwError.fromCompile(
+      "TRACE_CLASS_NOT_FOUND",
       `Class "${className}" not found in workspace scan. Make sure the class is used in your source files.`
     )
   }
@@ -591,14 +602,17 @@ export async function traceClass(className: string, options?: TraceOptions): Pro
     try {
       return compileCssFromClasses([className], {})
     } catch (error) {
-      throw new Error(
+      throw wrapUnknownError(
+        "compile",
+        "TRACE_COMPILE_FAILED",
         `Failed to compile CSS for class "${className}": ${error instanceof Error ? error.message : String(error)}`
       )
     }
   })()
 
   if (!cssResult.css || cssResult.css.trim() === "") {
-    throw new Error(
+    throw TwError.fromCompile(
+      "TRACE_NO_CSS_RULES",
       `Class "${className}" has no CSS rules. The class may not be a valid Tailwind class.`
     )
   }
@@ -607,7 +621,7 @@ export async function traceClass(className: string, options?: TraceOptions): Pro
 
   const ruleIds = classToRuleIds.get(className)
   if (!ruleIds || ruleIds.length === 0) {
-    throw new Error(`No rules found for class "${className}" after parsing CSS.`)
+    throw TwError.fromCompile("TRACE_NO_RULES_FOUND", `No rules found for class "${className}" after parsing CSS.`)
   }
 
   const resolver = new CascadeResolver()
@@ -621,12 +635,12 @@ export async function traceClass(className: string, options?: TraceOptions): Pro
 
 // Helper function to safely convert any value to string
 // Handles PropertyId, ValueId, RuleId, etc. that have a .value property
-function toString(value: unknown): string {
+function _toString(value: unknown): string {
   if (value === null || value === undefined) return ""
   if (typeof value === "string") return value
   if (typeof value === "number") return String(value)
   if (typeof value === "boolean") return String(value)
-  
+
   // For ID objects like PropertyId, ValueId, etc. - they have a .value property
   if (typeof value === "object" && value !== null) {
     const idValue = (value as { value?: unknown }).value
@@ -653,7 +667,7 @@ function safeToString(value: unknown): string {
   if (typeof value === "string") return String(value)
   if (typeof value === "number") return String(value)
   if (typeof value === "boolean") return String(value)
-  
+
   // For any object - try various methods
   if (typeof value === "object" && value !== null) {
     const obj = value as Record<string, unknown>
@@ -661,20 +675,20 @@ function safeToString(value: unknown): string {
     if (typeof name === "string" && name.length > 0) {
       return name
     }
-    
+
     const objValue = obj.value
     if (objValue !== undefined) {
       return String(objValue)
     }
-    
-    const valueOf = obj.valueOf
-    if (typeof valueOf === "function") {
+
+    const objValueOf = obj.valueOf
+    if (typeof objValueOf === "function") {
       try {
-        const vo = valueOf.call(value)
+        const vo = objValueOf.call(value)
         if (vo !== value) return String(vo)
       } catch {}
     }
-    
+
     const toStr = obj.toString
     if (typeof toStr === "function") {
       try {
@@ -684,10 +698,10 @@ function safeToString(value: unknown): string {
         }
       } catch {}
     }
-    
+
     return "?"
   }
-  
+
   return String(value)
 }
 

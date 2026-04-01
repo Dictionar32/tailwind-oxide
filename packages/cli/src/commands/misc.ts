@@ -1,12 +1,11 @@
 import path from "node:path"
 import { parseArgs as parseNodeArgs } from "node:util"
-
-import { codeCommandName, npmCommandName, runCommand } from "../utils/process"
 import { CliUsageError } from "../utils/errors"
 import { pathExists, readJsonSafe } from "../utils/fs"
 import { writeJsonSuccess } from "../utils/json"
-import type { CommandDefinition } from "./types"
+import { codeCommandName, npmCommandName, runCommand } from "../utils/process"
 import { resolveScript } from "./helpers"
+import type { CommandDefinition } from "./types"
 
 const testCommand: CommandDefinition = {
   name: "test",
@@ -39,7 +38,7 @@ const shareCommand: CommandDefinition = {
   async run(args, context) {
     const name = args.find((arg) => !arg.startsWith("-")) ?? "component-name"
     const manifestPath = path.join(process.cwd(), ".tw-cache", "deploy-manifest.json")
-    
+
     const defaultManifest: Required<Pick<ShareManifest, "name" | "version">> = {
       name,
       version: "0.1.0",
@@ -146,7 +145,7 @@ const isVersionOutdated = (currentVersion: string, latestVersion: string): boole
   const current = parseSemver(currentVersion)
   const latest = parseSemver(latestVersion)
   if (!current || !latest) return null
-  
+
   const firstDiffIndex = current.findIndex((val, idx) => val !== latest[idx])
   return firstDiffIndex === -1 ? false : current[firstDiffIndex] < latest[firstDiffIndex]
 }
@@ -163,10 +162,10 @@ const resolveCurrentCliVersion = async (
   for (const candidate of candidates) {
     if (!(await pathExists(candidate))) continue
     const pkg = await readJsonSafe<{ name?: string; version?: string }>(candidate)
-    const isCliPackage = pkg?.version && (
-      pkg.name === CLI_PACKAGE_NAME ||
-      candidate.includes(`${path.sep}packages${path.sep}cli${path.sep}`)
-    )
+    const isCliPackage =
+      pkg?.version &&
+      (pkg.name === CLI_PACKAGE_NAME ||
+        candidate.includes(`${path.sep}packages${path.sep}cli${path.sep}`))
     if (isCliPackage) return pkg.version ?? "0.0.0"
   }
 

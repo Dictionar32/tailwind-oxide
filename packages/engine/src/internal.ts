@@ -7,10 +7,43 @@
  * Usage: import from "@tailwind-styled/engine/internal"
  */
 
-export { BundleAnalyzer, type BundleAnalysisResult, type ClassBundleInfo } from "./bundleAnalyzer"
-export { ImpactTracker, type ImpactReport, type ComponentImpact } from "./impactTracker"
-export { ReverseLookup, type ReverseLookupResult, type ClassUsage } from "./reverseLookup"
+// Re-export scanner types
+export type {
+  ScanFileResult,
+  ScanWorkspaceOptions,
+  ScanWorkspaceResult,
+} from "@tailwind-styled/scanner"
+export { type BundleAnalysisResult, BundleAnalyzer, type ClassBundleInfo } from "./bundleAnalyzer"
+export { type ComponentImpact, type ImpactReport, ImpactTracker } from "./impactTracker"
 export { applyIncrementalChange } from "./incremental"
+export {
+  CascadeResolutionId,
+  type CascadeResolutionIR,
+  CascadeStage,
+  ConditionId,
+  type ConditionIR,
+  ConditionResult,
+  compareCascadeOrder,
+  createFingerprint,
+  createResolutionReason,
+  type FinalComputedStyleIR,
+  Importance,
+  LayerId,
+  Origin,
+  type PropertyBucketIR,
+  PropertyId,
+  type ResolutionCause,
+  type ResolutionReason,
+  RuleId,
+  type RuleIR,
+  SelectorId,
+  type SelectorIR,
+  type SourceLocation,
+  type StyleGraphIR,
+  ValueId,
+  VariantChainId,
+  type VariantChainIR,
+} from "./ir"
 export type { EngineMetricsSnapshot } from "./metrics"
 export { EngineMetricsCollector } from "./metrics"
 export {
@@ -26,42 +59,8 @@ export {
   runOnError,
   runTransformClasses,
 } from "./plugin-api"
+export { type ClassUsage, ReverseLookup, type ReverseLookupResult } from "./reverseLookup"
 export type { WorkspaceWatcher } from "./watch"
 export { watchWorkspace as watchWorkspaceLegacy } from "./watch"
 export type { WatchCallback, WatchEvent, WatchEventKind, WatchHandle } from "./watch-native"
 export { watchWorkspace as watchWorkspaceNative } from "./watch-native"
-export {
-  RuleId,
-  SelectorId,
-  VariantChainId,
-  PropertyId,
-  ValueId,
-  LayerId,
-  ConditionId,
-  CascadeResolutionId,
-  Origin,
-  Importance,
-  ConditionResult,
-  CascadeStage,
-  type ResolutionCause,
-  type ResolutionReason,
-  type SelectorIR,
-  type VariantChainIR,
-  type ConditionIR,
-  type RuleIR,
-  type PropertyBucketIR,
-  type CascadeResolutionIR,
-  type StyleGraphIR,
-  type FinalComputedStyleIR,
-  type SourceLocation,
-  createFingerprint,
-  compareCascadeOrder,
-  createResolutionReason,
-} from "./ir"
-
-// Re-export scanner types
-export type {
-  ScanWorkspaceResult,
-  ScanFileResult,
-  ScanWorkspaceOptions,
-} from "@tailwind-styled/scanner"

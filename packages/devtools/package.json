@@ -8,22 +8,20 @@
   "engines": {
     "node": ">=20"
   },
-  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.tsx --format cjs,esm --dts --out-dir dist --clean",
-    "dev": "tsup src/index.tsx --format cjs,esm --dts --out-dir dist --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "check": "tsc --noEmit",
     "test": "node --test test/*.test.mjs",
     "test:watch": "node --test --watch test/*.test.mjs",

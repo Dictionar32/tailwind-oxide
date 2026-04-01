@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "rspack serve",
     "build": "rspack build",
-    "test": "node -e \"const fs=require('fs');['rspack.config.mjs','src/index.ts'].forEach(p=>{if(!fs.existsSync(p)) throw new Error('missing '+p)});console.log('rspack example files ok')\""
+    "test": "npm install --ignore-scripts && npx rspack build"
   },
   "dependencies": {
-    "tailwind-styled-v4": "*"
+    "tailwind-styled-v4": "file:../.."
   },
   "devDependencies": {
     "@rspack/cli": "^1.0.0",

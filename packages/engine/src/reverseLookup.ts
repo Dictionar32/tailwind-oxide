@@ -1,4 +1,4 @@
-import { RuleIR, SourceLocation } from "./ir"
+import type { RuleIR, SourceLocation } from "./ir"
 
 export interface ClassUsage {
   className: string
@@ -45,7 +45,7 @@ export class ReverseLookup {
     const columnState = { offset: 0 }
 
     for (const [i, line] of lines.entries()) {
-      const lineStart = columnState.offset
+      const _lineStart = columnState.offset
       const lineEnd = columnState.offset + line.length + 1
 
       // Use for...of + matchAll instead of while loop with let match
@@ -65,7 +65,7 @@ export class ReverseLookup {
 
           const variants: string[] = []
           const variantMatch = className.match(/^(.+?)(?::([a-zA-Z0-9_-]+))?$/)
-          if (variantMatch && variantMatch[2]) {
+          if (variantMatch?.[2]) {
             variants.push(variantMatch[2])
           }
 
@@ -117,7 +117,10 @@ export class ReverseLookup {
 
   private findClosingBrace(css: string, start: number): number {
     const braceState = { depth: 1 }
-    for (const [i, char] of css.slice(start + 1).split("").entries()) {
+    for (const [i, char] of css
+      .slice(start + 1)
+      .split("")
+      .entries()) {
       if (char === "{") braceState.depth++
       else if (char === "}") {
         braceState.depth--
@@ -131,7 +134,7 @@ export class ReverseLookup {
     const pseudoClasses = className.match(/:[a-zA-Z-]+/g) || []
     const attributes = className.match(/\[[^\]]+\]/g) || []
     const pseudoElements = className.match(/::[a-zA-Z-]+/g) || []
-    return 1 + (pseudoClasses.length * 10) + (attributes.length * 10) + (pseudoElements.length * 100)
+    return 1 + pseudoClasses.length * 10 + attributes.length * 10 + pseudoElements.length * 100
   }
 
   fromCSS(cssProperty: string, cssValue: string, css: string): ReverseLookupResult[] {
@@ -190,7 +193,7 @@ export class ReverseLookup {
     const results: RuleIR[] = []
 
     for (const rule of rules) {
-      if (rule.className === className || rule.className.startsWith(className + ":")) {
+      if (rule.className === className || rule.className.startsWith(`${className}:`)) {
         const ruleIR: RuleIR = {
           id: { value: results.length },
           selector: { value: 0 },
@@ -235,7 +238,7 @@ export class ReverseLookup {
 
       if (rule.className.includes(baseClass) && rule.className !== className) {
         const isVariant = rule.className.includes(":")
-        if (isVariant && !rule.className.startsWith(className + ":")) {
+        if (isVariant && !rule.className.startsWith(`${className}:`)) {
           dependents.add(rule.className)
         }
       }

@@ -1,80 +1,57 @@
-"use client"
-import React from "react"
+import { tw } from "tailwind-styled-v4"
 
-/**
- * Alert — cx() conditional class merge + tw template literal
- *
- * Contoh penggunaan:
- *   <Alert type="info" title="Info">Pesan info</Alert>
- *   <Alert type="success" title="Sukses!" dismissible>Berhasil disimpan</Alert>
- *   <Alert type="warning">Perhatian tanpa title</Alert>
- *   <Alert type="error" title="Error">Gagal memuat data</Alert>
- */
+// ── Base Alert dengan subcomponents ──────────────────────────────────────
+export const Alert = tw.div`
+  relative flex items-start gap-3 rounded-lg p-4 border-l-4
 
-import { useState } from "react"
-import { tw, cx } from "tailwind-styled-v4"
+  icon {
+    flex-shrink-0 w-5 h-5 mt-0.5
+  }
 
-// ── tw template literal ───────────────────────────────────────────────────────
-const AlertRoot = tw.div`
-  relative flex gap-3 rounded-xl border p-4 text-sm
-  icon{
-    mt-0.5 shrink-0 leading-non
+  content {
+    flex-1 min-w-0
+  }
+
+  title {
+    font-semibold mb-1 leading-snug
+  }
+
+  message {
+    text-sm leading-relaxed opacity-80
+  }
+
+  close {
+    flex-shrink-0 ml-auto -mr-1 -mt-1 rounded-lg p-1
+    opacity-50 cursor-pointer
+    hover:opacity-100 transition-opacity
   }
 `
 
-const AlertIcon = tw.span`mt-0.5 shrink-0 text-lg leading-none`
-const AlertContent = tw.div`flex-1 min-w-0`
-const AlertTitle = tw.p`font-semibold leading-snug`
-const AlertBody = tw.p`mt-0.5 leading-relaxed opacity-80`
-const DismissButton = tw.button`
-  ml-auto -mr-1 -mt-1 rounded-lg p-1
-  opacity-60 hover:opacity-100 transition-opacity
+// ── Variants via .extend() ───────────────────────────────────────────────
+export const InfoAlert = Alert.extend`
+  border-l-blue-500 bg-blue-50
+  icon { text-blue-500 }
+  title { text-blue-800 }
+  message { text-blue-700 }
 `
 
-// ── color maps ────────────────────────────────────────────────────────────────
-const colorMap = {
-  info:    { root: "border-blue-200 bg-blue-50 text-blue-800",   icon: "ℹ️" },
-  success: { root: "border-green-200 bg-green-50 text-green-800", icon: "✅" },
-  warning: { root: "border-yellow-200 bg-yellow-50 text-yellow-800", icon: "⚠️" },
-  error:   { root: "border-red-200 bg-red-50 text-red-800",       icon: "❌" },
-}
+export const SuccessAlert = Alert.extend`
+  border-l-green-500 bg-green-50
+  icon { text-green-500 }
+  title { text-green-800 }
+  message { text-green-700 }
+`
 
-// ── Props ─────────────────────────────────────────────────────────────────────
-interface AlertProps {
-  type?: "info" | "success" | "warning" | "error"
-  title?: string
-  dismissible?: boolean
-  className?: string
-  children: React.ReactNode
-}
+export const WarningAlert = Alert.extend`
+  border-l-yellow-500 bg-yellow-50
+  icon { text-yellow-500 }
+  title { text-yellow-800 }
+  message { text-yellow-700 }
+`
 
-export function Alert({
-  type = "info",
-  title,
-  dismissible = false,
-  className,
-  children,
-}: AlertProps) {
-  const [dismissed, setDismissed] = useState(false)
-
-  if (dismissed) return null
-
-  const { root, icon } = colorMap[type]
-
-  return (
-    // cx() — merge base classes dengan conditional color classes
-    <AlertRoot className={cx(root, className)}>
-
-      <AlertRoot.icon>{icon}</AlertRoot.icon>
-      <AlertContent>
-        {title && <AlertTitle>{title}</AlertTitle>}
-        <AlertBody>{children}</AlertBody>
-      </AlertContent>
-      {dismissible && (
-        <DismissButton onClick={() => setDismissed(true)} aria-label="Tutup">
-          ✕
-        </DismissButton>
-      )}
-    </AlertRoot>
-  )
-}
+export const ErrorAlert = Alert.extend`
+  border-l-red-500 bg-red-50
+  icon { text-red-500 }
+  title { text-red-800 }
+  message { text-red-700 }
+`

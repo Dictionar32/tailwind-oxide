@@ -3,13 +3,12 @@
  */
 import path from "node:path"
 import { parseArgs as parseNodeArgs } from "node:util"
-
-import { CliUsageError } from "./utils/errors"
-import { loadAnalyzerModule } from "./utils/analyzer"
-import { pathExists } from "./utils/fs"
-import { createCliOutput, type CliOutput } from "./utils/output"
-
 import type { AnalyzerReport } from "@tailwind-styled/analyzer"
+import { loadAnalyzerModule } from "./utils/analyzer"
+import { CliUsageError } from "./utils/errors"
+import { pathExists } from "./utils/fs"
+import { type CliOutput, createCliOutput } from "./utils/output"
+
 export type { AnalyzerReport as AnalysisReport } from "@tailwind-styled/analyzer"
 
 // Keep ComponentDef for extract.ts and stats.ts compatibility.

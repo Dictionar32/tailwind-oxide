@@ -1,5 +1,4 @@
 import { type ChildProcess, spawn } from "node:child_process"
-import * as vscode from "vscode"
 import { DEFAULT_TIMEOUT } from "../constants"
 
 interface ExecOptions {

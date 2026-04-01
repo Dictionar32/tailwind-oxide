@@ -1,18 +1,24 @@
+import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import type { LoaderOptions } from "@tailwind-styled/compiler"
+import { parseNextAdapterOptions } from "./schemas"
+
+interface TailwindStyledLoaderOptions {
+  mode?: "zero-runtime"
+  autoClientBoundary?: boolean
+  addDataAttr?: boolean
+  hoist?: boolean
+  routeCss?: boolean
+  incremental?: boolean
+  verbose?: boolean
+  preserveImports?: boolean
+}
 
 export interface TailwindStyledNextOptions
   extends Pick<
-    LoaderOptions,
-    | "mode"
-    | "autoClientBoundary"
-    | "addDataAttr"
-    | "hoist"
-    | "routeCss"
-    | "incremental"
-    | "verbose"
+    TailwindStyledLoaderOptions,
+    "mode" | "autoClientBoundary" | "addDataAttr" | "hoist" | "routeCss" | "incremental" | "verbose"
   > {
   include?: RegExp
   exclude?: RegExp
@@ -21,8 +27,7 @@ export interface TailwindStyledNextOptions
 interface NextWebpackRule {
   test?: RegExp
   exclude?: RegExp
-  use?: unknown[]
-  _tailwindStyledNextMarker?: boolean
+  use?: Array<{ loader: string; options: TailwindStyledLoaderOptions }>
 }
 
 interface NextWebpackConfig {
@@ -33,14 +38,10 @@ interface NextWebpackConfig {
 }
 
 interface NextConfigWithTurbopack {
-  webpack?: (
-    config: NextWebpackConfig,
-    options: Record<string, unknown>
-  ) => NextWebpackConfig | Promise<NextWebpackConfig>
-  turbopack?: {
-    rules?: Record<string, unknown>
-    [key: string]: unknown
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  webpack?: ((...args: any[]) => any) | null | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  turbopack?: Record<string, unknown>
   [key: string]: unknown
 }
 
@@ -54,25 +55,39 @@ const resolveRuntimeDir = (): string => {
   return process.cwd()
 }
 
-const WEBPACK_LOADER_PATH = path.resolve(resolveRuntimeDir(), "webpackLoader.js")
-const TURBOPACK_LOADER_PATH = path.resolve(resolveRuntimeDir(), "turbopackLoader.js")
+const resolveLoaderPath = (basename: string): string => {
+  const runtimeDir = resolveRuntimeDir()
+  const preferredExtensions =
+    typeof __dirname !== "undefined" && __dirname.length > 0 ? [".cjs", ".js"] : [".js", ".cjs"]
+
+  for (const ext of preferredExtensions) {
+    const candidate = path.resolve(runtimeDir, `${basename}${ext}`)
+    if (fs.existsSync(candidate)) return candidate
+  }
+
+  return path.resolve(runtimeDir, `${basename}.js`)
+}
+
 const DEFAULT_INCLUDE = /\.[jt]sx?$/
 const DEFAULT_EXCLUDE = /node_modules/
 
-const createLoaderOptions = (options: TailwindStyledNextOptions): LoaderOptions => ({
-  mode: options.mode ?? "zero-runtime",
-  autoClientBoundary: options.autoClientBoundary ?? true,
-  addDataAttr: options.addDataAttr,
-  hoist: options.hoist,
-  routeCss: options.routeCss,
-  incremental: options.incremental,
-  verbose: options.verbose,
-  preserveImports: true,
-})
+const createLoaderOptions = (options: TailwindStyledNextOptions): TailwindStyledLoaderOptions => {
+  const opts: TailwindStyledLoaderOptions = {
+    mode: options.mode ?? "zero-runtime",
+    autoClientBoundary: options.autoClientBoundary ?? true,
+    preserveImports: true,
+  }
+  if (options.addDataAttr !== undefined) opts.addDataAttr = options.addDataAttr
+  if (options.hoist !== undefined) opts.hoist = options.hoist
+  if (options.routeCss !== undefined) opts.routeCss = options.routeCss
+  if (options.incremental !== undefined) opts.incremental = options.incremental
+  if (options.verbose !== undefined) opts.verbose = options.verbose
+  return opts
+}
 
 const buildTurbopackRules = (
   loaderPath: string,
-  loaderOptions: LoaderOptions
+  loaderOptions: TailwindStyledLoaderOptions
 ): Record<string, unknown> => ({
   "*.js": { loaders: [{ loader: loaderPath, options: loaderOptions }] },
   "*.jsx": { loaders: [{ loader: loaderPath, options: loaderOptions }] },
@@ -82,39 +97,46 @@ const buildTurbopackRules = (
 
 const applyWebpackRule = (
   config: NextWebpackConfig,
-  options: TailwindStyledNextOptions
+  options: TailwindStyledNextOptions,
+  loaderPath: string
 ): NextWebpackConfig => {
   const loaderOptions = createLoaderOptions(options)
   const rules = config.module?.rules ?? []
-  const alreadyRegistered = rules.some((rule) => rule?._tailwindStyledNextMarker === true)
+  const alreadyRegistered = rules.some((rule) =>
+    Array.isArray(rule?.use) && rule.use.some((entry) => entry.loader === loaderPath)
+  )
 
-  if (!alreadyRegistered) {
-    const tailwindStyledRule: NextWebpackRule = {
-      _tailwindStyledNextMarker: true,
-      test: options.include ?? DEFAULT_INCLUDE,
-      exclude: options.exclude ?? DEFAULT_EXCLUDE,
-      use: [{ loader: WEBPACK_LOADER_PATH, options: loaderOptions }],
-    }
+  if (alreadyRegistered) return config
 
-    config.module = {
-      ...(config.module ?? {}),
-      rules: [tailwindStyledRule, ...rules],
-    }
+  const tailwindStyledRule: NextWebpackRule = {
+    test: options.include ?? DEFAULT_INCLUDE,
+    exclude: options.exclude ?? DEFAULT_EXCLUDE,
+    use: [{ loader: loaderPath, options: loaderOptions }],
+  }
+
+  config.module = {
+    ...(config.module ?? {}),
+    rules: [tailwindStyledRule, ...rules],
   }
 
   return config
 }
 
 export function withTailwindStyled(options: TailwindStyledNextOptions = {}) {
+  const normalizedOptions = parseNextAdapterOptions(options)
+  const webpackLoaderPath = resolveLoaderPath("webpackLoader")
+  const turbopackLoaderPath = resolveLoaderPath("turbopackLoader")
+
   return function wrap(nextConfig: NextConfigWithTurbopack = {}): NextConfigWithTurbopack {
     const previousWebpack = nextConfig.webpack
-    const loaderOptions = createLoaderOptions(options)
+    const loaderOptions = createLoaderOptions(normalizedOptions)
 
     return {
       ...nextConfig,
-      webpack(config: NextWebpackConfig, webpackOptions: Record<string, unknown>) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      webpack(config: NextWebpackConfig, webpackOptions: any) {
         const apply = (resolvedConfig: NextWebpackConfig) =>
-          applyWebpackRule(resolvedConfig, options)
+          applyWebpackRule(resolvedConfig, normalizedOptions, webpackLoaderPath)
 
         if (typeof previousWebpack !== "function") {
           return apply(config)
@@ -127,7 +149,7 @@ export function withTailwindStyled(options: TailwindStyledNextOptions = {}) {
         ...(nextConfig.turbopack ?? {}),
         rules: {
           ...(nextConfig.turbopack?.rules ?? {}),
-          ...buildTurbopackRules(TURBOPACK_LOADER_PATH, loaderOptions),
+          ...buildTurbopackRules(turbopackLoaderPath, loaderOptions),
         },
       },
     }

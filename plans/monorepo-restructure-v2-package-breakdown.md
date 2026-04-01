@@ -4,6 +4,7 @@ Source of truth:
 - [PLAN.md](c:/Users/User/Documents/demoPackageNpm/focus/tailwind-styled-v4.5-platform-modify-v3_fixed%20(1)/library/plans/PLAN.md)
 - [monorepo-restructure-v2-mermaid.md](c:/Users/User/Documents/demoPackageNpm/focus/tailwind-styled-v4.5-platform-modify-v3_fixed%20(1)/library/plans/monorepo-restructure-v2-mermaid.md)
 - [monorepo-restructure-v2-checklist.md](c:/Users/User/Documents/demoPackageNpm/focus/tailwind-styled-v4.5-platform-modify-v3_fixed%20(1)/library/plans/monorepo-restructure-v2-checklist.md)
+- [monorepo-restructure-v2-execution-log.md](c:/Users/User/Documents/demoPackageNpm/focus/tailwind-styled-v4.5-platform-modify-v3_fixed%20(1)/library/plans/monorepo-restructure-v2-execution-log.md)
 
 ## Status
 - `Approved`
@@ -1066,7 +1067,7 @@ flowchart TD
 - [ ] **Wave 1**: Root import compatibility, foundation contract cleanup, smoke test root/subpath/workspace import
 - [ ] **Wave 2**: Pipeline typing hardening, `scanner→analyzer→compiler→engine` full flow smoke, artifact safety
 - [ ] **Wave 3**: Adapter smoke (vite, next, rspack, vue, svelte), tooling compatibility, desktop packaging
-- [ ] **Wave 4**: `doctor`, `trace`, `why`, dashboard metrics, devtools traces, plugin starter
+- [ ] **Wave 4**: `doctor`, `trace`, `why`, dan dashboard metrics sudah masuk production prototype; devtools traces dan plugin starter masih pending
 - [ ] **Wave 5**: Full `build`, `check`, `test`, `pack:check`, release candidate gate
 
 ---
@@ -2207,11 +2208,11 @@ CLI (`create-tailwind-styled` / `tw`) adalah user-facing tool yang harus punya s
 ### Current Commands
 | Command | File | Status |
 |---------|------|--------|
-| `why` | `cli/src/commands/why.ts` | **Implemented** — explain class contribution, usage, impact |
+| `why` | `cli/src/commands/why.ts` | **Implemented** — explain class contribution, usage location, variant chain, impact, dan fallback diagnostics |
 | `create` | `cli/src/createApp.ts` | **Implemented** — scaffolding new project |
 | `migrate` | `cli/src/migrate.ts` | **Implemented** — migration from tailwind-styled-components |
-| `doctor` | (planned) | **Wave 4** — dependency, boundary, artifact diagnostics |
-| `trace` | (planned) | **Wave 4** — trace class transform/scan/build flow |
+| `doctor` | `cli/src/commands/doctor.ts` | **Implemented** — workspace/tailwind/analysis diagnostics dengan JSON output dan summary-based exit code |
+| `trace` | `cli/src/commands/trace.ts` | **Implemented** — class trace atau `--target` file/directory trace dengan output text/json/mermaid |
 
 ### `why` Command Contract
 ```typescript
@@ -2234,8 +2235,8 @@ interface WhyResult {
 | ESM-only | Binary harus ESM-safe untuk `npx` |
 | Commands harus punya smoke test | Tidak boleh `echo "No tests yet"` |
 | `why` pakai engine | `whyClass()` → engine → bundleAnalyzer → impactTracker |
-| `doctor` (Wave 4) | Cek dependency, boundary, artifact, native binding |
-| `trace` (Wave 4) | Cek transform flow, scan result, build result |
+| `doctor` | `runDiagnostics()` mengecek workspace, tailwind project, dan analyzer summary dengan exit code `0/1/2` |
+| `trace` | `traceClass()` dan `traceTarget()` menangani trace class maupun inspeksi file/directory |
 
 ---
 
@@ -2453,31 +2454,37 @@ npx @tailwind-styled/cli doctor [options]
 
 Options:
   --cwd <path>           Working directory (default: process.cwd())
+  --include <checks>     Comma-separated: workspace,tailwind,analysis
   --json                 Output as JSON
-  --fix                  Auto-fix issues yang aman
-  --include <checks>     Comma-separated: boundaries,deps,artifacts,types
+  --verbose, -v          Tambahkan info analyzer yang lebih detail
 
-Checks:
-  1. Workspace structure (semua 28 package punya script minimal)
-  2. Boundary rules (dependency-cruiser pass)
-  3. Artifact safety (tidak ada src/ di dist)
-  4. Type safety (tsc --noEmit pass)
-  5. Native binding (engine native tersedia atau fallback aktif)
+Current checks:
+  1. Workspace root + npm workspace discovery
+  2. Required script coverage per workspace package
+  3. Tailwind/tailwind-styled dependency detection
+  4. CSS entry, tailwind config, dan tsconfig JSX hints
+  5. Workspace scan + analyzer semantic diagnostics bila tersedia
 
 Exit code: 0 = semua OK, 1 = ada error, 2 = ada warning
 ```
 
 ### `trace` Mode
 ```
+npx @tailwind-styled/cli trace <class-name>
 npx @tailwind-styled/cli trace --target <path> [options]
 
 Options:
   --target <path>        File atau directory yang di-trace
-  --depth <n>            Max trace depth (default: 5)
+  --cwd <path>           Working directory (default: process.cwd())
   --format <fmt>         Output: text, json, mermaid
-  --include-deps         Include dependency resolution trace
+  --json                 Shortcut untuk machine-readable output
 
-Output:
+Current output:
+  - Class mode: definedAt, variants, rules, conflicts, dan final style
+  - Target mode: imports, classes, file summary, unknown classes, dan compiler availability
+  - Mermaid mode: graph ringkas target -> imports/classes
+
+Example target trace:
   File: packages/cli/src/index.ts
   ├─ Import: @tailwind-styled/engine
   │  └─ engine exports: scanWorkspace, analyzeWorkspace, build
@@ -2507,10 +2514,10 @@ Output:
 | Aturan | Detail |
 |--------|--------|
 | Semua punya `--json` | Machine-readable output |
-| Callable as library | Bukan hanya CLI; devtools dan dashboard bisa pakai |
-| Fail-fast error | Pesan jelas, bukan generic error |
-| Streaming progress | Output bertahap, bukan tunggu selesai |
-| Wave 4 | `doctor`, `trace`, `codegen` masuk Wave 4 |
+| Callable as library | `packages/cli/src/api.ts` mengekspor `runDiagnostics`, `traceClass`, `traceTarget`, dan `whyClass` untuk reuse |
+| Fail-fast error | Pesan usage jelas via `CliUsageError`, bukan generic error |
+| Graceful fallback | `trace` dan `why` tetap memberi hasil berguna saat compiler/native bridge belum tersedia |
+| Wave 4 status | `doctor`, `trace`, `why`, dan dashboard metrics sudah masuk production prototype; `codegen` tetap optional/pending |
 
 ---
 

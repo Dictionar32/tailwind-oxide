@@ -1,3 +1,4 @@
+import type { Writable } from "node:stream"
 import {
   intro as clackIntro,
   isTTY as clackIsTTY,
@@ -6,7 +7,6 @@ import {
   spinner as clackSpinner,
 } from "@clack/prompts"
 import pc from "picocolors"
-import type { Writable } from "node:stream"
 
 import { errorToJson } from "./errors"
 import { toJsonSuccess } from "./json"

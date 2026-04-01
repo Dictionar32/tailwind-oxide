@@ -7,15 +7,11 @@ import { runMigrateCli } from "../migrate"
 import { runScanCli } from "../scan"
 import { runSetupCli } from "../setup"
 import { runStatsCli } from "../stats"
-import { runTraceCli } from "./trace"
-import { runDoctorCli } from "./doctor"
-import { runWhyCli } from "./why"
-import { CliUsageError } from "../utils/errors"
 import { resolveCommandHelp } from "../utils/runtime"
 import { createCommand } from "./create"
 import { dashboardCommand } from "./dashboard"
 import { deployCommand } from "./deploy"
-import { loadRegistry, resolveScript, validatePackageName } from "./helpers"
+import { runDoctorCli } from "./doctor"
 import { miscCommands } from "./misc"
 import { pluginCommand } from "./plugin"
 import { preflightCommand } from "./preflight"
@@ -24,7 +20,9 @@ import { scriptCommands } from "./scriptCommands"
 import { storybookCommand } from "./storybook"
 import { studioCommand } from "./studio"
 import { syncCommand } from "./sync"
+import { runTraceCli } from "./trace"
 import type { CommandContext, CommandDefinition } from "./types"
+import { runWhyCli } from "./why"
 
 function contextArgs(args: string[], context: CommandContext): string[] {
   return context.json ? [...args, "--json"] : args
@@ -48,7 +46,7 @@ function toVariadic(value: string | string[] | undefined): string[] {
 }
 
 export function buildMainProgram(context: CommandContext): Command {
-  const miscByName = new Map(miscCommands.map((command) => [command.name, command]))
+  const _miscByName = new Map(miscCommands.map((command) => [command.name, command]))
   const scriptByName = new Map(scriptCommands.map((command) => [command.name, command]))
 
   const program = new Command("tw")
@@ -80,22 +78,23 @@ export function buildMainProgram(context: CommandContext): Command {
       if (options.dryRun) args.push("--dry-run")
       if (options.skipInstall) args.push("--skip-install")
       await runSetupCli(contextArgs(args, context))
-    }),
-    program
-      .command("create [name]")
-      .description("Create project from template")
-      .option("-y, --yes", "Skip prompts")
-      .option("--template <template>", "Template name")
-      .option("--dry-run", "Preview generated files")
-      .action(async (name: string | undefined, ...actionArgs) => {
-        const options = actionCommand(actionArgs).opts()
-        const args: string[] = []
-        if (name) args.push(name)
-        if (options.template) args.push(`--template=${options.template}`)
-        if (options.yes) args.push("--yes")
-        if (options.dryRun) args.push("--dry-run")
-        await createCommand.run(contextArgs(args, context), context)
-      })
+    })
+
+  program
+    .command("create [name]")
+    .description("Create project from template")
+    .option("-y, --yes", "Skip prompts")
+    .option("--template <template>", "Template name")
+    .option("--dry-run", "Preview generated files")
+    .action(async (name: string | undefined, ...actionArgs) => {
+      const options = actionCommand(actionArgs).opts()
+      const args: string[] = []
+      if (name) args.push(name)
+      if (options.template) args.push(`--template=${options.template}`)
+      if (options.yes) args.push("--yes")
+      if (options.dryRun) args.push("--dry-run")
+      await createCommand.run(contextArgs(args, context), context)
+    })
 
   program
     .command("init [target]")
@@ -501,31 +500,51 @@ export function buildMainProgram(context: CommandContext): Command {
     })
 
   program
-    .command("trace <class>")
-    .description("Trace why a class behaves the way it does")
+    .command("trace [class]")
+    .description("Trace a class or inspect a file/directory target")
     .aliases(["t"])
-    .action(async (className: string) => {
-      await runTraceCli([className], context)
+    .option("--target <path>", "Trace a file or directory instead of a single class")
+    .option("--cwd <path>", "Working directory for trace resolution")
+    .option("--format <format>", "Output format: text, json, mermaid")
+    .action(async (className: string | undefined, ...actionArgs) => {
+      const options = actionCommand(actionArgs).opts()
+      const args: string[] = []
+      if (className) args.push(className)
+      if (options.target) args.push(`--target=${options.target}`)
+      if (options.cwd) args.push(`--cwd=${options.cwd}`)
+      if (options.format) args.push(`--format=${options.format}`)
+      await runTraceCli(contextArgs(args, context), context)
     })
 
   program
     .command("doctor")
     .description("Run diagnostics on your codebase")
     .aliases(["d", "diagnose"])
+    .option("--cwd <path>", "Working directory for diagnostics")
+    .option(
+      "--include <checks>",
+      `Diagnostic categories: ${["workspace", "tailwind", "analysis"].join(", ")}`
+    )
     .option("--verbose", "Show detailed diagnostics")
     .action(async (...actionArgs) => {
       const options = actionCommand(actionArgs).opts()
       const args: string[] = []
+      if (options.cwd) args.push(`--cwd=${options.cwd}`)
+      if (options.include) args.push(`--include=${options.include}`)
       if (options.verbose) args.push("--verbose")
-      await runDoctorCli(args, context)
+      await runDoctorCli(contextArgs(args, context), context)
     })
 
   program
     .command("why <class>")
     .description("Explain why a class is in the bundle")
     .aliases(["w"])
-    .action(async (className: string) => {
-      await runWhyCli([className], context)
+    .option("--cwd <path>", "Working directory for why analysis")
+    .action(async (className: string, ...actionArgs) => {
+      const options = actionCommand(actionArgs).opts()
+      const args: string[] = [className]
+      if (options.cwd) args.push(`--cwd=${options.cwd}`)
+      await runWhyCli(contextArgs(args, context), context)
     })
 
   return program

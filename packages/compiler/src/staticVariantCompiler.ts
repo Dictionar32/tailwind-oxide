@@ -81,10 +81,13 @@ function cartesian(variants: Record<string, string[]>): Record<string, string>[]
   const keys = Object.keys(variants).sort()
   if (keys.length === 0) return [{}]
 
-  return keys.reduce((combinations, key) => {
-    const values = variants[key]
-    return combinations.flatMap(combo => values.map(val => ({ ...combo, [key]: val })))
-  }, [{}] as Record<string, string>[])
+  return keys.reduce(
+    (combinations, key) => {
+      const values = variants[key]
+      return combinations.flatMap((combo) => values.map((val) => ({ ...combo, [key]: val })))
+    },
+    [{}] as Record<string, string>[]
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

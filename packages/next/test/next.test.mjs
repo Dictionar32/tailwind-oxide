@@ -1,72 +1,115 @@
-/**
- * Test suite: @tailwind-styled/next
- * Verifikasi: withTailwindStyled, loader exports
- */
-import { test, describe } from "node:test"
 import assert from "node:assert/strict"
-import { createRequire } from "node:module"
-import { fileURLToPath } from "node:url"
+import fs from "node:fs"
 import path from "node:path"
+import { describe, test } from "node:test"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
-const require = createRequire(import.meta.url)
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
-const next = require(path.join(ROOT, "packages/next/dist/index.cjs"))
+const next = await import(pathToFileURL(path.join(ROOT, "packages/next/dist/index.js")))
 
-describe("withTailwindStyled", () => {
-  test("export tersedia", () => {
+const isTailwindStyledRule = (rule) =>
+  Array.isArray(rule?.use) &&
+  rule.use.some(
+    (entry) => typeof entry?.loader === "string" && /webpackLoader\.(cjs|js)$/.test(entry.loader)
+  )
+
+const countTailwindStyledRules = (rules = []) => rules.filter((rule) => isTailwindStyledRule(rule)).length
+
+describe("@tailwind-styled/next exports", () => {
+  test("exports withTailwindStyled", () => {
     assert.equal(typeof next.withTailwindStyled, "function")
-  })
-
-  test("wrap nextConfig dan return object", () => {
-    const config = { reactStrictMode: true }
-    const wrapped = next.withTailwindStyled(config)
-    assert.ok(typeof wrapped === "object" || typeof wrapped === "function",
-      `result: ${typeof wrapped}`)
-  })
-
-  test("wrapped config mempertahankan properties asli", () => {
-    const config = { reactStrictMode: true, output: "standalone" }
-    const wrapped = next.withTailwindStyled(config)
-    // withTailwindStyled mengembalikan function atau object
-    if (typeof wrapped === "object") {
-      // properties asli harus masih ada
-      const hasOriginal = "reactStrictMode" in wrapped || "webpack" in wrapped
-      assert.ok(hasOriginal, `wrapped: ${JSON.stringify(Object.keys(wrapped))}`)
-    }
-  })
-
-  test("withTailwindStyled dengan options", () => {
-    const wrapped = next.withTailwindStyled({}, {
-      cssEntry: "src/globals.css",
-    })
-    assert.ok(typeof wrapped === "object" || typeof wrapped === "function")
-  })
-
-  test("withTailwindStyled idempotent — aman dipanggil dua kali", () => {
-    const config = { reactStrictMode: true }
-    const w1 = next.withTailwindStyled(config)
-    const w2 = next.withTailwindStyled(config)
-    // Tidak crash = idempotent
-    assert.ok(w1 !== null)
-    assert.ok(w2 !== null)
   })
 })
 
-describe("Loader exports", () => {
-  test("webpackLoader file ada di dist", () => {
-    // Loader butuh full Next.js environment — cukup verifikasi file ada
-    const fs = require("node:fs")
-    const loaderPath = path.join(ROOT, "packages/next/dist/webpackLoader.cjs")
-    assert.ok(fs.existsSync(loaderPath), `webpackLoader.cjs not found at ${loaderPath}`)
+describe("@tailwind-styled/next withTailwindStyled()", () => {
+  test("injects a single webpack rule and preserves loader options", async () => {
+    const wrapped = next.withTailwindStyled({
+      include: /\.view\.tsx$/,
+      exclude: /vendor/,
+      autoClientBoundary: false,
+      addDataAttr: false,
+      verbose: true,
+    })({
+      reactStrictMode: true,
+    })
+
+    assert.equal(wrapped.reactStrictMode, true)
+    assert.equal(typeof wrapped.webpack, "function")
+
+    const webpackConfig = await wrapped.webpack(
+      { module: { rules: [{ test: /\.css$/ }] } },
+      {}
+    )
+
+    assert.equal(countTailwindStyledRules(webpackConfig.module.rules), 1)
+    assert.equal(webpackConfig.module.rules.length, 2)
+
+    const injectedRule = webpackConfig.module.rules[0]
+    const loaderEntry = injectedRule.use[0]
+
+    assert.equal(String(injectedRule.test), String(/\.view\.tsx$/))
+    assert.equal(String(injectedRule.exclude), String(/vendor/))
+    assert.match(loaderEntry.loader, /webpackLoader\.(cjs|js)$/)
+    assert.equal(fs.existsSync(loaderEntry.loader), true)
+    assert.equal(loaderEntry.options.mode, "zero-runtime")
+    assert.equal(loaderEntry.options.autoClientBoundary, false)
+    assert.equal(loaderEntry.options.addDataAttr, false)
+    assert.equal(loaderEntry.options.verbose, true)
+    assert.equal(loaderEntry.options.preserveImports, true)
   })
 
-  test("turbopackLoader file ada di dist", () => {
-    const fs = require("node:fs")
-    const loaderPath = path.join(ROOT, "packages/next/dist/turbopackLoader.cjs")
-    assert.ok(fs.existsSync(loaderPath), `turbopackLoader.cjs not found at ${loaderPath}`)
+  test("wraps an existing webpack function and remains idempotent", async () => {
+    const wrapped = next.withTailwindStyled({})({
+      webpack(config) {
+        return {
+          ...config,
+          customFlag: "from-user",
+        }
+      },
+    })
+
+    const initialConfig = { module: { rules: [] } }
+    const firstPass = await wrapped.webpack(initialConfig, {})
+    const secondPass = await wrapped.webpack(firstPass, {})
+
+    assert.equal(firstPass.customFlag, "from-user")
+    assert.equal(countTailwindStyledRules(firstPass.module.rules), 1)
+    assert.equal(countTailwindStyledRules(secondPass.module.rules), 1)
   })
 
-  test("withTailwindStyled ada di index.cjs", () => {
-    assert.ok("withTailwindStyled" in next, `exports: ${Object.keys(next)}`)
+  test("generates turbopack rules and preserves existing entries", () => {
+    const wrapped = next.withTailwindStyled({
+      include: /\.tsx$/,
+      exclude: /vendor/,
+      autoClientBoundary: false,
+    })({
+      turbopack: {
+        rules: {
+          "*.mdx": { loaders: [{ loader: "mdx-loader" }] },
+        },
+      },
+    })
+
+    assert.equal(typeof wrapped.turbopack, "object")
+    assert.deepEqual(wrapped.turbopack.rules["*.mdx"], {
+      loaders: [{ loader: "mdx-loader" }],
+    })
+
+    for (const key of ["*.js", "*.jsx", "*.ts", "*.tsx"]) {
+      const rule = wrapped.turbopack.rules[key]
+      assert.equal(Array.isArray(rule.loaders), true)
+      assert.match(rule.loaders[0].loader, /turbopackLoader\.(cjs|js)$/)
+      assert.equal(fs.existsSync(rule.loaders[0].loader), true)
+      assert.equal(rule.loaders[0].options.mode, "zero-runtime")
+      assert.equal(rule.loaders[0].options.autoClientBoundary, false)
+      assert.equal(rule.loaders[0].options.preserveImports, true)
+    }
+  })
+})
+
+describe("@tailwind-styled/next loader artifacts", () => {
+  test("ships both loader entrypoints in dist", () => {
+    assert.equal(fs.existsSync(path.join(ROOT, "packages/next/dist/webpackLoader.js")), true)
+    assert.equal(fs.existsSync(path.join(ROOT, "packages/next/dist/turbopackLoader.js")), true)
   })
 })

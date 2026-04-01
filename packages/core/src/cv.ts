@@ -26,14 +26,19 @@ export function cv<C extends ComponentConfig>(config: C): CvFn<C> {
   const { base = "", variants = {}, compoundVariants = [], defaultVariants = {} } = config
 
   return (
-    props: InferVariantProps<C> & { className?: string } & Readonly<Record<string, unknown>> = {} as never
+    props: InferVariantProps<C> & { className?: string } & Readonly<
+        Record<string, unknown>
+      > = {} as never
   ): string => {
     const classes = [base]
 
     // Process single-value variants
     for (const key in variants) {
       const val = (props as Record<string, unknown>)[key] ?? defaultVariants[key]
-      if (val !== undefined && (variants as Record<string, Record<string, string>>)[key]?.[String(val)]) {
+      if (
+        val !== undefined &&
+        (variants as Record<string, Record<string, string>>)[key]?.[String(val)]
+      ) {
         classes.push((variants as Record<string, Record<string, string>>)[key]![String(val)])
       }
     }
@@ -41,7 +46,9 @@ export function cv<C extends ComponentConfig>(config: C): CvFn<C> {
     // Process compound variants
     for (const compound of compoundVariants) {
       const { class: cls, ...conditions } = compound
-      const match = Object.entries(conditions).every(([k, v]) => (props as Record<string, unknown>)[k] === v)
+      const match = Object.entries(conditions).every(
+        ([k, v]) => (props as Record<string, unknown>)[k] === v
+      )
       if (match) classes.push(cls)
     }
 

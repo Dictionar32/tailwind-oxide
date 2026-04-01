@@ -9,8 +9,6 @@
  */
 
 import path from "node:path"
-
-import { pickProjectTypeInteractive } from "./commands/setup/prompt"
 import {
   patchNextConfigImpl,
   patchRspackConfigImpl,
@@ -18,6 +16,7 @@ import {
   patchTsConfigImpl,
   patchViteConfigImpl,
 } from "./commands/setup/patchers"
+import { pickProjectTypeInteractive } from "./commands/setup/prompt"
 import {
   alreadyInstalled,
   configureSetupFlags,
@@ -25,13 +24,13 @@ import {
   detectPm,
   findExisting,
   installPackages,
-  patchFileWithDryRun,
-  writeFileWithDryRun,
   type ProjectType,
+  patchFileWithDryRun,
   type SetupFlags,
   type SetupProjectOption,
+  writeFileWithDryRun,
 } from "./commands/setup/workspace"
-import { createCliLogger, type CliLogEvent } from "./utils/logger"
+import { type CliLogEvent, createCliLogger } from "./utils/logger"
 import { createCliOutput } from "./utils/output"
 
 const cwd = process.cwd()
@@ -134,10 +133,11 @@ export const runSetupCli = async (rawArgs: string[]): Promise<void> => {
     alreadyInstalled(cwd, "tailwind-merge"),
     alreadyInstalled(cwd, adapterPkg),
   ])
-  
-  const toInstall = [hasCorePkg ? null : "tailwind-styled-v4", hasMergePkg ? null : "tailwind-merge"].filter(
-    Boolean
-  ) as string[]
+
+  const toInstall = [
+    hasCorePkg ? null : "tailwind-styled-v4",
+    hasMergePkg ? null : "tailwind-merge",
+  ].filter(Boolean) as string[]
   const toInstallDev = [hasAdapterPkg ? null : adapterPkg].filter(Boolean) as string[]
 
   if (toInstall.length > 0) await installPackages(cwd, pm, toInstall, false, setupFlags, logger)
@@ -148,8 +148,11 @@ export const runSetupCli = async (rawArgs: string[]): Promise<void> => {
   else logger.skip(`${adapterPkg} sudah terpasang`)
 
   output.writeText("\n>> [2/5] Patch bundler config")
-  
-  const bundlerConfigMap: Record<string, { files: string[]; patcher: (src: string) => string | null; warnMsg: string }> = {
+
+  const bundlerConfigMap: Record<
+    string,
+    { files: string[]; patcher: (src: string) => string | null; warnMsg: string }
+  > = {
     next: {
       files: ["next.config.ts", "next.config.mjs", "next.config.js"],
       patcher: patchNextConfig,
@@ -168,10 +171,11 @@ export const runSetupCli = async (rawArgs: string[]): Promise<void> => {
   }
 
   const bundlerConfig = bundlerConfigMap[bundler]
-  
+
   if (bundlerConfig) {
     const cfg = await findExisting(cwd, bundlerConfig.files)
-    if (cfg) await patchFileWithDryRun(cfg, bundlerConfig.patcher, path.basename(cfg), setupFlags, logger)
+    if (cfg)
+      await patchFileWithDryRun(cfg, bundlerConfig.patcher, path.basename(cfg), setupFlags, logger)
     else logger.warn(bundlerConfig.warnMsg)
   } else {
     logger.skip("React tanpa bundler - tidak ada bundler config yang di-patch")
@@ -181,7 +185,7 @@ export const runSetupCli = async (rawArgs: string[]): Promise<void> => {
   output.writeText("\n>> [3/5] tailwind-styled.config.json")
   const twsCfgPath = path.join(cwd, "tailwind-styled.config.json")
   const hasTwsConfig = await findExisting(cwd, ["tailwind-styled.config.json"])
-  
+
   if (hasTwsConfig) {
     logger.skip("tailwind-styled.config.json sudah ada")
   } else {
@@ -237,7 +241,7 @@ export const runSetupCli = async (rawArgs: string[]): Promise<void> => {
   output.writeText("\n>> [5/5] tsconfig.json")
   const tsCfg = path.join(cwd, "tsconfig.json")
   const hasTsConfig = await findExisting(cwd, ["tsconfig.json"])
-  
+
   if (hasTsConfig) {
     await patchFileWithDryRun(tsCfg, patchTsConfig, "tsconfig.json", setupFlags, logger)
   } else {

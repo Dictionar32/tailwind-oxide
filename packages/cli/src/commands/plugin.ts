@@ -1,8 +1,8 @@
 import { CliUsageError } from "../utils/errors"
 import { writeJsonSuccess } from "../utils/json"
 import { npmCommandName, runCommand, runCommandAsJson } from "../utils/process"
-import type { CommandDefinition } from "./types"
 import { loadRegistry, resolveScript, validatePackageName } from "./helpers"
+import type { CommandDefinition } from "./types"
 
 export const pluginCommand: CommandDefinition = {
   name: "plugin",

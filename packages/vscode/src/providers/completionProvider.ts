@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { EngineService } from "../services/engineService"
+import type { EngineService } from "../services/engineService"
 
 const TAILWIND_PREFIXES = [
   "bg-",
@@ -96,7 +96,7 @@ export function createCompletionProvider(
     provideCompletionItems(
       document: vscode.TextDocument,
       position: vscode.Position,
-      token: vscode.CancellationToken
+      _token: vscode.CancellationToken
     ): vscode.ProviderResult<vscode.CompletionItem[]> {
       return (async () => {
         try {

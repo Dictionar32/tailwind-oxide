@@ -3,8 +3,6 @@ import { createRequire } from "node:module"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { Worker } from "node:worker_threads"
-
-import { extractAllClasses } from "@tailwind-styled/syntax"
 import { createLogger } from "@tailwind-styled/shared"
 import { filePriority, type NativeCacheEntry, readCache, writeCache } from "./cache-native"
 import { hashContentNative, isRustCacheAvailable } from "./native-bridge"
@@ -62,7 +60,16 @@ const createNativeParserLoader = () => {
       path.resolve(process.cwd(), "native/tailwind_styled_parser.node"),
       path.resolve(process.cwd(), "native/build/Release/tailwind_styled_parser.node"),
       path.resolve(runtimeDir, "..", "..", "..", "native", "tailwind_styled_parser.node"),
-      path.resolve(runtimeDir, "..", "..", "..", "native", "build", "Release", "tailwind_styled_parser.node"),
+      path.resolve(
+        runtimeDir,
+        "..",
+        "..",
+        "..",
+        "native",
+        "build",
+        "Release",
+        "tailwind_styled_parser.node"
+      ),
     ]
 
     for (const fullPath of candidates) {
@@ -71,11 +78,9 @@ const createNativeParserLoader = () => {
         const required = req(fullPath) as NativeParserBinding
         if (
           required &&
-          (
-            typeof required.extractClassesFromSource === "function" ||
+          (typeof required.extractClassesFromSource === "function" ||
             typeof required.parseClasses === "function" ||
-            typeof required.parse_classes === "function"
-          )
+            typeof required.parse_classes === "function")
         ) {
           _state.binding = required
           debugNative(`using native parser from ${fullPath}`)
@@ -90,7 +95,7 @@ const createNativeParserLoader = () => {
     if (!_state.initError) {
       _state.initError = "native .node binding not found"
     }
-    debugNative(`fallback to JS: ${_state.initError}`)
+    debugNative(`native binding not available: ${_state.initError}`)
     return _state.binding
   }
 
@@ -126,9 +131,9 @@ function normalizeWithNativeParser(tokens: string[]): string[] {
 
 export type { ScanFileResult, ScanWorkspaceOptions, ScanWorkspaceResult } from "./schemas"
 export {
+  parseScannerWorkerMessage,
   parseScanWorkspaceOptions,
   parseScanWorkspaceResult,
-  parseScannerWorkerMessage,
 } from "./schemas"
 
 export const DEFAULT_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"]
@@ -260,10 +265,6 @@ function toCacheSize(size: number): number {
   return Math.min(normalized, 0xffffffff)
 }
 
-function extractClassesJs(source: string): string[] {
-  return extractAllClasses(source)
-}
-
 export function scanSource(source: string): string[] {
   const nativeBinding = nativeParserLoader.get()
   if (nativeBinding?.extractClassesFromSource) {
@@ -273,18 +274,11 @@ export function scanSource(source: string): string[] {
     }
   }
 
-  if (nativeBinding && (typeof nativeBinding.parseClasses === "function" || typeof nativeBinding.parse_classes === "function")) {
-    try {
-      const baseClasses = extractClassesJs(source)
-      const nativeNormalized = normalizeWithNativeParser(baseClasses)
-      return nativeNormalized
-    } catch (error) {
-      throw error
-    }
-  }
-
   throw new Error(
-    "Native parser binding is required but not available. Run 'npm run build:rust' to build it."
+    "FATAL: Native parser binding is required but not available.\n" +
+    "This package requires native Rust bindings.\n\n" +
+    "Resolution steps:\n" +
+    "1. Build the native Rust module: npm run build:rust"
   )
 }
 
@@ -311,7 +305,7 @@ export function scanWorkspace(
   const extensionSet = buildExtensionSet(includeExtensions)
   const ignoreDirectories = new Set(normalizedOptions.ignoreDirectories ?? DEFAULT_IGNORES)
   const useCache = normalizedOptions.useCache ?? true
-  const smartInvalidation = normalizedOptions.smartInvalidation ?? true
+  const _smartInvalidation = normalizedOptions.smartInvalidation ?? true
 
   const files: ScanFileResult[] = []
   const unique = new Set<string>()
@@ -322,6 +316,7 @@ export function scanWorkspace(
     for (const cls of result.classes) unique.add(cls)
   }
 
+  
   const { scanWorkspaceNative } = require("./native-bridge")
 
   if (!normalizedOptions.cacheDir && !useCache) {
@@ -365,8 +360,11 @@ export function scanWorkspace(
 
     for (const filePath of candidates) {
       const stat = (() => {
-        try { return fs.statSync(filePath) }
-        catch { return null }
+        try {
+          return fs.statSync(filePath)
+        } catch {
+          return null
+        }
       })()
       if (!stat) continue
 
@@ -395,8 +393,11 @@ export function scanWorkspace(
 
     for (const { filePath, stat, size, cached } of ranked) {
       const content = (() => {
-        try { return fs.readFileSync(filePath, "utf8") }
-        catch { return null }
+        try {
+          return fs.readFileSync(filePath, "utf8")
+        } catch {
+          return null
+        }
       })()
       if (!content) continue
 

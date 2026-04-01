@@ -21,7 +21,7 @@ import type {
 } from "./types"
 
 // types.ts is single source of truth — re-export for consumers
-export type { TwTagFactory, TwComponentFactory, TwObject, TwServerObject }
+export type { TwComponentFactory, TwObject, TwServerObject, TwTagFactory }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Template parser
@@ -63,8 +63,8 @@ function makeTag(tag: React.ElementType): RuntimeTagFactory {
       stringsOrConfig !== null &&
       !("raw" in stringsOrConfig)
     ) {
-        return createComponent(tag, stringsOrConfig as ComponentConfig)
-      }
+      return createComponent(tag, stringsOrConfig as ComponentConfig)
+    }
     const classes = parseTemplate(stringsOrConfig as TemplateStringsArray, exprs)
     return createComponent(tag, classes)
   }) as RuntimeTagFactory
@@ -192,7 +192,10 @@ function makeServerTag(tag: React.ElementType): RuntimeTagFactory {
       stringsOrConfig: TemplateStringsArray | ComponentConfig,
       ...exprs: unknown[]
     ): TwStyledComponent<Record<string, unknown>> => {
-      const tagName = typeof tag === "string" ? tag : ((tag as { displayName?: string }).displayName ?? "Component")
+      const tagName =
+        typeof tag === "string"
+          ? tag
+          : ((tag as { displayName?: string }).displayName ?? "Component")
       console.warn(
         `[tailwind-styled-v4] tw.server.${tagName} rendered in browser. ` +
           `Ensure withTailwindStyled or Vite plugin is configured.`

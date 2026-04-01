@@ -68,7 +68,8 @@ const AnalyzerClassStatsSchema = z.object({
     .optional(),
   frequentThreshold: z
     .number({
-      error: "analyzeWorkspace options.classStats.frequentThreshold must be a number when provided.",
+      error:
+        "analyzeWorkspace options.classStats.frequentThreshold must be a number when provided.",
     })
     .finite()
     .optional(),
@@ -80,7 +81,10 @@ const AnalyzerSemanticOptionsSchema = z.object({
       error:
         "analyzeWorkspace options.semantic.tailwindConfigPath must be a non-empty string when provided.",
     })
-    .min(1, "analyzeWorkspace options.semantic.tailwindConfigPath must be a non-empty string when provided.")
+    .min(
+      1,
+      "analyzeWorkspace options.semantic.tailwindConfigPath must be a non-empty string when provided."
+    )
     .optional(),
 })
 

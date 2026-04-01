@@ -2,13 +2,11 @@ import assert from "node:assert/strict"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
-import { createRequire } from "node:module"
 import { afterEach, describe, test } from "node:test"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
-const require = createRequire(import.meta.url)
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
-const vite = require(path.join(ROOT, "packages/vite/dist/plugin.cjs"))
+const vite = await import(pathToFileURL(path.join(ROOT, "packages/vite/dist/plugin.js")))
 
 const tempDirs = []
 
@@ -22,6 +20,7 @@ function makeTempRoot() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "tailwind-styled-vite-"))
   tempDirs.push(root)
   fs.mkdirSync(path.join(root, "src"), { recursive: true })
+  fs.mkdirSync(path.join(root, "stories"), { recursive: true })
   return root
 }
 
@@ -60,8 +59,17 @@ describe("@tailwind-styled/vite plugin structure", () => {
 })
 
 describe("@tailwind-styled/vite transform()", () => {
-  test("transforms matching source files", async () => {
-    const plugin = vite.tailwindStyledPlugin()
+  test("transforms matching source files via an injected transform runner", async () => {
+    const plugin = vite.tailwindStyledPlugin({
+      __internalTransformRunner({ source }) {
+        return {
+          changed: true,
+          code: `/* @tw-transformed */\n${source}`,
+          classes: ["bg-red-500", "px-4"],
+        }
+      },
+    })
+
     const result = await plugin.transform(
       "const Button = tw.button`bg-red-500 px-4`",
       "/src/App.tsx"
@@ -72,6 +80,33 @@ describe("@tailwind-styled/vite transform()", () => {
     assert.match(result.code, /@tw-transformed/)
   })
 
+  test("warns and no-ops when the transform runner is unavailable", async () => {
+    const warnings = []
+    const originalWarn = console.warn
+    console.warn = (...args) => warnings.push(args.map(String).join(" "))
+
+    try {
+      const plugin = vite.tailwindStyledPlugin({
+        __internalTransformRunner() {
+          throw new Error("native compiler bridge unavailable")
+        },
+      })
+
+      const result = await plugin.transform(
+        "const Button = tw.button`bg-red-500 px-4`",
+        "/src/App.tsx"
+      )
+
+      assert.equal(result, null)
+      assert.ok(
+        warnings.some((message) => message.includes("Transform skipped for /src/App.tsx")),
+        warnings.join(" | ")
+      )
+    } finally {
+      console.warn = originalWarn
+    }
+  })
+
   test("skips excluded or unmatched files", async () => {
     const plugin = vite.tailwindStyledPlugin({ include: /\.custom$/ })
 
@@ -80,56 +115,149 @@ describe("@tailwind-styled/vite transform()", () => {
   })
 
   test("strips query strings before include/exclude checks", async () => {
-    const plugin = vite.tailwindStyledPlugin()
+    const plugin = vite.tailwindStyledPlugin({
+      __internalTransformRunner({ source }) {
+        return { changed: false, code: source, classes: [] }
+      },
+    })
     const result = await plugin.transform("const x = 1", "/src/App.tsx?import=static")
     assert.equal(result, null)
   })
 })
 
 describe("@tailwind-styled/vite buildEnd()", () => {
-  test("generates a safelist file in build mode", async () => {
+  test("uses the engine facade for safelist and report generation", async () => {
     const root = makeTempRoot()
-    fs.writeFileSync(path.join(root, "src", "App.tsx"), "const Button = tw.button`bg-red-500 px-4`")
+    const calls = []
 
-    const plugin = vite.tailwindStyledPlugin({ useEngineBuild: false })
+    const plugin = vite.tailwindStyledPlugin({
+      useEngineBuild: false,
+      scanDirs: ["src"],
+      __internalCreateEngine: async (options) => {
+        calls.push(options)
+        return {
+          async scanWorkspace() {
+            return {
+              files: [
+                {
+                  file: path.join(root, "src", "App.tsx"),
+                  classes: ["bg-red-500", "px-4"],
+                },
+                {
+                  file: path.join(root, "stories", "Button.stories.tsx"),
+                  classes: ["text-blue-500"],
+                },
+              ],
+              totalFiles: 2,
+              uniqueClasses: ["bg-red-500", "px-4", "text-blue-500"],
+            }
+          },
+          async build() {
+            throw new Error("build should not run when useEngineBuild=false")
+          },
+        }
+      },
+    })
+
     plugin.configResolved({ root, command: "build" })
     await plugin.buildEnd()
 
-    const safelistPath = path.join(root, ".tailwind-styled-safelist.json")
-    assert.equal(fs.existsSync(safelistPath), true)
+    const safelist = JSON.parse(
+      fs.readFileSync(path.join(root, ".tailwind-styled-safelist.json"), "utf8")
+    )
+    const report = JSON.parse(
+      fs.readFileSync(path.join(root, ".tailwind-styled-scan-report.json"), "utf8")
+    )
 
-    const safelist = JSON.parse(fs.readFileSync(safelistPath, "utf8"))
-    assert.ok(Array.isArray(safelist))
-    assert.ok(safelist.includes("bg-red-500"))
+    assert.deepEqual(safelist, ["bg-red-500", "px-4"])
+    assert.equal(report.totalFiles, 1)
+    assert.equal(report.uniqueClassCount, 2)
+    assert.deepEqual(calls[0]?.scanner?.includeExtensions, [".tsx", ".ts", ".jsx", ".js"])
   })
 
-  test("handles scanner failures without crashing the build", async () => {
+  test("warns when engine scan fails without crashing the build", async () => {
     const root = makeTempRoot()
-    fs.writeFileSync(path.join(root, "src", "App.tsx"), "const Button = tw.button`bg-red-500`")
-    const scanReportPath = path.join(root, "scan.json")
-
     const warnings = []
     const originalWarn = console.warn
     console.warn = (...args) => warnings.push(args.map(String).join(" "))
 
     try {
-      const plugin = vite.tailwindStyledPlugin({ useEngineBuild: false, scanReportOutput: "scan.json" })
+      const plugin = vite.tailwindStyledPlugin({
+        useEngineBuild: false,
+        __internalCreateEngine: async () => ({
+          async scanWorkspace() {
+            throw new Error("scanner unavailable")
+          },
+          async build() {
+            return undefined
+          },
+        }),
+      })
+
       plugin.configResolved({ root, command: "build" })
       await plugin.buildEnd()
+
+      assert.ok(
+        warnings.some((message) => message.includes("Engine scan phase failed")),
+        warnings.join(" | ")
+      )
     } finally {
       console.warn = originalWarn
     }
+  })
 
-    assert.ok(
-      fs.existsSync(scanReportPath) ||
-        warnings.some((message) => message.includes("Scan report generation failed")),
-      `warnings: ${warnings.join(" | ")}`
-    )
+  test("build errors warn by default and throw in strict mode", async () => {
+    const root = makeTempRoot()
+    const warnings = []
+    const originalWarn = console.warn
+    console.warn = (...args) => warnings.push(args.map(String).join(" "))
+
+    try {
+      const warnPlugin = vite.tailwindStyledPlugin({
+        __internalCreateEngine: async () => ({
+          async scanWorkspace() {
+            return { files: [], totalFiles: 0, uniqueClasses: [] }
+          },
+          async build() {
+            throw new Error("engine build failed")
+          },
+        }),
+      })
+
+      warnPlugin.configResolved({ root, command: "build" })
+      await warnPlugin.buildEnd()
+
+      const strictPlugin = vite.tailwindStyledPlugin({
+        strict: true,
+        __internalCreateEngine: async () => ({
+          async scanWorkspace() {
+            return { files: [], totalFiles: 0, uniqueClasses: [] }
+          },
+          async build() {
+            throw new Error("engine build failed")
+          },
+        }),
+      })
+
+      strictPlugin.configResolved({ root, command: "build" })
+      await assert.rejects(() => strictPlugin.buildEnd(), /Engine build step failed/)
+      assert.ok(
+        warnings.some((message) => message.includes("Engine build step failed")),
+        warnings.join(" | ")
+      )
+    } finally {
+      console.warn = originalWarn
+    }
   })
 
   test("does nothing in dev mode", async () => {
     const root = makeTempRoot()
-    const plugin = vite.tailwindStyledPlugin({ useEngineBuild: false })
+    const plugin = vite.tailwindStyledPlugin({
+      __internalCreateEngine: async () => {
+        throw new Error("engine should not be created in dev mode")
+      },
+    })
+
     plugin.configResolved({ root, command: "serve" })
     await plugin.buildEnd()
 

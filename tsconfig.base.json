@@ -10,6 +10,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "rootDir": ".",
     "jsx": "react-jsx",
     "declaration": true,
     "declarationDir": "dist",

@@ -51,7 +51,7 @@ export const hoistComponents = (source: string): HoistResult => {
   }> = []
 
   const matches = [...source.matchAll(INDENTED_TW_DECL_RE)]
-  
+
   for (const match of matches) {
     const indent = match[1]
     const keyword = match[2]
@@ -115,13 +115,18 @@ export const hoistComponents = (source: string): HoistResult => {
   )
 
   // Inject hoisted declarations after imports
-  const code = hoistedDecls.length > 0
-    ? (() => {
-        const insertPoint = findAfterImports(codeAfterRemoval)
-        const hoistBlock = `\n${hoistedDecls.join("\n\n")}\n`
-        return codeAfterRemoval.slice(0, insertPoint) + hoistBlock + codeAfterRemoval.slice(insertPoint)
-      })()
-    : codeAfterRemoval
+  const code =
+    hoistedDecls.length > 0
+      ? (() => {
+          const insertPoint = findAfterImports(codeAfterRemoval)
+          const hoistBlock = `\n${hoistedDecls.join("\n\n")}\n`
+          return (
+            codeAfterRemoval.slice(0, insertPoint) +
+            hoistBlock +
+            codeAfterRemoval.slice(insertPoint)
+          )
+        })()
+      : codeAfterRemoval
 
   return { code, hoisted, warnings }
 }
@@ -167,7 +172,7 @@ const extractFullStatement = (source: string): string | null => {
 
 const findAfterImports = (source: string): number => {
   const lines = source.split("\n")
-  
+
   const lastImportLine = lines.reduce((lastIdx, line, idx) => {
     const trimmed = line.trim()
     if (

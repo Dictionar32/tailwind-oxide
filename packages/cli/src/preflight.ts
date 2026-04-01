@@ -54,16 +54,15 @@ export interface PreflightReport {
 }
 
 const DEFAULT_TAILWIND_CSS = '@import "tailwindcss";\n'
-const DEFAULT_TW_CONFIG =
-  JSON.stringify(
-    {
-      version: 1,
-      compiler: { engine: "rust" },
-      css: { entry: "src/tailwind.css" },
-    },
-    null,
-    2
-  ) + "\n"
+const DEFAULT_TW_CONFIG = `${JSON.stringify(
+  {
+    version: 1,
+    compiler: { engine: "rust" },
+    css: { entry: "src/tailwind.css" },
+  },
+  null,
+  2
+)}\n`
 
 function pkgHasDep(pkg: PackageJsonLike, name: string): boolean {
   return Boolean(pkg.dependencies?.[name] || pkg.devDependencies?.[name])

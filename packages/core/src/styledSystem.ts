@@ -284,8 +284,9 @@ export function createStyledSystem<
 
     // Find or create the :root style element
     const styleId = `__tw-sys-tokens-${prefix}`
-    const style = (document.getElementById(styleId) as HTMLStyleElement | null)
-      ?? (() => {
+    const style =
+      (document.getElementById(styleId) as HTMLStyleElement | null) ??
+      (() => {
         const el = document.createElement("style")
         el.id = styleId
         document.head.appendChild(el)

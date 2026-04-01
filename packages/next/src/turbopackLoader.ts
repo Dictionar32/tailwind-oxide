@@ -2,17 +2,23 @@
  * tailwind-styled-v4 - Turbopack Loader
  */
 
-import type { LoaderOptions } from "@tailwind-styled/compiler"
-import { runLoaderTransform } from "@tailwind-styled/compiler"
+import { runLoaderTransform } from "@tailwind-styled/compiler/internal"
 
 interface TurbopackContext {
   resourcePath: string
 }
 
+interface TurbopackLoaderOptions {
+  addDataAttr?: boolean | string
+  autoClientBoundary?: boolean | string
+  hoist?: boolean | string
+  preserveImports?: boolean | string
+}
+
 export default function turbopackLoader(
   this: TurbopackContext,
   source: string,
-  options: LoaderOptions = {}
+  options: TurbopackLoaderOptions = {}
 ): string {
   const parseBool = (val: boolean | string | undefined): boolean => {
     if (typeof val === "boolean") return val
@@ -34,7 +40,6 @@ export default function turbopackLoader(
       addDataAttr,
       autoClientBoundary,
       hoist,
-      // Preserve cv, cx, cn, etc — only tw.* is transformed
       preserveImports: true,
     },
   })

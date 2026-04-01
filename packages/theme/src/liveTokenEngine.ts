@@ -1,6 +1,8 @@
 import React from "react"
 
-export type TokenMap = Record<string, string>
+import type { TokenMap } from '@tailwind-styled/shared'
+export type { TokenMap }
+
 export type TokenSubscriber = (tokens: TokenMap) => void
 
 export interface LiveTokenSet {

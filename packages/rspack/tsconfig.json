@@ -1,8 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@tailwind-styled/compiler": ["../compiler/dist/index.d.ts"]
+    }
   },
   "include": ["src"]
 }

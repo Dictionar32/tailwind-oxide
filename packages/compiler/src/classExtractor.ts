@@ -7,16 +7,19 @@
  * Ekstrak semua Tailwind class dari source untuk safelist generation.
  */
 
-import { extractAllClasses as extractClassesFromSyntax, parseClasses } from "@tailwind-styled/syntax"
+import {
+  extractAllClasses as extractClassesFromSyntax,
+  parseClasses,
+} from "@tailwind-styled/syntax"
 import { parseComponentConfig } from "./astParser"
 import { EXTEND_RE, OBJECT_RE, TEMPLATE_RE } from "./twDetector"
 
-const TEMPLATE_SCAN_RE = new RegExp(TEMPLATE_RE.source, "g")
-const OBJECT_SCAN_RE = new RegExp(OBJECT_RE.source, "g")
-const EXTEND_SCAN_RE = new RegExp(EXTEND_RE.source, "g")
-const CLASS_NAME_RE = /className\s*=\s*["']([^"']+)["']/g
+const _TEMPLATE_SCAN_RE = new RegExp(TEMPLATE_RE.source, "g")
+const _OBJECT_SCAN_RE = new RegExp(OBJECT_RE.source, "g")
+const _EXTEND_SCAN_RE = new RegExp(EXTEND_RE.source, "g")
+const _CLASS_NAME_RE = /className\s*=\s*["']([^"']+)["']/g
 
-function resetRegex(regex: RegExp): void {
+function _resetRegex(regex: RegExp): void {
   regex.lastIndex = 0
 }
 

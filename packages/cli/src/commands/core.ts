@@ -5,9 +5,9 @@ import { runMigrateCli } from "../migrate"
 import { runScanCli } from "../scan"
 import { runSetupCli } from "../setup"
 import { runStatsCli } from "../stats"
-import { runTraceCli } from "./trace"
-import { runDoctorCli } from "./doctor"
 import { ensureFlag } from "../utils/args"
+import { runDoctorCli } from "./doctor"
+import { runTraceCli } from "./trace"
 import type { CommandDefinition } from "./types"
 
 function withGlobalJson(args: string[], enabled: boolean): string[] {

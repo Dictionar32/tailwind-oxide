@@ -2,8 +2,8 @@ import { parseArgs as parseNodeArgs } from "node:util"
 
 import { CliUsageError } from "../utils/errors"
 import { runCommand } from "../utils/process"
-import type { CommandDefinition } from "./types"
 import { resolveScript } from "./helpers"
+import type { CommandDefinition } from "./types"
 
 export const studioCommand: CommandDefinition = {
   name: "studio",

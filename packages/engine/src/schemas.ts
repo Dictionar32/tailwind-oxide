@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { EnginePlugin } from "./plugin-api"
 
 const formatIssues = (error: z.ZodError): string =>
   error.issues
@@ -28,6 +29,7 @@ export const EngineOptionsSchema = z.object({
   compileCss: z.boolean().optional(),
   tailwindConfigPath: z.string().optional(),
   analyze: z.boolean().optional(),
+  plugins: z.array(z.custom<EnginePlugin>()).optional(),
 })
 
 export type EngineOptionsInput = z.infer<typeof EngineOptionsSchema>
@@ -42,7 +44,9 @@ export type EngineWatchOptionsInput = z.infer<typeof EngineWatchOptionsSchema>
 
 export const BuildResultSchema = z.object({
   scan: z.object({
-    files: z.array(z.object({ file: z.string(), classes: z.array(z.string()), hash: z.string().optional() })),
+    files: z.array(
+      z.object({ file: z.string(), classes: z.array(z.string()), hash: z.string().optional() })
+    ),
     totalFiles: z.number().int().min(0),
     uniqueClasses: z.array(z.string()),
   }),
@@ -51,12 +55,14 @@ export const BuildResultSchema = z.object({
   analysis: z
     .object({
       unusedClasses: z.array(z.string()),
-      classConflicts: z.array(z.object({
-        className: z.string(),
-        files: z.array(z.string()),
-        classes: z.array(z.string()).optional(),
-        message: z.string().optional(),
-      })),
+      classConflicts: z.array(
+        z.object({
+          className: z.string(),
+          files: z.array(z.string()),
+          classes: z.array(z.string()).optional(),
+          message: z.string().optional(),
+        })
+      ),
       classUsage: z.record(z.string(), z.number()),
     })
     .optional(),

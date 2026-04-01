@@ -17,16 +17,16 @@ export interface EnginePlugin {
   afterScan?(
     scan: ScanWorkspaceResult,
     context: EnginePluginContext
-  ): ScanWorkspaceResult | void | Promise<ScanWorkspaceResult | void>
+  ): ScanWorkspaceResult | undefined | Promise<ScanWorkspaceResult | undefined>
   transformClasses?(
     classes: string[],
     context: EnginePluginContext
-  ): string[] | void | Promise<string[] | void>
+  ): string[] | undefined | Promise<string[] | undefined>
   beforeBuild?(scan: ScanWorkspaceResult, context: EnginePluginContext): void | Promise<void>
   afterBuild?(
     result: BuildResult,
     context: EnginePluginContext
-  ): BuildResult | void | Promise<BuildResult | void>
+  ): BuildResult | undefined | Promise<BuildResult | undefined>
   onError?(error: Error, context: EnginePluginContext): void | Promise<void>
   beforeWatch?(context: EngineWatchContext): void | Promise<void>
   afterWatch?(context: EngineWatchContext): void | Promise<void>
@@ -46,14 +46,11 @@ export async function runAfterScan(
   scan: ScanWorkspaceResult,
   context: EnginePluginContext
 ): Promise<ScanWorkspaceResult> {
-  return await plugins.reduce(
-    async (currentPromise, plugin) => {
-      const current = await currentPromise
-      const next = await plugin.afterScan?.(current, context)
-      return next ?? current
-    },
-    Promise.resolve(scan)
-  )
+  return await plugins.reduce(async (currentPromise, plugin) => {
+    const current = await currentPromise
+    const next = await plugin.afterScan?.(current, context)
+    return next ?? current
+  }, Promise.resolve(scan))
 }
 
 export async function runTransformClasses(
@@ -61,14 +58,11 @@ export async function runTransformClasses(
   classes: string[],
   context: EnginePluginContext
 ): Promise<string[]> {
-  return await plugins.reduce(
-    async (currentPromise, plugin) => {
-      const current = await currentPromise
-      const next = await plugin.transformClasses?.(current, context)
-      return next ?? current
-    },
-    Promise.resolve(classes)
-  )
+  return await plugins.reduce(async (currentPromise, plugin) => {
+    const current = await currentPromise
+    const next = await plugin.transformClasses?.(current, context)
+    return next ?? current
+  }, Promise.resolve(classes))
 }
 
 export async function runBeforeBuild(

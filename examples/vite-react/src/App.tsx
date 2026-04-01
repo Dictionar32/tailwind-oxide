@@ -1,17 +1,6 @@
-/**
- * tailwind-styled-v4 — Vite React Example
- *
- * Menunjukkan fitur:
- *  1. tw template literal dasar
- *  2. Responsive layout dengan Tailwind breakpoints
- *  3. Animation dengan tw + Tailwind animate classes
- *  4. Dark mode toggle
- */
-
 import { useState } from "react"
 import { tw } from "tailwind-styled-v4"
 
-// ── Komponen dasar ──────────────────────────────────────────────────────────
 const Heading = tw.h1`
   text-3xl font-extrabold tracking-tight
   text-gray-900 dark:text-white
@@ -27,7 +16,6 @@ const Tag = tw.span`
   ring-1 ring-inset ring-indigo-700/10
 `
 
-// ── Feature card ─────────────────────────────────────────────────────────────
 const FeatureCard = tw.div`
   group relative overflow-hidden rounded-2xl border border-gray-200
   bg-white p-6 shadow-sm transition-all duration-200
@@ -37,8 +25,8 @@ const FeatureCard = tw.div`
 
 const FeatureIcon = tw.div`
   mb-4 inline-flex h-12 w-12 items-center justify-center
-  rounded-xl bg-indigo-100 text-2xl
-  dark:bg-indigo-900/50
+  rounded-xl bg-indigo-100 text-lg font-bold text-indigo-700
+  dark:bg-indigo-900/50 dark:text-indigo-200
 `
 
 const FeatureTitle = tw.h3`
@@ -49,111 +37,107 @@ const FeatureDesc = tw.p`
   mt-1 text-sm text-gray-500 dark:text-gray-400
 `
 
-// ── Code snippet display ─────────────────────────────────────────────────────
 const Code = tw.pre`
   mt-4 rounded-xl bg-gray-900 p-4
   text-sm text-green-400 font-mono overflow-x-auto
   leading-relaxed
 `
 
-// ── Data ─────────────────────────────────────────────────────────────────────
 const features = [
   {
-    icon: "🦀",
+    icon: "RS",
     title: "Rust-powered engine",
-    desc:  "AST parsing via Oxc, 27 native N-API functions. Scan 1000 files in < 1ms.",
-    tag:   "Performance",
+    desc: "AST parsing via Oxc with native N-API hooks for fast scans and compilation.",
+    tag: "Performance",
   },
   {
-    icon: "🧩",
-    title: "tw template literal",
-    desc:  "Write tw.button`classes` — compiler extracts and hashes classes at build time.",
-    tag:   "DX",
+    icon: "TW",
+    title: "Template literals",
+    desc: "Write tw" + ".button`classes` and let the compiler extract classes at build time.",
+    tag: "DX",
   },
   {
-    icon: "⚡",
+    icon: "OV",
     title: "Object variants",
-    desc:  "tw.button({ variants: { intent: { primary: '...', danger: '...' } } })",
-    tag:   "API",
+    desc: "Use tw" + ".button({ variants: { intent: { primary: '...', danger: '...' } } })",
+    tag: "API",
   },
   {
-    icon: "🔁",
+    icon: "EX",
     title: ".extend() inheritance",
-    desc:  "DangerButton = Button.extend`border-2 border-red-500` — extend tanpa override.",
-    tag:   "Composition",
+    desc: "Compose Button" + ".extend`border-2 border-red-500` without rewriting the base styles.",
+    tag: "Composition",
   },
   {
-    icon: "🌐",
+    icon: "RSC",
     title: "RSC-aware",
-    desc:  "Deteksi otomatis 'use client' boundary untuk Next.js App Router.",
-    tag:   "Next.js",
+    desc: "Detect the correct client boundary automatically for Next.js App Router builds.",
+    tag: "Next.js",
   },
   {
-    icon: "🛠️",
+    icon: "CLI",
     title: "CLI + DevTools",
-    desc:  "npx tw setup — inject semua config otomatis. tw preflight untuk verifikasi.",
-    tag:   "Tooling",
+    desc: "Use the CLI to wire project config quickly and run preflight checks before shipping.",
+    tag: "Tooling",
   },
 ]
 
-// ── App ───────────────────────────────────────────────────────────────────────
+const exampleSnippet = [
+  'import { tw } from "tailwind-styled-v4"',
+  "",
+  "const Button = tw" + '.button({',
+  '  base: "rounded-lg px-4 py-2 font-medium transition",',
+  "  variants: {",
+  "    intent: {",
+  '      primary:   "bg-blue-600 text-white hover:bg-blue-700",',
+  '      secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",',
+  "    },",
+  "  },",
+  '  defaultVariants: { intent: "primary" },',
+  "})",
+  "",
+  "// Usage:",
+  '<Button intent="primary">Click me</Button>',
+  '<Button intent="secondary">Cancel</Button>',
+].join("\n")
+
 export default function App() {
   const [dark, setDark] = useState(false)
 
   return (
     <div className={dark ? "dark" : ""}>
-      <main className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
+      <main className="min-h-screen bg-gray-50 transition-colors dark:bg-gray-950">
         <div className="mx-auto max-w-5xl px-6 py-16">
-
-          {/* Hero */}
           <div className="mb-12 text-center">
             <Tag>Rust + TypeScript + React</Tag>
             <Heading className="mt-4">tailwind-styled-v4</Heading>
             <Lead>
-              Rust-powered compiler untuk Tailwind CSS di React.
+              A Tailwind compiler for React with a styled-components-like authoring model.
               <br />
-              Build time 10× lebih cepat, DX seperti styled-components.
+              Faster build-time extraction with a small runtime surface.
             </Lead>
             <button
-              onClick={() => setDark(d => !d)}
+              onClick={() => setDark((value) => !value)}
               className="mt-6 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              {dark ? "☀️ Light mode" : "🌙 Dark mode"}
+              {dark ? "Light mode" : "Dark mode"}
             </button>
           </div>
 
-          {/* Code snippet */}
-          <Code>{`import { tw } from "tailwind-styled-v4"
+          <Code>{exampleSnippet}</Code>
 
-const Button = tw.button({
-  base: "rounded-lg px-4 py-2 font-medium transition",
-  variants: {
-    intent: {
-      primary:   "bg-blue-600 text-white hover:bg-blue-700",
-      secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
-    },
-  },
-  defaultVariants: { intent: "primary" },
-})
-
-// Usage:
-<Button intent="primary">Click me</Button>
-<Button intent="secondary">Cancel</Button>`}</Code>
-
-          {/* Feature grid */}
           <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map(f => (
-              <FeatureCard key={f.title}>
-                <FeatureIcon>{f.icon}</FeatureIcon>
+            {features.map((feature) => (
+              <FeatureCard key={feature.title}>
+                <FeatureIcon>{feature.icon}</FeatureIcon>
                 <div className="flex items-start justify-between gap-2">
-                  <FeatureTitle>{f.title}</FeatureTitle>
-                  <Tag>{f.tag}</Tag>
+                  <FeatureTitle>{feature.title}</FeatureTitle>
+                  <Tag>{feature.tag}</Tag>
                 </div>
-                <FeatureDesc>{f.desc}</FeatureDesc>
+                <FeatureDesc>{feature.desc}</FeatureDesc>
               </FeatureCard>
             ))}
           </div>
-
         </div>
       </main>
     </div>

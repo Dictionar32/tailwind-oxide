@@ -1,12 +1,22 @@
 /**
- * tailwind-styled-v4 — Webpack Loader
+ * tailwind-styled-v4 - Webpack Loader
  */
 
-import type { LoaderOptions } from "@tailwind-styled/compiler"
-import { runLoaderTransform, shouldSkipFile } from "@tailwind-styled/compiler"
+import {
+  type LoaderOutput,
+  runLoaderTransform,
+  shouldSkipFile,
+} from "@tailwind-styled/compiler/internal"
 
-interface WebpackLoaderOptions extends LoaderOptions {
+interface WebpackLoaderOptions {
+  mode?: "zero-runtime"
   autoClientBoundary?: boolean
+  addDataAttr?: boolean
+  hoist?: boolean
+  routeCss?: boolean
+  incremental?: boolean
+  verbose?: boolean
+  preserveImports?: boolean
 }
 
 interface WebpackContext {
@@ -27,7 +37,7 @@ export default function webpackLoader(this: WebpackContext, source: string): voi
   try {
     const options = this.getOptions()
 
-    const output = runLoaderTransform({
+    const output: LoaderOutput = runLoaderTransform({
       filepath,
       source,
       options: {
@@ -39,7 +49,6 @@ export default function webpackLoader(this: WebpackContext, source: string): voi
         routeCss: options.routeCss,
         incremental: options.incremental,
         verbose: options.verbose,
-        // Preserve cv, cx, cn, etc — only tw.* is transformed
         preserveImports: true,
       },
     })
@@ -49,7 +58,7 @@ export default function webpackLoader(this: WebpackContext, source: string): voi
       const engine = output.engine ?? "js"
       const name = filepath.split(/[/\\]/).pop()
       console.log(
-        `[tailwind-styled/webpack] ${name} → ${output.classes.length} classes (${env}) [${engine}]`
+        `[tailwind-styled/webpack] ${name} -> ${output.classes.length} classes (${env}) [${engine}]`
       )
     }
 

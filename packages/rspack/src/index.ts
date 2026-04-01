@@ -1,5 +1,5 @@
 /**
- * tailwind-styled-v4 — Rspack Plugin v5 (stable)
+ * tailwind-styled-v4 - Rspack Plugin v5 (stable)
  *
  * Usage:
  *   import { tailwindStyledRspackPlugin } from "@tailwind-styled/rspack"
@@ -10,14 +10,15 @@
  *
  * v5:
  * - Simplified API
- * - Uses @tailwind-styled/engine for build
  * - Mode always zero-runtime
  */
 
+import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-// ESM-compatible __dirname equivalent
+import { parseRspackPluginOptions } from "./schemas"
+
 function getDirname(): string {
   if (typeof __dirname !== "undefined") {
     return __dirname
@@ -28,11 +29,38 @@ function getDirname(): string {
   return process.cwd()
 }
 
+function resolveLoaderPath(basename: string): string {
+  const runtimeDir = getDirname()
+  const preferredExtensions =
+    typeof __dirname !== "undefined" && __dirname.length > 0 ? [".cjs", ".js"] : [".js", ".cjs"]
+
+  for (const ext of preferredExtensions) {
+    const candidate = path.resolve(runtimeDir, `${basename}${ext}`)
+    if (fs.existsSync(candidate)) return candidate
+  }
+
+  return path.resolve(runtimeDir, `${basename}.js`)
+}
+
+interface RspackRule {
+  _tailwindStyledRspackMarker?: boolean
+  test?: RegExp
+  exclude?: RegExp
+  use?: Array<{
+    loader: string
+    options: {
+      mode: "zero-runtime"
+      addDataAttr: boolean
+      preserveImports: boolean
+    }
+  }>
+}
+
 interface RspackCompiler {
   options: {
     mode?: string
     module?: {
-      rules?: Array<Record<string, unknown>>
+      rules?: RspackRule[]
     }
   }
 }
@@ -48,47 +76,44 @@ export interface RspackPluginOptions {
   analyze?: boolean
 }
 
-const LOADER_PATH = path.resolve(getDirname(), "loader.js")
-
 export class TailwindStyledRspackPlugin {
   private opts: RspackPluginOptions
 
   constructor(opts: RspackPluginOptions = {}) {
-    this.opts = opts
+    this.opts = parseRspackPluginOptions(opts)
   }
 
   apply(compiler: RspackCompiler): void {
     const isDev = compiler.options.mode !== "production"
-
-    const loaderOpts = {
-      // v5: Always zero-runtime
-      mode: "zero-runtime" as const,
-      addDataAttr: this.opts.addDataAttr ?? isDev,
-      // Preserve cv, cx, cn, etc — only tw.* is transformed
-      preserveImports: true,
-    }
-
-    const include = this.opts.include ?? /\.[jt]sx?$/
-    const exclude = this.opts.exclude ?? /node_modules/
-
-    // Check idempotency
+    const loaderPath = resolveLoaderPath("loader")
     const existing = compiler.options.module?.rules ?? []
-    const alreadyRegistered = existing.some((r) => typeof r === "object" && r !== null && "_tailwindStyledRspackMarker" in r)
+    const alreadyRegistered = existing.some(
+      (rule) =>
+        typeof rule === "object" && rule !== null && rule._tailwindStyledRspackMarker === true
+    )
+
     if (alreadyRegistered) return
 
-    const rule = {
+    const rule: RspackRule = {
       _tailwindStyledRspackMarker: true,
-      test: include,
-      exclude: exclude,
+      test: this.opts.include ?? /\.[jt]sx?$/,
+      exclude: this.opts.exclude ?? /node_modules/,
       use: [
         {
-          loader: LOADER_PATH,
-          options: loaderOpts,
+          loader: loaderPath,
+          options: {
+            mode: "zero-runtime",
+            addDataAttr: this.opts.addDataAttr ?? isDev,
+            preserveImports: true,
+          },
         },
       ],
     }
 
-    compiler.options.module.rules = [rule, ...existing]
+    compiler.options.module = {
+      ...(compiler.options.module ?? {}),
+      rules: [rule, ...existing],
+    }
   }
 }
 
@@ -100,9 +125,8 @@ export function tailwindStyledRspackPlugin(
 
 export default tailwindStyledRspackPlugin
 
-// Re-export schemas
 export {
-  RspackPluginOptionsSchema,
   parseRspackPluginOptions,
   type RspackPluginOptionsInput,
+  RspackPluginOptionsSchema,
 } from "./schemas"

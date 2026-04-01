@@ -1,156 +1,77 @@
-import { Button } from "@/components/Button"
-import { Card, CardHeader, CardTitle, CardBadge, CardBody, CardFooter } from "@/components/Card"
-import { Badge } from "@/components/Badge"
-import { Alert } from "@/components/Alert"
-import { Avatar, AvatarGroup } from "@/components/Avatar"
-import { Input, Textarea } from "@/components/Input"
+"use client";
+import { tw } from "tailwind-styled-v4";
+import { useState } from "react";
 
-const teamMembers = [
-  { name: "Ahmad Rizky" },
-  { name: "Budi Santoso" },
-  { name: "Clara Dewi" },
-  { name: "Dian Pratama" },
-  { name: "Eka Surya" },
-  { name: "Fajar Nugroho" },
-  { name: "Gita Maharani" },
-]
+const Heading = tw.h1`text-3xl font-extrabold text-gray-900`;
+const Container = tw.div`max-w-4xl mx-auto py-12 px-4 space-y-8`;
 
-const products = [
-  { name: "Pro Plan",   price: "$29/mo", badge: "Popular",    color: "blue" as const,   desc: "Untuk tim kecil hingga 10 orang." },
-  { name: "Team Plan",  price: "$79/mo", badge: "New",        color: "green" as const,  desc: "Kolaborasi tak terbatas." },
-  { name: "Enterprise", price: "Custom", badge: "Contact us", color: "purple" as const, desc: "SLA, SSO, dan dedicated support." },
-]
+const Alert = tw.div`relative flex gap-3 rounded-lg p-4 border-l-4 text-sm`;
+const InfoAlert = Alert.extend`border-l-blue-500 bg-blue-50 text-blue-800`;
+const SuccessAlert = Alert.extend`border-l-green-500 bg-green-50 text-green-800`;
 
-export default function ShowcasePage() {
+const CardBase = tw.article`rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden p-6`;
+const HoverableCard = CardBase.extend`transition-all hover:-translate-y-1 hover:shadow-md`;
+
+const PrimaryButton = tw.button`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition`;
+const DangerButton = PrimaryButton.extend`bg-red-600 hover:bg-red-700`;
+
+const Section = tw.section``;
+const SectionTitle = tw.h2`text-xl font-bold mb-3`;
+const CardGrid = tw.div`grid md:grid-cols-2 gap-4`;
+const AlertStack = tw.div`space-y-3`;
+const CounterRow = tw.div`flex items-center gap-3`;
+const CardTitle = tw.h3`font-semibold text-gray-900`;
+const CardDescription = tw.p`text-gray-500 mt-1`;
+
+function Counter() {
+  const [count, setCount] = useState(0);
   return (
-    <div>
+    <CounterRow>
+      <PrimaryButton onClick={() => setCount((c) => c + 1)}>
+        Count: {count}
+      </PrimaryButton>
+      <DangerButton onClick={() => setCount(0)}>Reset</DangerButton>
+    </CounterRow>
+  );
+}
 
-      <section>
-        <h2>Button — cv() variants + compoundVariants</h2>
-        <div>
-          <Button>Default</Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button variant="danger">Danger</Button>
-        </div>
-        <br/>
-        <div>
-          <Button size="sm">Small</Button>
-          <Button size="md">Medium</Button>
-          <Button size="lg">Large</Button>
-        </div>
-        <br/>
-        <div>
-          <Button loading>Loading...</Button>
-          <Button disabled>Disabled</Button>
-          <Button variant="outline" size="lg">Outline + Large (compound)</Button>
-        </div>
-      </section>
+export default function Page() {
+  return (
+    <Container>
+      <Heading>tailwind-styled-v4 — Next.js Example</Heading>
 
-      <section>
-        <h2>Badge — tw({"{"}base, variants{"}"}) object config</h2>
-        <div>
-          <Badge>Default</Badge>
-          <Badge color="blue">Blue</Badge>
-          <Badge color="green" dot>Active</Badge>
-          <Badge color="yellow" dot>Pending</Badge>
-          <Badge color="red" dot>Error</Badge>
-          <Badge color="purple" size="lg">Large Purple</Badge>
-        </div>
-      </section>
+      <Section>
+        <SectionTitle>Card Variants</SectionTitle>
+        <CardGrid>
+          <CardBase>
+            <CardTitle>Default Card</CardTitle>
+            <CardDescription>Standard card with tw.article</CardDescription>
+          </CardBase>
+          <HoverableCard>
+            <CardTitle>Hoverable Card</CardTitle>
+            <CardDescription>Hover me! Uses .extend()</CardDescription>
+          </HoverableCard>
+        </CardGrid>
+      </Section>
 
-      <section>
-        <h2>Alert — cx() conditional merge + dismissible</h2>
-        <div>
-          <Alert type="info" title="Informasi">
-            Komponen ini menggunakan cx() untuk merge class secara kondisional.
-          </Alert>
-          <Alert type="success" title="Berhasil!" dismissible>
-            Data berhasil disimpan. Klik tanda X untuk menutup alert ini.
-          </Alert>
-          <Alert type="warning" title="Perhatian">
-            Sisa kuota API kamu tinggal 10%. Upgrade sekarang.
-          </Alert>
-          <Alert type="error" title="Terjadi Error" dismissible>
-            Gagal memuat data. Silakan coba lagi.
-          </Alert>
-        </div>
-      </section>
+      <Section>
+        <SectionTitle>Alert Variants</SectionTitle>
+        <AlertStack>
+          <InfoAlert>
+            <span>ℹ️</span>
+            <span>Info alert — uses .extend() for color variants</span>
+          </InfoAlert>
+          <SuccessAlert>
+            <span>✅</span>
+            <span>Success alert — compiler transforms tw.div template</span>
+          </SuccessAlert>
+        </AlertStack>
+      </Section>
 
-      <section>
-        <h2>Avatar — tw.server RSC-only + AvatarGroup</h2>
-        <div>
-          <Avatar name="Ahmad Rizky" size="xs" />
-          <Avatar name="Budi Santoso" size="sm" />
-          <Avatar name="Clara Dewi" size="md" />
-          <Avatar name="Dian Pratama" size="lg" />
-          <Avatar name="Eka Surya" size="xl" />
-        </div>
-        <br/>
-        <div>
-          <p>AvatarGroup — overflow +N</p>
-          <AvatarGroup users={teamMembers} max={4} size="md" />
-        </div>
-      </section>
-
-      <section>
-        <h2>Input + Textarea — tw(Component) extend + error state</h2>
-        <div>
-          <Input
-            label="Email"
-            type="email"
-            placeholder="hello@example.com"
-            hint="Kami tidak akan spam."
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="••••••••"
-            error="Password minimal 8 karakter."
-          />
-          <Input
-            label="Search"
-            type="search"
-            placeholder="Cari produk..."
-            prefix="🔍"
-          />
-          <Input
-            label="Harga"
-            type="number"
-            placeholder="0"
-            prefix="Rp"
-            suffix="IDR"
-          />
-          <div>
-            <Textarea
-              label="Pesan"
-              rows={3}
-              placeholder="Tulis pesan kamu di sini..."
-              hint="Maksimal 500 karakter."
-            />
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Card — tw(Component) extend + komponen komposisi</h2>
-        <div>
-          {products.map((p) => (
-            <Card key={p.name} hoverable>
-              <CardHeader>
-                <CardTitle>{p.name}</CardTitle>
-                <CardBadge>{p.badge}</CardBadge>
-              </CardHeader>
-              <CardBody>{p.desc}</CardBody>
-              <CardFooter>
-                <span>{p.price}</span>
-                <Button size="sm">Pilih</Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-    </div>
-  )
+      <Section>
+        <SectionTitle>Button + useState (Client Component)</SectionTitle>
+        <Counter />
+      </Section>
+    </Container>
+  );
 }

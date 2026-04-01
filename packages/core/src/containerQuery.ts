@@ -71,10 +71,7 @@ if (typeof window !== "undefined") {
 
 function hashContainer(tag: string, container: ContainerConfig, name?: string): string {
   const key = tag + (name ?? "") + JSON.stringify(Object.entries(container).sort())
-  const hash = key.split("").reduce(
-    (h, char) => ((h << 5) + h) ^ char.charCodeAt(0),
-    5381
-  )
+  const hash = key.split("").reduce((h, char) => ((h << 5) + h) ^ char.charCodeAt(0), 5381)
   return `tw-cq-${Math.abs(hash).toString(36).slice(0, 6)}`
 }
 
@@ -155,21 +152,24 @@ function buildContainerRules(
   container: ContainerConfig,
   containerName?: string
 ): string {
-  const rules = Object.entries(container).map(([key, value]) => {
-    const minWidth = typeof value === "string" 
-      ? CONTAINER_BREAKPOINTS[key] ?? key 
-      : value.minWidth ?? CONTAINER_BREAKPOINTS[key] ?? key
-    const classes = typeof value === "string" ? value : value.classes
+  const rules = Object.entries(container)
+    .map(([key, value]) => {
+      const minWidth =
+        typeof value === "string"
+          ? (CONTAINER_BREAKPOINTS[key] ?? key)
+          : (value.minWidth ?? CONTAINER_BREAKPOINTS[key] ?? key)
+      const classes = typeof value === "string" ? value : value.classes
 
-    const css = layoutClassesToCss(classes)
-    if (!css) return null
+      const css = layoutClassesToCss(classes)
+      if (!css) return null
 
-    const query = containerName
-      ? `@container ${containerName} (min-width: ${minWidth})`
-      : `@container (min-width: ${minWidth})`
+      const query = containerName
+        ? `@container ${containerName} (min-width: ${minWidth})`
+        : `@container (min-width: ${minWidth})`
 
-    return `${query}{.${id}{${css}}}`
-  }).filter(Boolean) as string[]
+      return `${query}{.${id}{${css}}}`
+    })
+    .filter(Boolean) as string[]
 
   return rules.join("\n")
 }
@@ -192,7 +192,6 @@ function injectContainerStyles(
 
   // Try batched injector first (available when runtime-css is installed)
   try {
-     
     const { batchedInject } = require("@tailwind-styled/runtime-css/batched") as {
       batchedInject: (css: string) => void
     }

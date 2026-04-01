@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "tw": "node ../../dist/cli.js"
+    "tw": "node ../../dist/cli.js",
+    "test": "npm install --ignore-scripts && npx tsc --noEmit && npx next build --webpack"
   },
   "dependencies": {
     "@clack/prompts": "^1.1.0",
@@ -19,10 +20,10 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tailwind-merge": "^3.5.0",
-    "tailwind-styled-v4": "^5.0.0"
+    "tailwind-styled-v4": "file:../.."
   },
   "devDependencies": {
-    "@tailwind-styled/next": "^5.0.0",
+    "@tailwind-styled/next": "file:../../packages/next",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

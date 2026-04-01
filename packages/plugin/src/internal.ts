@@ -5,7 +5,7 @@
  * TIDAK untuk penggunaan langsung oleh plugin consumers.
  */
 
-import type { PluginRegistry, CssHook } from "./index"
+import type { PluginRegistry } from "./index"
 
 /**
  * Generate :root CSS variables from registered tokens.

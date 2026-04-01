@@ -6,8 +6,8 @@
  * Compiles Tailwind class lists to atomic CSS using Rust native engine.
  */
 
-import path from "node:path"
 import { createRequire } from "node:module"
+import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 // ESM-compatible __dirname
@@ -54,15 +54,7 @@ const createBindingLoader = () => {
       return bindingState.current
     }
 
-    if (process.env.TWS_NO_NATIVE === "1") {
-      bindingState.current = null
-      throw new Error(
-        `[tailwind-styled/compiler v5] Native binding is required.\n` +
-          `The TWS_NO_NATIVE environment variable is set, which disables native binding.`
-      )
-    }
-
-    const req = typeof require === "function" ? require : createRequire(import.meta.url)
+    const req = createRequire(import.meta.url)
     const currentDir = getDirname()
     const candidates = [
       path.resolve(process.cwd(), "native", "tailwind_styled_parser.node"),
@@ -108,12 +100,12 @@ export interface CssCompileResult {
   css: string
   /** Classes successfully resolved to native CSS */
   resolvedClasses: string[]
-  /** Classes with no native mapping (get @apply fallback) */
+  /** Classes with no native mapping */
   unknownClasses: string[]
   /** Byte size of generated CSS */
   sizeBytes: number
   /** Which engine produced this output */
-  engine: "rust" | "fallback"
+  engine: "rust"
 }
 
 /**

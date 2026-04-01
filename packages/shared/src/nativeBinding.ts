@@ -102,6 +102,7 @@ export function resolveNativeBindingCandidates(
 
     out.push(path.resolve(process.cwd(), "native", defaultBindingName))
     out.push(path.resolve(options.runtimeDir, "..", "..", "..", "native", defaultBindingName))
+    out.push(path.resolve(options.runtimeDir, "..", "..", "..", "..", "native", defaultBindingName))
   }
 
   return Array.from(new Set(out))

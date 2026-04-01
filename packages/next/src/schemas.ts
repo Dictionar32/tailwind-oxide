@@ -15,7 +15,7 @@ const parseWithSchema = <T>(schema: z.ZodType<T>, data: unknown, label: string):
 }
 
 export const NextAdapterOptionsSchema = z.object({
-  mode: z.enum(["zero-runtime", "runtime"]).optional(),
+  mode: z.literal("zero-runtime").optional(),
   autoClientBoundary: z.boolean().optional(),
   addDataAttr: z.boolean().optional(),
   hoist: z.boolean().optional(),

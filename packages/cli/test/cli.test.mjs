@@ -4,8 +4,8 @@
 import { test, describe } from "node:test"
 import assert from "node:assert/strict"
 import { createRequire } from "node:module"
-import { fileURLToPath } from "node:url"
-import { execFileSync, execSync } from "node:child_process"
+import { fileURLToPath, pathToFileURL } from "node:url"
+import { execFileSync, execSync, spawnSync } from "node:child_process"
 import path from "node:path"
 import fs from "node:fs"
 import os from "node:os"
@@ -14,8 +14,48 @@ const require = createRequire(import.meta.url)
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
 const DIST = path.join(ROOT, "packages/cli/dist")
 
+function createObservabilityProject(prefix = "tw-cli-observe-") {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix))
+  fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true })
+  fs.writeFileSync(
+    path.join(tmpDir, "package.json"),
+    JSON.stringify({
+      name: "observability-demo",
+      private: true,
+      dependencies: {
+        react: "^19.0.0",
+        tailwindcss: "^4.0.0",
+        "tailwind-styled-v4": "^5.0.4",
+      },
+    })
+  )
+  fs.writeFileSync(
+    path.join(tmpDir, "tsconfig.json"),
+    JSON.stringify({
+      compilerOptions: {
+        jsx: "react-jsx",
+      },
+    })
+  )
+  fs.writeFileSync(path.join(tmpDir, "tailwind.config.js"), "export default {}\n")
+  fs.writeFileSync(path.join(tmpDir, "src", "styles.css"), '@import "tailwindcss";\n')
+  fs.writeFileSync(
+    path.join(tmpDir, "src", "App.tsx"),
+    [
+      'import React from "react"',
+      'import "./styles.css"',
+      "export function App() {",
+      '  return <div className="flex bg-red-500 hover:bg-red-500 p-4">demo</div>',
+      "}",
+      "",
+    ].join("\n")
+  )
+  return tmpDir
+}
+
 describe("Dist files tersedia", () => {
   for (const file of [
+    "api.js",
     "index.js", "setup.js", "preflight.js",
     "analyze.js", "scan.js", "stats.js",
     "migrate.js", "init.js", "extract.js",
@@ -24,6 +64,16 @@ describe("Dist files tersedia", () => {
       assert.ok(fs.existsSync(path.join(DIST, file)), `${file} tidak ada di dist/`)
     })
   }
+})
+
+describe("API entry", () => {
+  test("api entry bisa di-import tanpa menjalankan CLI utama", async () => {
+    const mod = await import(pathToFileURL(path.join(DIST, "api.js")).href)
+
+    assert.equal(typeof mod.buildMainProgram, "function")
+    assert.equal(typeof mod.runCliMain, "function")
+    assert.equal(typeof mod.runCreateCli, "function")
+  })
 })
 
 describe("setup — source verifikasi", () => {
@@ -203,6 +253,92 @@ describe("create — runtime verifikasi", () => {
 })
 
 describe("json schema — runtime verifikasi", () => {
+  test("doctor --json mendukung --cwd dan include filters", () => {
+    const tmpDir = createObservabilityProject("tw-cli-doctor-")
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [
+          path.join(DIST, "index.js"),
+          "--json",
+          "doctor",
+          `--cwd=${tmpDir}`,
+          "--include=tailwind,analysis",
+        ],
+        { cwd: ROOT, encoding: "utf8", timeout: 10000 }
+      )
+
+      const parsed = JSON.parse(result.stdout)
+      assert.equal(parsed.ok, true)
+      assert.equal(parsed.error, false)
+      assert.equal(parsed.command, "doctor")
+      assert.equal(parsed.data.root, tmpDir)
+      assert.deepEqual(parsed.data.includes, ["tailwind", "analysis"])
+      assert.equal(Array.isArray(parsed.data.checks), true)
+      assert.equal(typeof parsed.data.summary.exitCode, "number")
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test("trace --target --json mengembalikan trace file yang terstruktur", () => {
+    const tmpDir = createObservabilityProject("tw-cli-trace-")
+    try {
+      const out = execFileSync(
+        process.execPath,
+        [
+          path.join(DIST, "index.js"),
+          "--json",
+          "trace",
+          "--target=src/App.tsx",
+          `--cwd=${tmpDir}`,
+        ],
+        { cwd: ROOT, encoding: "utf8", timeout: 10000 }
+      )
+
+      const parsed = JSON.parse(out)
+      assert.equal(parsed.ok, true)
+      assert.equal(parsed.error, false)
+      assert.equal(parsed.command, "trace")
+      assert.equal(parsed.data.mode, "target")
+      assert.equal(parsed.data.targetType, "file")
+      assert.equal(parsed.data.classCount >= 1, true)
+      assert.equal(Array.isArray(parsed.data.imports), true)
+      assert.equal(parsed.data.imports.some((entry) => entry.source === "react"), true)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test("why --json melaporkan lokasi penggunaan class yang lebih akurat", () => {
+    const tmpDir = createObservabilityProject("tw-cli-why-")
+    try {
+      const out = execFileSync(
+        process.execPath,
+        [
+          path.join(DIST, "index.js"),
+          "--json",
+          "why",
+          "bg-red-500",
+          `--cwd=${tmpDir}`,
+        ],
+        { cwd: ROOT, encoding: "utf8", timeout: 10000 }
+      )
+
+      const parsed = JSON.parse(out)
+      assert.equal(parsed.ok, true)
+      assert.equal(parsed.error, false)
+      assert.equal(parsed.command, "why")
+      assert.equal(parsed.data.className, "bg-red-500")
+      assert.equal(Array.isArray(parsed.data.usedIn), true)
+      assert.equal(parsed.data.usedIn.length >= 1, true)
+      assert.equal(parsed.data.usedIn[0].line >= 1, true)
+      assert.equal(parsed.data.usedIn[0].column >= 1, true)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
   test("deploy --dry-run --json mengembalikan envelope JSON sukses", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tw-cli-deploy-json-"))
     try {

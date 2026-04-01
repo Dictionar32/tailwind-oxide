@@ -5,7 +5,7 @@
 import { test, describe } from "node:test"
 import assert from "node:assert/strict"
 import { createRequire } from "node:module"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import path from "node:path"
 import fs from "node:fs"
 
@@ -13,7 +13,7 @@ const require = createRequire(import.meta.url)
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
 process.chdir(ROOT)
 
-const engine = require(path.join(ROOT, "packages/engine/dist/index.cjs"))
+const engine = await import(pathToFileURL(path.join(ROOT, "packages/engine/dist/index.js")))
 const native  = (() => {
   try { return require(path.join(ROOT, "native/tailwind_styled_parser.node")) } catch { return null }
 })()

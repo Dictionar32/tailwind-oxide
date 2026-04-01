@@ -2,8 +2,8 @@ import { parseArgs as parseNodeArgs } from "node:util"
 
 import { CliUsageError } from "../utils/errors"
 import { runCommand, runCommandAsJson } from "../utils/process"
-import type { CommandDefinition } from "./types"
 import { resolveScript } from "./helpers"
+import type { CommandDefinition } from "./types"
 
 interface ScriptRunOptions {
   jsonUnsupported?: boolean

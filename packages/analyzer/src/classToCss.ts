@@ -26,7 +26,9 @@ export const normalizeClassInput = (input: string | string[]): string[] => {
   return out
 }
 
-const normalizeClassToCssOptions = (options: ClassToCssOptions): {
+const normalizeClassToCssOptions = (
+  options: ClassToCssOptions
+): {
   prefix: string | null
   strict: boolean
 } => {
@@ -71,7 +73,7 @@ export const classToCss = async (
 ): Promise<ClassToCssResult> => {
   const inputClasses = normalizeClassInput(input)
   const normalizedOptions = normalizeClassToCssOptions(options)
-  
+
   if (inputClasses.length === 0) {
     return {
       inputClasses: [],
@@ -85,7 +87,7 @@ export const classToCss = async (
 
   const binding = await requireNativeCssCompiler()
   const prefix = normalizedOptions.prefix
-  
+
   const results = await Promise.all(
     inputClasses.map(async (className) => {
       const compiled = (() => {
@@ -115,11 +117,11 @@ export const classToCss = async (
     })
   )
 
-  const cssChunks = results.map(r => r.css)
-  const resolvedClasses = results.flatMap(r => r.resolvedClasses)
-  const unknownClasses = results.flatMap(r => r.unknownClasses)
+  const cssChunks = results.map((r) => r.css)
+  const resolvedClasses = results.flatMap((r) => r.resolvedClasses)
+  const unknownClasses = results.flatMap((r) => r.unknownClasses)
   const sizeBytes = results.reduce((sum, r) => sum + r.sizeBytes, 0)
-  
+
   const declarationMap = new Map<string, string>()
   for (const result of results) {
     mergeDeclarationMap(declarationMap, result.css)

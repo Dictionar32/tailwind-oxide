@@ -6,11 +6,7 @@ import { scanWorkspaceAsync } from "@tailwind-styled/scanner"
 import { requireNativeBinding } from "./binding"
 import { parseAnalyzerOptions, parseNativeReport } from "./schemas"
 import { buildSemanticReport } from "./semantic"
-import type {
-  AnalyzerOptions,
-  AnalyzerReport,
-  ClassUsage,
-} from "./types"
+import type { AnalyzerOptions, AnalyzerReport, ClassUsage } from "./types"
 import { debugLog, formatErrorMessage, sanitizeFrequentThreshold, sanitizeTopLimit } from "./utils"
 
 function normalizeScan(
@@ -23,7 +19,7 @@ function normalizeScan(
     file: file.file,
     classes: file.classes.filter((className) => includeClass(className)),
   }))
-  
+
   const unique = new Set<string>()
   for (const file of filteredFiles) {
     for (const className of file.classes) {
@@ -102,18 +98,25 @@ export async function analyzeWorkspace(
     const scanStartedAtMs = Date.now()
     try {
       const result = await scanWorkspaceAsync(resolvedRoot, normalizedOptions.scanner)
-      debugLog(`scanWorkspaceAsync processed ${result.totalFiles} files in ${Date.now() - scanStartedAtMs}ms`)
+      debugLog(
+        `scanWorkspaceAsync processed ${result.totalFiles} files in ${Date.now() - scanStartedAtMs}ms`
+      )
       return result
     } catch (error) {
-      throw new Error(`Failed to scan workspace at "${resolvedRoot}": ${formatErrorMessage(error)}`, {
-        cause: error,
-      })
+      throw new Error(
+        `Failed to scan workspace at "${resolvedRoot}": ${formatErrorMessage(error)}`,
+        {
+          cause: error,
+        }
+      )
     }
   })()
 
   const normalizedScan = normalizeScan(scan, normalizedOptions.includeClass)
   const topLimit = sanitizeTopLimit(normalizedOptions.classStats?.top)
-  const frequentThreshold = sanitizeFrequentThreshold(normalizedOptions.classStats?.frequentThreshold)
+  const frequentThreshold = sanitizeFrequentThreshold(
+    normalizedOptions.classStats?.frequentThreshold
+  )
 
   const binding = await requireNativeBinding()
   const filesJson = JSON.stringify(
@@ -129,9 +132,12 @@ export async function analyzeWorkspace(
       }
       return parseNativeReport(report)
     } catch (error) {
-      throw new Error(`Native analyzer failed for "${resolvedRoot}": ${formatErrorMessage(error)}`, {
-        cause: error,
-      })
+      throw new Error(
+        `Native analyzer failed for "${resolvedRoot}": ${formatErrorMessage(error)}`,
+        {
+          cause: error,
+        }
+      )
     }
   })()
 
@@ -143,19 +149,19 @@ export async function analyzeWorkspace(
     if (!normalizedOptions.semantic) {
       return { all: baseAll, semanticReport: undefined }
     }
-    
+
     const semanticOption =
       typeof normalizedOptions.semantic === "object" ? normalizedOptions.semantic : undefined
     const semanticStartedAtMs = Date.now()
-    
+
     try {
       const report = await buildSemanticReport(baseAll, resolvedRoot, semanticOption)
       debugLog(`semantic report built in ${Date.now() - semanticStartedAtMs}ms`)
-      
+
       if (report.conflicts.length === 0) {
         return { all: baseAll, semanticReport: report }
       }
-      
+
       const conflicted = new Set(report.conflicts.flatMap((conflict) => conflict.classes))
       const updatedAll = baseAll.map((usage) =>
         conflicted.has(usage.name) ? { ...usage, isConflict: true } : usage

@@ -3,12 +3,25 @@
 ### Status
 - `Approved`
 - Official direction: `tanpa mengurangi fungsi + memperkuat fungsi lama + menambah fungsi baru`
+- Execution snapshot: `2026-03-29` root `build`, `check`, `test`, dan `pack:check` sudah diverifikasi hijau.
+- Current delivery state: Wave 4 observability untuk `doctor`, `trace`, `why`, engine metrics, dan dashboard summary/health sudah masuk production prototype.
+- Current open gap: `devtools traces`, shared trace/inspection surface lintas tooling, dan plugin starter masih pending.
 
 ### Document Map
 - Visual architecture reference: `plans/monorepo-restructure-v2-mermaid.md`
 - Execution checklist: `plans/monorepo-restructure-v2-checklist.md`
 - Per-package execution map: `plans/monorepo-restructure-v2-package-breakdown.md`
+- Execution log / handoff notes: `plans/monorepo-restructure-v2-execution-log.md`
 - Baseline migration and workspace-green history remain in this file below.
+
+### Current Execution Snapshot
+- Latest verified gate date: `2026-03-29`
+- Verified commands: `npm.cmd run build`, `npm.cmd run check`, `npm.cmd test`, `npx.cmd turbo run pack:check --continue`
+- Production prototype yang sudah aktif:
+  - CLI: `tw doctor --cwd <path> --include workspace,tailwind,analysis`, `tw trace <class>`, `tw trace --target <path>`, `tw why <class>`
+  - Engine: metrics write ke `.tw-cache/metrics.json` untuk build success, watch update, dan error path
+  - Dashboard: `/metrics`, `/history`, `/summary`, `/health`, dan reset history surface
+- Recommended next execution target: perluas trace/inspection ke `devtools` di atas shared observability API, lalu lanjutkan plugin starter/codegen bila coupling-nya tetap tipis.
 
 ### Official Execution Order
 1. Preserve compatibility shell.
@@ -62,6 +75,25 @@
 - [ ] Types and schemas no longer drift apart in important package contracts.
 - [ ] Runtime failures from malformed external data become rarer and easier to diagnose.
 - [ ] TypeScript and Zod are used as complementary tools, not competing styles.
+
+### Official Cross-Layer Stack Recommendation
+- Default cross-layer stack: `TypeScript + Zod + neverthrow + ts-pattern + Rust (serde + schemars + napi-rs)`.
+- `TypeScript` remains the primary static contract layer for package internals, inference, IDE tooling, and refactors.
+- `Zod` remains the default runtime validation layer at boundaries where data enters from config, JSON, CLI, adapters, plugins, IPC, or native bindings.
+- `neverthrow` is the recommended Result-style error flow for native, I/O, and boundary-heavy paths where `try/catch` would otherwise spread through the codebase.
+- `ts-pattern` is the recommended exhaustive branching tool for discriminated unions returned by adapters, plugins, scanners, analyzers, and Rust/native bridges.
+- `Rust` should use `serde` for serialization, `schemars` for schema export, and `napi-rs` for Node bindings when a native module crosses into TypeScript.
+- Optional Rust layer hardening such as `nutype` or `garde` is encouraged when domain values need stronger validation or normalization close to the native boundary.
+- The stack should stay intentionally small: do not introduce multiple competing schema systems as defaults when `TypeScript + Zod` already covers the same problem well enough.
+- Do not make `tRPC`, `Immer`, `Effect`, `Valibot`, `ArkType`, or `TypeBox` baseline requirements for the monorepo; they may be adopted only for a package with a concrete need and an explicit justification.
+
+### Stack Guardrails
+- `Zod` is the default runtime schema language unless a package has a documented reason to use another schema tool.
+- `neverthrow` is preferred over ad-hoc custom `Result` types for new boundary-heavy TypeScript code.
+- `ts-pattern` is preferred when a discriminated union has more than two meaningful runtime branches and missing a branch would be risky.
+- `serde + schemars + napi-rs` should be treated as the default Rust-to-TypeScript bridge path for new native-facing modules.
+- Avoid duplicating the same contract in three forms by hand when one of them can be generated or derived.
+- Avoid adding library churn: one package should not mix multiple validation libraries unless there is a strong performance or interoperability reason.
 
 ### Future Module Direction
 - Official long-term target: `full ESM-only`.

@@ -1,18 +1,19 @@
 import { defineConfig } from "tsup"
 
 export default defineConfig({
-  entry: [
-    "src/index.ts",
-    "src/setup.ts",
-    "src/preflight.ts",
-    "src/analyze.ts",
-    "src/scan.ts",
-    "src/stats.ts",
-    "src/migrate.ts",
-    "src/init.ts",
-    "src/extract.ts",
-    "src/createApp.ts",
-  ],
+  entry: {
+    api: "src/api.ts",
+    index: "src/index.ts",
+    setup: "src/setup.ts",
+    preflight: "src/preflight.ts",
+    analyze: "src/analyze.ts",
+    scan: "src/scan.ts",
+    stats: "src/stats.ts",
+    migrate: "src/migrate.ts",
+    init: "src/init.ts",
+    extract: "src/extract.ts",
+    createApp: "src/createAppEntry.ts",
+  },
   format: ["esm"],
   dts: true,
   clean: true,

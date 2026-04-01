@@ -45,6 +45,10 @@ export const OutlineButton = tw.button`
   icon {
     inline-block w-5 h-5
   }
+
+  text {
+    inline-block
+  }
   
   badge {
     absolute -top-2 -right-2

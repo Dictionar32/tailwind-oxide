@@ -1,5 +1,5 @@
 import { classToCss } from "@tailwind-styled/analyzer"
-import { LRUCache, formatErrorMessage } from "@tailwind-styled/shared"
+import { formatErrorMessage, LRUCache } from "@tailwind-styled/shared"
 
 import { getAnimateBinding } from "./binding"
 import type {

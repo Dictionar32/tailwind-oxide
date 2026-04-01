@@ -65,11 +65,13 @@ export type TransformOptionsValidated = z.infer<typeof TransformOptionsSchema>
 export const TransformResultSchema = z.object({
   code: z.string(),
   classes: z.array(z.string()),
-  rsc: z.object({
-    isServer: z.boolean(),
-    needsClientDirective: z.boolean(),
-    clientReasons: z.array(z.string()),
-  }).optional(),
+  rsc: z
+    .object({
+      isServer: z.boolean(),
+      needsClientDirective: z.boolean(),
+      clientReasons: z.array(z.string()),
+    })
+    .optional(),
   changed: z.boolean(),
 })
 export type TransformResultValidated = z.infer<typeof TransformResultSchema>
@@ -80,7 +82,7 @@ export const CssCompileResultSchema = z.object({
   resolvedClasses: z.array(z.string()),
   unknownClasses: z.array(z.string()),
   sizeBytes: z.number().int().min(0),
-  engine: z.enum(["rust", "fallback"]),
+  engine: z.enum(["rust"]),
 })
 export type CssCompileResultValidated = z.infer<typeof CssCompileResultSchema>
 

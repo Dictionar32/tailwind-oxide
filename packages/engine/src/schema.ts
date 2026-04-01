@@ -1,13 +1,15 @@
 import { z } from "zod"
 
 // --- ScanWorkspaceOptions passthrough (from @tailwind-styled/scanner) ---
-const ScanWorkspaceOptionsSchema = z.object({
-  includeExtensions: z.array(z.string()).optional(),
-  ignoreDirectories: z.array(z.string()).optional(),
-  useCache: z.boolean().optional(),
-  cacheDir: z.string().min(1).optional(),
-  smartInvalidation: z.boolean().optional(),
-}).optional()
+const ScanWorkspaceOptionsSchema = z
+  .object({
+    includeExtensions: z.array(z.string()).optional(),
+    ignoreDirectories: z.array(z.string()).optional(),
+    useCache: z.boolean().optional(),
+    cacheDir: z.string().min(1).optional(),
+    smartInvalidation: z.boolean().optional(),
+  })
+  .optional()
 
 // --- EngineOptions (primary boundary input) ---
 export const EngineOptionsSchema = z.object({
@@ -15,9 +17,13 @@ export const EngineOptionsSchema = z.object({
   scanner: ScanWorkspaceOptionsSchema,
   compileCss: z.boolean().optional(),
   tailwindConfigPath: z.string().min(1).optional(),
-  plugins: z.array(z.object({
-    name: z.string().min(1, "plugin name tidak boleh kosong"),
-  })).optional(),
+  plugins: z
+    .array(
+      z.object({
+        name: z.string().min(1, "plugin name tidak boleh kosong"),
+      })
+    )
+    .optional(),
   analyze: z.boolean().optional(),
 })
 export type EngineOptionsValidated = z.infer<typeof EngineOptionsSchema>

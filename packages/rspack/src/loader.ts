@@ -1,15 +1,14 @@
 /**
- * tailwind-styled-v4 — Rspack Loader v5
+ * tailwind-styled-v4 - Rspack Loader v5
  *
  * v5 Changes:
  * - Mode always zero-runtime (no more runtime mode)
  * - Uses native binding from compiler
  */
 
-import type { LoaderOptions } from "@tailwind-styled/compiler"
-import { runLoaderTransform, shouldSkipFile } from "@tailwind-styled/compiler"
+import { runLoaderTransform, shouldSkipFile } from "@tailwind-styled/compiler/internal"
 
-interface RspackLoaderOptions extends LoaderOptions {
+interface RspackLoaderOptions {
   addDataAttr?: boolean
   preserveImports?: boolean
 }
@@ -36,12 +35,10 @@ export default function rspackLoader(this: RspackLoaderContext, source: string):
       filepath,
       source,
       options: {
-        // v5: Always zero-runtime
         mode: "zero-runtime",
         addDataAttr: options.addDataAttr ?? true,
         hoist: true,
         filename: filepath,
-        // Preserve cv, cx, cn, etc — only tw.* is transformed
         preserveImports: true,
       },
     })

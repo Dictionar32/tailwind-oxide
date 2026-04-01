@@ -36,14 +36,14 @@ export async function runInitCli(rawArgs: string[]): Promise<void> {
 
   await ensureFile(
     path.join(root, "tailwind-styled.config.json"),
-    JSON.stringify(
+    `${JSON.stringify(
       {
         version: 1,
         cssEntry: "src/tailwind.css",
       },
       null,
       2
-    ) + "\n",
+    )}\n`,
     report
   )
 

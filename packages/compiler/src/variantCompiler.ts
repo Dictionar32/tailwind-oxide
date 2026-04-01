@@ -24,7 +24,7 @@
 import { type ParsedComponentConfig, parseComponentConfig } from "./astParser"
 import { normalizeClasses } from "./classMerger"
 
-export type CompoundCondition = Record<string, string>
+export type CompoundCondition = Record<string, string | number | boolean>
 
 export interface CompiledVariants {
   base: string

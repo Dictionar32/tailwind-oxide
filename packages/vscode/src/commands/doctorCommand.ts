@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { EngineService } from "../services/engineService"
+import type { EngineService } from "../services/engineService"
 
 export function registerDoctorCommand(engineService: EngineService) {
   return vscode.commands.registerCommand("tailwind-styled.doctor", async () => {
@@ -13,7 +13,8 @@ export function registerDoctorCommand(engineService: EngineService) {
         {}
       )
 
-      const parts: string[] = [`<!DOCTYPE html>
+      const parts: string[] = [
+        `<!DOCTYPE html>
 <html>
 <head>
   <style>
@@ -40,7 +41,8 @@ export function registerDoctorCommand(engineService: EngineService) {
     <div class="summary-item errors">${result.summary.errors} Error${result.summary.errors !== 1 ? "s" : ""}</div>
     <div class="summary-item warnings">${result.summary.warnings} Warning${result.summary.warnings !== 1 ? "s" : ""}</div>
     <div class="summary-item info">${result.summary.info} Info</div>
-  </div>`]
+  </div>`,
+      ]
 
       if (result.issues.length === 0) {
         parts.push(`

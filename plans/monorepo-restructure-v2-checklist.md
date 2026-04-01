@@ -2,10 +2,13 @@
 
 Source of truth:
 - [monorepo-restructure-v2-mermaid.md](c:/Users/User/Documents/demoPackageNpm/focus/tailwind-styled-v4.5-platform-modify-v3_fixed%20(1)/library/plans/monorepo-restructure-v2-mermaid.md)
+- Execution handoff: [monorepo-restructure-v2-execution-log.md](c:/Users/User/Documents/demoPackageNpm/focus/tailwind-styled-v4.5-platform-modify-v3_fixed%20(1)/library/plans/monorepo-restructure-v2-execution-log.md)
 
 ## Status
 - `Approved`
 - Direction: `tanpa mengurangi fungsi + memperkuat fungsi lama + menambah fungsi baru`
+- Execution snapshot: `2026-03-29` root gate verified green setelah perbaikan fallback/native bridge di compiler.
+- Wave 4 observability snapshot: `doctor`, `trace`, `why`, engine metrics write, dan dashboard summary/health surface sudah masuk production prototype; devtools traces dan plugin starter masih pending.
 
 ## Success Criteria
 - Root import, root subpath import, dan direct import `@tailwind-styled/*` tetap berjalan.
@@ -36,16 +39,16 @@ Source of truth:
 - [ ] Kurangi jalur `implicit any` dan fallback type yang terlalu longgar.
 
 ### Stability and Fallbacks
-- [ ] Perkuat native binding resolution agar fallback behavior konsisten.
+- [x] Perkuat native binding resolution agar fallback behavior konsisten.
 - [ ] Perkuat worker/bootstrap path agar artifact release aman.
 - [ ] Pastikan adapter tidak bergantung pada internal package file lintas workspace.
 - [ ] Pastikan package publish tidak bocor `src/`, fixture manifest, atau eksperimen.
 
 ### Diagnostics and Observability
-- [ ] Perkuat output `trace`.
-- [ ] Perkuat output `why`.
-- [ ] Perkuat surface `doctor`.
-- [ ] Perluas metrik yang bisa dipakai oleh `dashboard`.
+- [x] Perkuat output `trace`.
+- [x] Perkuat output `why`.
+- [x] Perkuat surface `doctor`.
+- [x] Perluas metrik yang bisa dipakai oleh `dashboard`.
 - [ ] Perluas trace/inspection yang bisa dipakai oleh `devtools`.
 
 ### Tests and Regression Safety
@@ -63,9 +66,9 @@ Source of truth:
 - [ ] Tambahkan atau stabilkan facade `generateSafelist`.
 
 ### Tooling Additions
-- [ ] Tambahkan mode `doctor` yang lebih kaya untuk CLI.
+- [x] Tambahkan mode `doctor` yang lebih kaya untuk CLI.
 - [ ] Tambahkan mode `trace` yang reusable untuk CLI, devtools, dan dashboard.
-- [ ] Tambahkan mode `why` untuk menjelaskan hasil transform/scan/build.
+- [x] Tambahkan mode `why` untuk menjelaskan hasil transform/scan/build.
 - [ ] Tambahkan helper codegen bila memang relevan dan tidak memperlebar coupling.
 
 ### Plugin and Preset Growth
@@ -82,11 +85,11 @@ Source of truth:
 ## Stream 4: Delivery Hardening
 ### Build and Check
 - [ ] Semua workspace punya script minimal: `build`, `test`, `check`, `clean`, `pack:check`.
-- [ ] `turbo` graph tetap memaksa dependency build order yang benar.
-- [ ] Boundary rules tetap mencegah coupling lama muncul kembali.
+- [x] `turbo` graph tetap memaksa dependency build order yang benar.
+- [x] Boundary rules tetap mencegah coupling lama muncul kembali.
 
 ### Packaging
-- [ ] Jalankan `pack:check` untuk workspace publik utama.
+- [x] Jalankan `pack:check` untuk workspace publik utama.
 - [ ] Verifikasi artifact root umbrella tetap tipis dan wrapper-only.
 - [ ] Verifikasi package private tidak memaksakan kebijakan publish package publik.
 
@@ -102,11 +105,14 @@ Source of truth:
 5. Harden packaging and release flow.
 
 ## Validation Commands
-- [ ] `npm.cmd run build`
-- [ ] `npm.cmd run check`
-- [ ] `npm.cmd test`
-- [ ] `npx.cmd turbo run pack:check --continue`
+- [x] `npm.cmd run build`
+- [x] `npm.cmd run check`
+- [x] `npm.cmd test`
+- [x] `npx.cmd turbo run pack:check --continue`
 
 ## Notes
 - Checklist ini sengaja turunan langsung dari dokumen Mermaid yang sudah approved.
 - Fokus utamanya bukan rewrite, tetapi additive restructuring dengan compatibility-first approach.
+- Gate sudah diverifikasi hijau pada `2026-03-29`; residual warning `import.meta` di beberapa build CJS masih ada tetapi tidak memblokir `build/check/test/pack:check`.
+- Production prototype observability yang sudah diverifikasi pada `2026-03-29`: `tw doctor --cwd <path> --include workspace,tailwind,analysis`, `tw trace --target <path>`, `tw why <class>`, engine `.tw-cache/metrics.json`, dan dashboard endpoint `/summary` + `/health`.
+- Item `trace` reusable lintas `cli/devtools/dashboard` tetap terbuka sampai surface bersama tidak lagi berhenti di CLI API export saja.

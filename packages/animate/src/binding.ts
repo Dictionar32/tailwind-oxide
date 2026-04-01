@@ -15,12 +15,6 @@ const createAnimateBindingLoader = () => {
   const _state = { bindingPromise: null as Promise<NativeAnimateBinding> | null }
 
   const loadAnimateBinding = (): NativeAnimateBinding => {
-    if (process.env.TWS_NO_NATIVE === "1" || process.env.TWS_NO_RUST === "1") {
-      throw new Error(
-        "Native animate backend is required in v5. TWS_NO_NATIVE/TWS_NO_RUST is not supported."
-      )
-    }
-
     const runtimeDir = resolveRuntimeDir(
       typeof __dirname === "string" ? __dirname : undefined,
       import.meta.url

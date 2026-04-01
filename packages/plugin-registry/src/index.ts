@@ -276,12 +276,15 @@ export class PluginRegistry {
       const pkgPath = join(process.cwd(), "node_modules", pluginName, "package.json")
       if (!existsSync(pkgPath)) return { ok: false, reason: "plugin not installed" }
       const content = readFileSync(pkgPath, "utf8")
-      const hash = "sha256-" + createHash("sha256").update(content).digest("base64")
+      const hash = `sha256-${createHash("sha256").update(content).digest("base64")}`
       return hash === plugin.integrity
         ? { ok: true }
         : { ok: false, reason: `Integrity mismatch: expected ${plugin.integrity}` }
     } catch (e: unknown) {
-      return { ok: false, reason: `Integrity check failed: ${e instanceof Error ? e.message : String(e)}` }
+      return {
+        ok: false,
+        reason: `Integrity check failed: ${e instanceof Error ? e.message : String(e)}`,
+      }
     }
   }
 
@@ -308,7 +311,10 @@ export class PluginRegistry {
       const hasUpdate = la > ca || (la === ca && lb > cb) || (la === ca && lb === cb && lc > cc)
       return { hasUpdate, current, latest }
     } catch (e: unknown) {
-      return { hasUpdate: false, error: `Update check failed: ${e instanceof Error ? e.message : String(e)}` }
+      return {
+        hasUpdate: false,
+        error: `Update check failed: ${e instanceof Error ? e.message : String(e)}`,
+      }
     }
   }
 

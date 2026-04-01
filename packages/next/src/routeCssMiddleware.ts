@@ -61,7 +61,7 @@ export function getRouteCssPaths(route: string, manifestPath?: string): string[]
 
   const paths: string[] = []
   // Always include global CSS
-  if (manifest["__global"]) paths.push(manifest["__global"])
+  if (manifest.__global) paths.push(manifest.__global)
   // Route-specific
   if (manifest[route]) paths.push(manifest[route])
   return paths
@@ -165,7 +165,7 @@ export function getDynamicRouteCssPaths(
   const resolvedRoute = resolveDynamicRoute(routePattern, params, manifest)
   const paths: string[] = []
 
-  if (manifest["__global"]) paths.push(manifest["__global"])
+  if (manifest.__global) paths.push(manifest.__global)
   if (manifest[resolvedRoute] && resolvedRoute !== "__global") paths.push(manifest[resolvedRoute])
 
   _dynamicCache.set(cacheKey, paths)

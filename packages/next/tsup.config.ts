@@ -8,7 +8,7 @@ export default defineConfig({
     turbopackLoader: "src/turbopackLoader.ts",
     webpackLoader:   "src/webpackLoader.ts",
   },
-  format: ["cjs", "esm"],
+  format: ["esm"],
   dts: true,
   clean: true,
   external: [

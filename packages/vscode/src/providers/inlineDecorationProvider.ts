@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { EngineService } from "../services/engineService"
+import type { EngineService } from "../services/engineService"
 
 const TAILWIND_CLASS_REGEX =
   /(?<=class[=:]["'`]([^"'`]*?\s+)?)[a-zA-Z][a-zA-Z0-9:/-]*(?=[^"'`]*?["'`])/g
@@ -83,7 +83,7 @@ async function updateDecorations(
     for (const className of classes) {
       const result = await engineService.trace(className)
 
-      if (result && result.conflicts && result.conflicts.length > 0) {
+      if (result?.conflicts && result.conflicts.length > 0) {
         const positions = findClassPositions(document, className)
 
         const message = result.conflicts
@@ -100,7 +100,7 @@ async function updateDecorations(
       return
     }
 
-    const hoverMessage = decorations.map((d) => d.message).join("\n\n")
+    const _hoverMessage = decorations.map((d) => d.message).join("\n\n")
 
     const decorationType = vscode.window.createTextEditorDecorationType({
       textDecoration: "underline wavy #D97706",
@@ -131,7 +131,7 @@ function debounceUpdate(document: vscode.TextDocument, engineService: EngineServ
 }
 
 export function createInlineDecorationProvider(engineService: EngineService): void {
-  const changeListener = vscode.workspace.onDidChangeTextDocument(
+  const _changeListener = vscode.workspace.onDidChangeTextDocument(
     (event: vscode.TextDocumentChangeEvent) => {
       try {
         const document = event.document
@@ -171,7 +171,7 @@ export function createInlineDecorationProvider(engineService: EngineService): vo
     }
   )
 
-  const visibleTextEditorsChangeListener = vscode.window.onDidChangeVisibleTextEditors(
+  const _visibleTextEditorsChangeListener = vscode.window.onDidChangeVisibleTextEditors(
     (editors: readonly vscode.TextEditor[]) => {
       try {
         for (const editor of editors) {

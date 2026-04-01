@@ -2,9 +2,11 @@
  * Rust-backed CSS compiler and AST extractor bridge.
  */
 
-import path from "node:path"
 import { createRequire } from "node:module"
+import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { TwError } from "@tailwind-styled/shared"
+import { CssCompileResultSchema } from "./schemas"
 
 const getDirname = (): string => {
   if (typeof __dirname !== "undefined") return __dirname
@@ -47,24 +49,18 @@ const createCompilerBindingLoader = () => {
 
   const loadBinding = (): NativeCompilerBinding => {
     if (bindingState.current !== undefined) {
-      if (bindingState.current === null) {
-        throw new Error(
-          `[tailwind-styled/compiler v5] Native CSS binding is required but not available.\n` +
-            `Please ensure the native module is properly built.`
-        )
+    if (bindingState.current === null) {
+      throw new TwError(
+        "rust",
+        "NATIVE_CSS_BINDING_UNAVAILABLE",
+        `[tailwind-styled/compiler v5] Native CSS binding is required but not available.\n` +
+          `Please ensure the native module is properly built.`
+      )
       }
       return bindingState.current
     }
 
-    if (process.env.TWS_NO_NATIVE === "1") {
-      bindingState.current = null
-      throw new Error(
-        `[tailwind-styled/compiler v5] Native binding is required.\n` +
-          `The TWS_NO_NATIVE environment variable is set, which disables native binding.`
-      )
-    }
-
-    const req = typeof require === "function" ? require : createRequire(import.meta.url)
+    const req = createRequire(import.meta.url)
     const currentDir = getDirname()
     const candidates = [
       path.resolve(process.cwd(), "native", "tailwind_styled_parser.node"),
@@ -85,13 +81,16 @@ const createCompilerBindingLoader = () => {
     }
 
     bindingState.current = null
-    throw new Error(
-      `[tailwind-styled/compiler v5] Native CSS binding not found.\n` +
-        `Tried loading from:\n` +
-        candidates.map((c) => `  - ${c}`).join("\n") +
-        `\n` +
-        `Please build the native module.`
-    )
+    const lines = [
+      "[tailwind-styled/compiler v5] Native CSS binding not found.",
+      "",
+      "Tried loading from:",
+      ...candidates.map((c) => `  - ${c}`),
+      "",
+      "Please build the native module.",
+    ]
+
+    throw new TwError("rust", "NATIVE_CSS_BINDING_NOT_FOUND", lines.join("\n"))
   }
 
   return {
@@ -111,7 +110,7 @@ export interface CssCompileResult {
   resolvedClasses: string[]
   unknownClasses: string[]
   sizeBytes: number
-  engine: "rust" | "fallback"
+  engine: "rust"
 }
 
 export interface AstExtractResult {
@@ -120,7 +119,7 @@ export interface AstExtractResult {
   hasTwUsage: boolean
   hasUseClient: boolean
   imports: string[]
-  engine: "rust" | "fallback"
+  engine: "rust"
 }
 
 export const compileCssNative = (
@@ -128,12 +127,29 @@ export const compileCssNative = (
   prefix: string | null = null
 ): CssCompileResult => {
   const binding = compilerBindingLoader.get()
-  const r = binding.compileCss!(classes, prefix)
-  return { ...r, engine: "rust" }
+  const raw = binding.compileCss!(classes, prefix)
+
+  // ── Boundary validation: validate native binding response with Zod ──
+  const parsed = CssCompileResultSchema.safeParse({ ...raw, engine: "rust" })
+  if (!parsed.success) {
+    throw TwError.fromRust({
+      code: "NATIVE_COMPILE_RESULT_INVALID",
+      message: `Native compileCss returned invalid result: ${parsed.error.issues.map(i => i.message).join("; ")}`,
+    })
+  }
+  return parsed.data
 }
 
 export const astExtractClassesNative = (source: string, filename: string): AstExtractResult => {
   const binding = compilerBindingLoader.get()
-  const r = binding.astExtractClasses!(source, filename)
-  return { ...r, engine: "rust" }
+  const raw = binding.astExtractClasses!(source, filename)
+
+  // ── Boundary validation: validate native binding response ──
+  if (!raw || !Array.isArray(raw.classes)) {
+    throw TwError.fromRust({
+      code: "NATIVE_EXTRACT_RESULT_INVALID",
+      message: `Native astExtractClasses returned invalid result for ${filename}`,
+    })
+  }
+  return { ...raw, engine: "rust" }
 }

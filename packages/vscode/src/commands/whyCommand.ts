@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { EngineService } from "../services/engineService"
+import type { EngineService } from "../services/engineService"
 
 export function registerWhyCommand(engineService: EngineService) {
   return vscode.commands.registerCommand("tailwind-styled.why", async () => {
@@ -36,7 +36,8 @@ export function registerWhyCommand(engineService: EngineService) {
           {}
         )
 
-        const parts: string[] = [`<!DOCTYPE html>
+        const parts: string[] = [
+          `<!DOCTYPE html>
 <html>
 <head>
   <style>
@@ -53,7 +54,8 @@ export function registerWhyCommand(engineService: EngineService) {
   </style>
 </head>
 <body>
-  <h1>.${className}</h1>`]
+  <h1>.${className}</h1>`,
+        ]
 
         parts.push(`
   <div class="section">

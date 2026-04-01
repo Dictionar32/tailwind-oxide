@@ -23,11 +23,33 @@
  * // <Button intent="danger" size="lg">Delete</Button>
  */
 
-import { computed, defineComponent, h, type App, type Component, type DefineComponent } from "vue"
 import { twMerge } from "tailwind-merge"
+import { type App, type Component, computed, type DefineComponent, defineComponent, h } from "vue"
 
-type VariantValue = string | number | boolean | undefined
-type Props = Record<string, VariantValue>
+import type { VariantValue, VariantProps as Props, HtmlTagName as HtmlTag } from '@tailwind-styled/shared'
+
+
+const isVariantValue = (value: unknown): value is VariantValue =>
+  typeof value === "string" ||
+  typeof value === "number" ||
+  typeof value === "boolean" ||
+  value === undefined
+
+const toVariantProps = (input: Record<string, unknown>): Props => {
+  const props: Props = {}
+  for (const [key, value] of Object.entries(input)) {
+    if (isVariantValue(value)) {
+      props[key] = value
+    }
+  }
+  return props
+}
+
+const toClassName = (value: VariantValue): string | undefined => {
+  if (typeof value === "string") return value
+  if (typeof value === "number") return String(value)
+  return undefined
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -40,52 +62,7 @@ export interface VueComponentConfig {
   defaultVariants?: Record<string, string>
 }
 
-export type HtmlTagName =
-  | "div"
-  | "section"
-  | "article"
-  | "aside"
-  | "header"
-  | "footer"
-  | "main"
-  | "nav"
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6"
-  | "p"
-  | "span"
-  | "strong"
-  | "em"
-  | "a"
-  | "button"
-  | "input"
-  | "textarea"
-  | "select"
-  | "form"
-  | "label"
-  | "ul"
-  | "ol"
-  | "li"
-  | "table"
-  | "tr"
-  | "th"
-  | "td"
-  | "thead"
-  | "tbody"
-  | "img"
-  | "figure"
-  | "figcaption"
-  | "blockquote"
-  | "code"
-  | "pre"
-  | "hr"
-  | "br"
-  | "dialog"
-  | "details"
-  | "summary"
+export type HtmlTagName = HtmlTag
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Variant resolver (sama dengan React adapter)
@@ -129,7 +106,7 @@ function resolveCompound(
  * @param tag - HTML tag atau Vue component
  * @param config - Konfigurasi base, variants, defaultVariants
  */
-export function tw<Tag extends HtmlTagName>(
+export function tw<Tag extends HtmlTag>(
   tag: Tag,
   config: VueComponentConfig = {}
 ): DefineComponent<Record<string, unknown>> {
@@ -142,7 +119,7 @@ export function tw<Tag extends HtmlTagName>(
   for (const key of variantKeys) {
     propsDefinition[key] = { type: null, default: undefined }
   }
-  propsDefinition["class"] = { type: null, default: undefined }
+  propsDefinition.class = { type: null, default: undefined }
 
   return defineComponent({
     name: `TwStyled${String(tag).charAt(0).toUpperCase() + String(tag).slice(1)}`,
@@ -150,14 +127,17 @@ export function tw<Tag extends HtmlTagName>(
     props: propsDefinition,
     setup(props, { attrs, slots }) {
       const className = computed(() => {
-        const variantClasses = resolveVariants(variants, props, defaultVariants)
-        const compoundClasses = resolveCompound(compoundVariants, { ...defaultVariants, ...props })
+        const variantProps = toVariantProps(props as Record<string, unknown>)
+        const attrProps = toVariantProps(attrs as Record<string, unknown>)
+        const mergedProps = { ...defaultVariants, ...variantProps, ...attrProps }
+        const variantClasses = resolveVariants(variants, mergedProps, defaultVariants)
+        const compoundClasses = resolveCompound(compoundVariants, mergedProps)
         return twMerge(
           base,
           variantClasses,
           compoundClasses,
-          props["class"] as string,
-          attrs.class as string
+          toClassName(variantProps.class),
+          toClassName(attrProps.class)
         )
       })
 
@@ -199,7 +179,7 @@ export function cv(config: VueComponentConfig) {
     const merged = { ...defaultVariants, ...props }
     const variantClasses = resolveVariants(variants, merged, defaultVariants)
     const compoundClasses = resolveCompound(compoundVariants, merged)
-    return twMerge(base, variantClasses, compoundClasses, props.class)
+    return twMerge(base, variantClasses, compoundClasses, toClassName(props.class))
   }
 }
 
@@ -213,7 +193,10 @@ export function cv(config: VueComponentConfig) {
  * @example
  * const PrimaryButton = extend(Button, 'bg-blue-500 text-white')
  */
-export function extend(component: Component, extraClasses: string): DefineComponent<Record<string, unknown>> {
+export function extend(
+  component: Component,
+  extraClasses: string
+): DefineComponent<Record<string, unknown>> {
   return defineComponent({
     name: `Extended${("name" in component ? component.name : undefined) ?? "Component"}`,
     inheritAttrs: false,
@@ -224,7 +207,7 @@ export function extend(component: Component, extraClasses: string): DefineCompon
           component,
           {
             ...attrs,
-            class: twMerge(extraClasses, props["class"] as string, attrs.class as string),
+            class: twMerge(extraClasses, props.class as string, attrs.class as string),
           },
           slots.default?.()
         )
@@ -255,5 +238,3 @@ export const TailwindStyledPlugin = {
     app.provide("cv", cv)
   },
 }
-
-export default { tw, cv, extend, TailwindStyledPlugin }

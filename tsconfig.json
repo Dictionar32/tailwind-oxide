@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": ".",
     "baseUrl": ".",
     "paths": {
       "@tailwind-styled/shared": ["packages/shared/src/index.ts"],

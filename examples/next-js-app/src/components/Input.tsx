@@ -45,7 +45,7 @@ const PrefixSlot = tw.span`absolute left-3 text-gray-400`
 const SuffixSlot = tw.span`absolute right-3 text-gray-400`
 
 // ── Input Props ───────────────────────────────────────────────────────────────
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "prefix"> {
   label?: string
   hint?: string
   error?: string

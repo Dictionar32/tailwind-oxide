@@ -33,8 +33,14 @@
 
 import { twMerge } from "tailwind-merge"
 
-type VariantValue = string | number | boolean | undefined
-type Props = Record<string, VariantValue>
+import type { VariantValue, VariantProps as Props } from '@tailwind-styled/shared'
+
+
+const toClassName = (value: VariantValue): string | undefined => {
+  if (typeof value === "string") return value
+  if (typeof value === "number") return String(value)
+  return undefined
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -105,7 +111,7 @@ export function cv(config: SvelteComponentConfig) {
     const variantClasses = resolveVariants(variants, merged, defaultVariants)
     const compoundClasses = resolveCompound(compoundVariants, merged)
 
-    return twMerge(base, variantClasses, compoundClasses, props.class)
+    return twMerge(base, variantClasses, compoundClasses, toClassName(props.class))
   }
 }
 
@@ -197,5 +203,3 @@ export function createVariants(config: SvelteComponentConfig, getProps: () => Pr
     config,
   }
 }
-
-export default { cv, tw, styled, createVariants }

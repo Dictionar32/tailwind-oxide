@@ -8,38 +8,33 @@
   "engines": {
     "node": ">=20"
   },
-  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/CssInjector.d.ts",
-      "import": "./dist/CssInjector.js",
-      "require": "./dist/CssInjector.cjs"
+      "import": "./dist/CssInjector.js"
     },
     "./client": {
       "types": "./dist/batchedInjector.d.ts",
-      "import": "./dist/batchedInjector.js",
-      "require": "./dist/batchedInjector.cjs"
+      "import": "./dist/batchedInjector.js"
     },
     "./server": {
       "types": "./dist/CssInjector.d.ts",
-      "import": "./dist/CssInjector.js",
-      "require": "./dist/CssInjector.cjs"
+      "import": "./dist/CssInjector.js"
     },
     "./batched": {
       "types": "./dist/batchedInjector.d.ts",
-      "import": "./dist/batchedInjector.js",
-      "require": "./dist/batchedInjector.cjs"
+      "import": "./dist/batchedInjector.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/CssInjector.tsx src/batchedInjector.ts --format cjs,esm --out-dir dist --clean",
-    "build:dts": "tsup src/CssInjector.tsx src/batchedInjector.ts --format cjs,esm --dts --out-dir dist --clean",
-    "dev": "tsup src/CssInjector.tsx src/batchedInjector.ts --format cjs,esm --dts --out-dir dist --watch",
+    "build": "tsup",
+    "build:dts": "tsup --dts",
+    "dev": "tsup --watch",
     "check": "tsc --noEmit",
     "test": "node --test test/*.test.mjs",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",

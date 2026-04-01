@@ -235,8 +235,9 @@ export class ThemeRegistry {
   inject(styleId = "__tw_themes"): void {
     if (typeof document === "undefined") return
 
-    const style = document.getElementById(styleId) as HTMLStyleElement | null
-      ?? (() => {
+    const style =
+      (document.getElementById(styleId) as HTMLStyleElement | null) ??
+      (() => {
         const el = document.createElement("style")
         el.id = styleId
         document.head.appendChild(el)
@@ -387,12 +388,12 @@ export function compileDesignTokens(tokens: DesignTokens, prefix = ""): string {
 
 // Re-export schemas
 export {
-  TokenConfigSchema,
-  LiveTokenUpdateSchema,
-  ThemeRegistrationSchema,
-  parseTokenConfig,
-  parseLiveTokenUpdate,
-  type TokenConfigInput,
   type LiveTokenUpdateInput,
+  LiveTokenUpdateSchema,
+  parseLiveTokenUpdate,
+  parseTokenConfig,
   type ThemeRegistrationInput,
+  ThemeRegistrationSchema,
+  type TokenConfigInput,
+  TokenConfigSchema,
 } from "./schemas"

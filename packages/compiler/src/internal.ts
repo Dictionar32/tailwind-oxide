@@ -85,11 +85,6 @@ export {
   getNativeBridge,
   resetNativeBridgeCache,
 } from "./nativeBridge"
-export {
-  parseComponentMetadataJson,
-  parseNativeRscJson,
-  parseSafelistJson,
-} from "./schemas"
 export { Pipeline } from "./pipeline"
 // ── Route CSS Collector ─────────────────────────────────────────────────────
 export type { RouteClassMap } from "./routeCssCollector"
@@ -120,6 +115,11 @@ export type {
 export { astExtractClassesNative, compileCssNative } from "./rustCssCompiler"
 // ── Safelist Generator ────────────────────────────────────────────────────
 export { generateSafelist, generateSafelistCss, loadSafelist } from "./safelistGenerator"
+export {
+  parseComponentMetadataJson,
+  parseNativeRscJson,
+  parseSafelistJson,
+} from "./schemas"
 export type { CompiledVariantTable, StaticVariantConfig } from "./staticVariantCompiler"
 // ── Static Variant Compiler ────────────────────────────────────────────────
 export {

@@ -6,24 +6,7 @@
  *   - withTailwindStyled decorator: inject className ke story
  *   - generateArgTypes: auto-generate controls dari ComponentConfig
  *   - enumerateVariantProps: buat semua kombinasi variant untuk testing
- *
- * @example
- * // .storybook/preview.ts
- * import { withTailwindStyled } from '@tailwind-styled/storybook-addon'
- * export const decorators = [withTailwindStyled]
- *
- * // Button.stories.ts
- * import { generateArgTypes } from '@tailwind-styled/storybook-addon'
- * import { buttonConfig } from './Button'
- *
- * export default {
- *   title: 'Components/Button',
- *   component: Button,
- *   argTypes: generateArgTypes(buttonConfig),
- * }
  */
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type VariantMatrix = Record<string, Array<string | number | boolean>>
 
@@ -72,18 +55,6 @@ export function enumerateVariantProps(
 /**
  * Generate Storybook argTypes dari ComponentConfig.
  * Otomatis membuat kontrol dropdown untuk setiap variant.
- *
- * @example
- * export default {
- *   title: 'Components/Button',
- *   argTypes: generateArgTypes({
- *     variants: {
- *       intent: { primary: '...', danger: '...' },
- *       size: { sm: '...', md: '...', lg: '...' },
- *     },
- *     defaultVariants: { intent: 'primary', size: 'md' },
- *   })
- * }
  */
 export function generateArgTypes(config: ComponentConfig): Record<string, unknown> {
   if (!config.variants) return {}
@@ -110,29 +81,12 @@ export function generateArgTypes(config: ComponentConfig): Record<string, unknow
   return argTypes
 }
 
-/**
- * Generate default args dari ComponentConfig.
- *
- * @example
- * export default {
- *   args: generateDefaultArgs(buttonConfig),
- * }
- */
 export function generateDefaultArgs(config: ComponentConfig): Record<string, string> {
   return { ...(config.defaultVariants ?? undefined) }
 }
 
 // ─── Storybook decorator ───────────────────────────────────────────────────────
 
-/**
- * Storybook decorator yang inject className dari args ke story.
- * Compatible dengan Storybook 7+ (CSF3).
- *
- * @example
- * // .storybook/preview.ts
- * import { withTailwindStyled } from '@tailwind-styled/storybook-addon'
- * export const decorators = [withTailwindStyled]
- */
 export function withTailwindStyled(
   StoryFn: () => unknown,
   context: {
@@ -143,8 +97,6 @@ export function withTailwindStyled(
   const wrapperClass = context.parameters?.tailwindStyled?.wrapperClass ?? ""
   const padding = context.parameters?.tailwindStyled?.padding ?? "p-8"
 
-  // Wrap story dalam div dengan class dari parameters
-  // Ini memungkinkan dark mode testing, custom backgrounds, dll
   if (typeof document !== "undefined") {
     const wrapper = document.createElement("div")
     wrapper.className = [padding, wrapperClass].filter(Boolean).join(" ")
@@ -156,13 +108,6 @@ export function withTailwindStyled(
 
 // ─── Story template helpers ────────────────────────────────────────────────────
 
-/**
- * Buat "All Variants" story yang menampilkan semua kombinasi variant.
- * Berguna untuk visual regression testing.
- *
- * @example
- * export const AllVariants = createAllVariantsStory(Button, buttonConfig)
- */
 export function createVariantStoryArgs(config: ComponentConfig): {
   combinations: Array<Record<string, string | number | boolean>>
   matrix: VariantMatrix
@@ -180,14 +125,6 @@ export function createVariantStoryArgs(config: ComponentConfig): {
   }
 }
 
-/**
- * Extract class string untuk variant props dari config.
- * Berguna untuk manual class lookup di stories.
- *
- * @example
- * const cls = getVariantClass(buttonConfig, { intent: 'primary', size: 'lg' })
- * // → 'bg-blue-500 text-white h-12 text-lg'
- */
 export function getVariantClass(config: ComponentConfig, props: Record<string, string>): string {
   const classes: string[] = []
 
@@ -211,3 +148,4 @@ export function getVariantClass(config: ComponentConfig, props: Record<string, s
 
   return classes.join(" ")
 }
+

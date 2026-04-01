@@ -5,7 +5,7 @@ export default defineConfig({
     index: "src/index.ts",
     internal: "src/internal.ts",
   },
-  format: ["cjs", "esm"],
+  format: ["esm"],
   dts: true,
   clean: true,
   target: "node20",

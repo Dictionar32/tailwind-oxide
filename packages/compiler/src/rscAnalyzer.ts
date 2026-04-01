@@ -75,7 +75,7 @@ export const analyzeFile = (source: string, _filename = ""): RscAnalysis => {
 
   const templateRe = /\btw\.(?:server\.)?(\w+)`((?:[^`\\]|\\.)*)`/g
   const templateMatches = [...source.matchAll(templateRe)]
-  
+
   for (const match of templateMatches) {
     const classes = match[2]
     const parts = classes.split(/\s+/).filter(Boolean)

@@ -2,14 +2,16 @@
  * tailwind-styled-v5 - loaderCore
  *
  * Unified loader path:
- *   incremental precheck -> core compiler (native/js pipeline) -> finalize
+ *   boundary validation -> incremental precheck -> core compiler (native/js pipeline) -> finalize
  */
 
+import { TwError } from "@tailwind-styled/shared"
 import type { TransformOptions, TransformResult } from "./astTransform"
 import { compileWithCore } from "./coreCompiler"
 import { getIncrementalEngine, parseClassesToNodes } from "./incrementalEngine"
 import type { ComponentMetadata } from "./nativeBridge"
 import { registerFileClasses } from "./routeCssCollector"
+import { LoaderOptionsSchema } from "./schemas"
 import { getBucketEngine } from "./styleBucketSystem"
 
 export interface LoaderOptions extends TransformOptions {
@@ -44,8 +46,18 @@ export function shouldSkipFile(filepath: string): boolean {
 }
 
 export function runLoaderTransform(ctx: LoaderContext): LoaderOutput {
-  const { filepath, source, options } = ctx
+  const { filepath, source } = ctx
   const passthrough: LoaderOutput = { code: source, changed: false, classes: [] }
+
+  // ── Boundary validation: validate loader options with Zod ──
+  const optionsParse = LoaderOptionsSchema.safeParse(ctx.options)
+  if (!optionsParse.success) {
+    throw TwError.fromCompile(
+      "LOADER_OPTIONS_INVALID",
+      `Invalid loader options for ${filepath}: ${optionsParse.error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join("; ")}`
+    )
+  }
+  const options = optionsParse.data
 
   if (shouldSkipFile(filepath)) return passthrough
 

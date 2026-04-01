@@ -1,25 +1,25 @@
 /**
  * tailwind-styled-v4 — Oxc AST bridge untuk scanner.
  *
+ * Native-only: Rust Oxc binding is required.
+ * No JavaScript fallback — native Rust binding must be available.
+ *
  * Mengekspos oxcExtractClasses sebagai pengganti astExtractClasses
  * yang berbasis regex. Lebih akurat karena pakai real AST parser.
  */
 
-import path from "node:path"
 import { createRequire } from "node:module"
+import path from "node:path"
 import { fileURLToPath } from "node:url"
-import type { AstExtractResult } from "./ast-native"
 
 // ESM-compatible __dirname equivalent
 function getDirname(): string {
   if (typeof __dirname !== "undefined") {
     return __dirname
   }
-  // ESM fallback
   if (typeof import.meta !== "undefined" && import.meta.url) {
     return path.dirname(fileURLToPath(import.meta.url))
   }
-  // Final fallback
   return process.cwd()
 }
 
@@ -44,11 +44,20 @@ interface NativeOxcBinding {
 const createOxcBindingLoader = () => {
   const _state = { binding: undefined as NativeOxcBinding | null | undefined }
 
-  const getBinding = (): NativeOxcBinding | null => {
-    if (_state.binding !== undefined) return _state.binding
-    if (process.env.TWS_NO_NATIVE === "1") return (_state.binding = null)
+  const getBinding = (): NativeOxcBinding => {
+    if (_state.binding !== undefined) {
+      if (_state.binding === null) {
+        throw new Error(
+          "FATAL: Native Oxc binding not found.\n" +
+          "This package requires native Rust bindings.\n\n" +
+          "Resolution steps:\n" +
+          "1. Build the native Rust module: npm run build:rust"
+        )
+      }
+      return _state.binding
+    }
 
-    const req = typeof require === "function" ? require : createRequire(import.meta.url)
+    const req = createRequire(import.meta.url)
     const runtimeDir = getDirname()
     const candidates = [
       path.resolve(process.cwd(), "native", "tailwind_styled_parser.node"),
@@ -57,12 +66,23 @@ const createOxcBindingLoader = () => {
     for (const c of candidates) {
       try {
         const mod = req(c) as NativeOxcBinding
-        if (mod?.oxcExtractClasses) return (_state.binding = mod)
+        if (mod?.oxcExtractClasses) {
+          _state.binding = mod
+          return mod
+        }
       } catch {
         /* next */
       }
     }
-    return (_state.binding = null)
+    _state.binding = null
+    throw new Error(
+      "FATAL: Native Oxc binding not found in any candidate path.\n" +
+      "This package requires native Rust bindings.\n\n" +
+      "Candidates checked:\n" +
+      candidates.map((p) => `  - ${p}`).join("\n") +
+      "\n\nResolution steps:\n" +
+      "1. Build the native Rust module: npm run build:rust"
+    )
   }
 
   return {
@@ -75,28 +95,38 @@ const createOxcBindingLoader = () => {
 
 const oxcBindingLoader = createOxcBindingLoader()
 
+export interface OxcExtractResult {
+  classes: string[]
+  componentNames: string[]
+  hasTwUsage: boolean
+  hasUseClient: boolean
+  imports: string[]
+  engine: "oxc"
+}
+
 /**
  * Ekstrak kelas Tailwind menggunakan Oxc AST parser (Rust).
  * Lebih akurat dari regex — memahami JSX, TypeScript, template literals.
  *
  * Mengembalikan format yang sama dengan astExtractClasses untuk kompatibilitas.
  */
-export function oxcExtractClasses(source: string, filename: string): AstExtractResult {
+export function oxcExtractClasses(source: string, filename: string): OxcExtractResult {
   const binding = oxcBindingLoader.get()
 
-  if (binding?.oxcExtractClasses) {
-    const r = binding.oxcExtractClasses(source, filename)
-    return {
-      classes: r.classes,
-      componentNames: r.componentNames,
-      hasTwUsage: r.hasTwUsage,
-      hasUseClient: r.hasUseClient,
-      imports: r.imports,
-      engine: "oxc" as const,
-    }
+  if (!binding.oxcExtractClasses) {
+    throw new Error(
+      "FATAL: Native binding 'oxcExtractClasses' is required but not available.\n" +
+      "This package requires native Rust bindings."
+    )
   }
 
-  // Fallback ke regex-based ast-native
-  const { astExtractClasses } = require("./ast-native")
-  return astExtractClasses(source, filename)
+  const r = binding.oxcExtractClasses(source, filename)
+  return {
+    classes: r.classes,
+    componentNames: r.componentNames,
+    hasTwUsage: r.hasTwUsage,
+    hasUseClient: r.hasUseClient,
+    imports: r.imports,
+    engine: "oxc",
+  }
 }

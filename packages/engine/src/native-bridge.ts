@@ -89,7 +89,7 @@ const createEngineBindingLoader = () => {
     const cached = _state.binding
     if (cached !== undefined) {
       if (cached === null) {
-        throwNativeBindingError()
+        return throwNativeBindingError()
       }
       return cached
     }
@@ -112,7 +112,7 @@ const createEngineBindingLoader = () => {
     if (binding) {
       log(`engine native binding loaded successfully`)
       _state.binding = binding
-      return _state.binding
+      return binding
     }
 
     if (loadErrors.length > 0) {
@@ -120,7 +120,7 @@ const createEngineBindingLoader = () => {
     }
 
     _state.binding = null
-    throwNativeBindingError()
+    return throwNativeBindingError()
   }
 
   return {
@@ -150,7 +150,11 @@ export function computeIncrementalDiff(
 } {
   const result = getNativeEngineBinding().computeIncrementalDiff?.(previousJson, currentJson)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "ENGINE_DIFF_FAILED", "Native computeIncrementalDiff returned null/undefined")
+    throw new TwError(
+      "rust",
+      "ENGINE_DIFF_FAILED",
+      "Native computeIncrementalDiff returned null/undefined"
+    )
   }
   return result
 }
@@ -158,7 +162,11 @@ export function computeIncrementalDiff(
 export function hashFileContent(content: string): string {
   const result = getNativeEngineBinding().hashFileContent?.(content)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "ENGINE_HASH_FAILED", "Native hashFileContent returned null/undefined")
+    throw new TwError(
+      "rust",
+      "ENGINE_HASH_FAILED",
+      "Native hashFileContent returned null/undefined"
+    )
   }
   return result
 }
@@ -170,7 +178,11 @@ export function processFileChange(
 ): { added: string[]; removed: string[] } {
   const result = getNativeEngineBinding().processFileChange?.(filepath, newClasses, content)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "ENGINE_PROCESS_FAILED", "Native processFileChange returned null/undefined")
+    throw new TwError(
+      "rust",
+      "ENGINE_PROCESS_FAILED",
+      "Native processFileChange returned null/undefined"
+    )
   }
   return result
 }

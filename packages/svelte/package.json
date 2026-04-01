@@ -3,14 +3,12 @@
   "version": "5.0.4",
   "description": "Svelte 4/5 adapter for tailwind-styled-v4 — cv(), tw(), and use:styled action",
   "type": "module",
-  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.js"
     }
   },
   "files": [
@@ -18,8 +16,8 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
     "check": "tsc --noEmit",
     "test": "node --test test/svelte-adapter.test.mjs",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
@@ -49,6 +47,7 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "@tailwind-styled/shared": "^5.0.4",
     "inversify": "^8.1.0",
     "reflect-metadata": "^0.2.2",
     "zod": "^4.3.6"

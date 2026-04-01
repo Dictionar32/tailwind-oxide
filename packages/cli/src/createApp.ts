@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
+import path from "node:path"
 import { isCancel, select, text } from "@clack/prompts"
 import { Command } from "commander"
-import path from "node:path"
-import { pathToFileURL } from "node:url"
 
 import type { CommandContext } from "./commands/types"
 import { CliUsageError } from "./utils/errors"
@@ -116,7 +115,7 @@ async function createNextApp(context: CreateContext): Promise<void> {
   await writeProjectFile(
     context,
     "package.json",
-    JSON.stringify(
+    `${JSON.stringify(
       {
         name: context.name,
         version: "0.1.0",
@@ -138,7 +137,7 @@ async function createNextApp(context: CreateContext): Promise<void> {
       },
       null,
       2
-    ) + "\n"
+    )}\n`
   )
 
   await writeProjectFile(
@@ -182,7 +181,7 @@ async function createViteReactApp(context: CreateContext): Promise<void> {
   await writeProjectFile(
     context,
     "package.json",
-    JSON.stringify(
+    `${JSON.stringify(
       {
         name: context.name,
         private: true,
@@ -199,7 +198,7 @@ async function createViteReactApp(context: CreateContext): Promise<void> {
       },
       null,
       2
-    ) + "\n"
+    )}\n`
   )
 
   await writeProjectFile(
@@ -225,7 +224,7 @@ async function createViteVueApp(context: CreateContext): Promise<void> {
   await writeProjectFile(
     context,
     "package.json",
-    JSON.stringify(
+    `${JSON.stringify(
       {
         name: context.name,
         private: true,
@@ -246,7 +245,7 @@ async function createViteVueApp(context: CreateContext): Promise<void> {
       },
       null,
       2
-    ) + "\n"
+    )}\n`
   )
 
   await writeProjectFile(
@@ -329,7 +328,7 @@ async function createViteSvelteApp(context: CreateContext): Promise<void> {
   await writeProjectFile(
     context,
     "package.json",
-    JSON.stringify(
+    `${JSON.stringify(
       {
         name: context.name,
         private: true,
@@ -347,7 +346,7 @@ async function createViteSvelteApp(context: CreateContext): Promise<void> {
       },
       null,
       2
-    ) + "\n"
+    )}\n`
   )
 
   await writeProjectFile(
@@ -426,11 +425,11 @@ async function createSimpleApp(context: CreateContext): Promise<void> {
   await writeProjectFile(
     context,
     "package.json",
-    JSON.stringify(
+    `${JSON.stringify(
       { name: context.name, private: true, scripts: { dev: "node index.js" } },
       null,
       2
-    ) + "\n"
+    )}\n`
   )
   await writeProjectFile(
     context,
@@ -514,14 +513,4 @@ export async function main(rawArgs: string[] = process.argv.slice(2)): Promise<v
     commandHint: "create",
     buildProgram: buildCreateProgram,
   })
-}
-
-function isDirectExecution(): boolean {
-  const scriptPath = process.argv[1]
-  if (!scriptPath) return false
-  return import.meta.url === pathToFileURL(scriptPath).href
-}
-
-if (isDirectExecution()) {
-  await main()
 }

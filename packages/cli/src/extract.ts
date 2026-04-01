@@ -30,7 +30,7 @@ function guessSuggestedName(pattern: string): string {
   }
   if (pattern.includes("text-sm") || pattern.includes("text-xs")) return "Caption"
   const first = pattern.split(" ")[0]
-  return first.replace(/[^a-zA-Z]/g, "").replace(/^(.)/, (char) => char.toUpperCase()) + "Base"
+  return `${first.replace(/[^a-zA-Z]/g, "").replace(/^(.)/, (char) => char.toUpperCase())}Base`
 }
 
 function guessSuggestedTag(pattern: string): string {

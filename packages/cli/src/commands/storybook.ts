@@ -1,10 +1,9 @@
 import path from "node:path"
 import { parseArgs as parseNodeArgs } from "node:util"
-
+import { CliUsageError } from "../utils/errors"
 import { pathExists } from "../utils/fs"
 import { writeJsonSuccess } from "../utils/json"
 import { npxCommandName, runCommand } from "../utils/process"
-import { CliUsageError } from "../utils/errors"
 import { enumerateVariantProps } from "./helpers"
 import type { CommandDefinition } from "./types"
 
@@ -24,7 +23,7 @@ export const storybookCommand: CommandDefinition = {
 
     const variantsRaw = typeof parsed.values.variants === "string" ? parsed.values.variants : null
     const port = typeof parsed.values.port === "string" ? parsed.values.port : "6006"
-    const open = !Boolean(parsed.values["no-open"])
+    const open = !parsed.values["no-open"]
 
     if (variantsRaw) {
       try {

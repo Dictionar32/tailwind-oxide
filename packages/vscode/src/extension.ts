@@ -1,8 +1,8 @@
 import * as vscode from "vscode"
-import { EngineService } from "./services/engineService"
+import { registerDoctorCommand } from "./commands/doctorCommand"
 import { registerTraceCommand } from "./commands/traceCommand"
 import { registerWhyCommand } from "./commands/whyCommand"
-import { registerDoctorCommand } from "./commands/doctorCommand"
+import { EngineService } from "./services/engineService"
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("Tailwind Styled VS Code extension is now active!")
@@ -47,7 +47,7 @@ class HoverProvider implements vscode.HoverProvider {
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken
+    _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
     const range = document.getWordRangeAtPosition(position)
     if (!range) {
@@ -72,8 +72,8 @@ class CompletionProvider implements vscode.CompletionItemProvider {
   provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext
+    _token: vscode.CancellationToken,
+    _context: vscode.CompletionContext
   ): vscode.ProviderResult<vscode.CompletionList> {
     const line = document.lineAt(position.line).text
     const beforeCursor = line.substring(0, position.character)

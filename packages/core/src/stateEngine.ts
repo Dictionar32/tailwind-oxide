@@ -47,10 +47,7 @@ if (typeof window !== "undefined") {
 
 function hashState(tag: string, state: StateConfig): string {
   const key = tag + JSON.stringify(Object.entries(state).sort())
-  const hash = key.split("").reduce(
-    (h, char) => ((h << 5) + h) ^ char.charCodeAt(0),
-    5381
-  )
+  const hash = key.split("").reduce((h, char) => ((h << 5) + h) ^ char.charCodeAt(0), 5381)
   return `tw-s-${Math.abs(hash).toString(36).slice(0, 6)}`
 }
 
@@ -195,7 +192,6 @@ function injectStateStyles(id: string, state: StateConfig): void {
 
   // Try batched injector first (available when runtime-css is installed)
   try {
-     
     const { batchedInject } = require("@tailwind-styled/runtime-css/batched") as {
       batchedInject: (css: string) => void
     }

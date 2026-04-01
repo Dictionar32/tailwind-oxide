@@ -51,7 +51,9 @@ export interface EliminationReport {
  * Extract all JSX component usages from source.
  * Finds: <ComponentName prop="value" /> patterns.
  */
-export const extractComponentUsage = (source: string): Record<string, Record<string, Set<string>>> => {
+export const extractComponentUsage = (
+  source: string
+): Record<string, Record<string, Set<string>>> => {
   const usage: Record<string, Record<string, Set<string>>> = {}
 
   // Match JSX elements: <ComponentName ...props...>
@@ -68,7 +70,7 @@ export const extractComponentUsage = (source: string): Record<string, Record<str
     // Extract static prop="value" patterns
     const propRe = /(\w+)=["']([^"']+)["']/g
     const propMatches = [...propsStr.matchAll(propRe)]
-    
+
     for (const propMatch of propMatches) {
       const [, propName, propValue] = propMatch
       // Skip non-variant props
@@ -364,7 +366,9 @@ export interface EliminationOptions {
  * fs.writeFileSync("dist/styles.min.css", result.css)
  * console.log(result.report)
  */
-export const runElimination = (opts: EliminationOptions): {
+export const runElimination = (
+  opts: EliminationOptions
+): {
   css: string
   report: EliminationReport
 } => {

@@ -138,3 +138,24 @@ describe("@tailwind-styled/plugin-api context builders", () => {
     assert.equal(tw.registry.utilities.has("pill"), true)
   })
 })
+
+describe("@tailwind-styled/plugin-api runtime validation", () => {
+  test("invalid token registration throws at runtime boundaries", () => {
+    const registry = pluginApi.createPluginRegistry()
+    const ctx = pluginApi.createPluginContext(registry)
+
+    assert.throws(() => ctx.addToken("", "#123456"), /token registration is invalid/)
+    assert.throws(() => pluginApi.registerToken("", "#123456"), /token registration is invalid/)
+  })
+
+  test("invalid plugin manifests are rejected", () => {
+    const tw = pluginApi.createTw()
+
+    assert.throws(() => tw.use({ setup() {} }), /plugin manifest is invalid/)
+    assert.throws(() => pluginApi.use({ name: "", setup() {} }), /plugin manifest is invalid/)
+    assert.throws(
+      () => pluginApi.createTw({ plugins: [{ name: "broken" }] }),
+      /plugin manifest is invalid/
+    )
+  })
+})

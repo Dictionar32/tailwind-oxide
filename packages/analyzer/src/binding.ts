@@ -23,11 +23,6 @@ const createAnalyzerBindingLoader = () => {
     if (_state.bindingPromise) return _state.bindingPromise
 
     _state.bindingPromise = (async (): Promise<NativeAnalyzerBinding | null> => {
-      if (process.env.TWS_NO_NATIVE === "1" || process.env.TWS_NO_RUST === "1") {
-        debugLog("native binding disabled by TWS_NO_NATIVE/TWS_NO_RUST")
-        return null
-      }
-
       const runtimeDir = resolveRuntimeDir(
         typeof __dirname === "string" ? __dirname : undefined,
         import.meta.url
@@ -105,16 +100,12 @@ export async function requireNativeBinding(): Promise<NativeAnalyzerBinding> {
     "Native analyzer binding not found. Ensure `tailwind_styled_parser.node` is built.",
   ]
 
-  if (process.env.TWS_NO_NATIVE === "1" || process.env.TWS_NO_RUST === "1") {
-    lines.push("Native loading is disabled by TWS_NO_NATIVE/TWS_NO_RUST.")
-  } else {
-    lines.push("Checked paths:")
-    for (const candidate of candidates) lines.push(`- ${candidate}`)
-    if (loadErrors.length > 0) {
-      lines.push("Load errors:")
-      for (const failure of loadErrors) {
-        lines.push(`- ${failure.path}: ${failure.message}`)
-      }
+  lines.push("Checked paths:")
+  for (const candidate of candidates) lines.push(`- ${candidate}`)
+  if (loadErrors.length > 0) {
+    lines.push("Load errors:")
+    for (const failure of loadErrors) {
+      lines.push(`- ${failure.path}: ${failure.message}`)
     }
   }
 

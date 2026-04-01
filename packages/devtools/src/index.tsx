@@ -1,5 +1,5 @@
 /**
- * tailwind-styled-v4 — DevTools v3
+ * tailwind-styled-v4 — DevTools v4
  *
  * Panels:
  *   🔍 Inspector  — hover element, see classes + variants
@@ -7,11 +7,12 @@
  *   📦 Container  — list container query components + active breakpoints
  *   🎨 Tokens     — live token editor with instant preview
  *   📊 Analyzer   — duplicate patterns + unused variants (runtime scan)
+ *   🔬 Trace      — build timeline, pipeline events, memory profile
  *
  * Keyboard shortcuts:
  *   Ctrl+Shift+D  → toggle devtools
  *   Escape        → close
- *   1-5           → switch panels
+ *   1-6           → switch panels
  */
 
 "use client"
@@ -35,7 +36,7 @@ interface InspectedElement {
   containerBps: string[]
 }
 
-type Panel = "inspector" | "state" | "container" | "tokens" | "analyzer"
+type Panel = "inspector" | "state" | "container" | "tokens" | "analyzer" | "trace"
 
 interface DevToolsState {
   open: boolean
@@ -831,6 +832,702 @@ function AnalyzerPanel() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Panel: Trace — build timeline, pipeline events, memory profile
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface TraceSnapshot {
+  generatedAt: string
+  buildMs: number | null
+  scanMs: number | null
+  analyzeMs: number | null
+  compileMs: number | null
+  memoryMb: { rss: number; heapUsed: number; heapTotal: number } | null
+  classCount: number | null
+  fileCount: number | null
+  cssBytes: number | null
+  mode: string | null
+  eventsReceived?: number
+  eventsProcessed?: number
+  batchesProcessed?: number
+  incrementalUpdates?: number
+  fullRescans?: number
+}
+
+interface TraceSummary {
+  workspace: {
+    totalPackages: number
+    totalFiles: number
+    totalClasses: number
+    lastScanDurationMs: number
+    lastBuildDurationMs: number
+  }
+  cache: {
+    hitRate: number
+    totalEntries: number
+    memoryUsageMb: number
+  }
+  pipeline: {
+    scanDurationMs: number
+    analyzeDurationMs: number
+    compileDurationMs: number
+    totalDurationMs: number
+  }
+  health: {
+    status: "healthy" | "degraded" | "unhealthy"
+    issues: Array<{ severity: string; message: string }>
+  }
+}
+
+const DASHBOARD_BASE = "http://localhost:3000"
+
+function TracePanel() {
+  const [metrics, setMetrics] = useState<TraceSnapshot | null>(null)
+  const [history, setHistory] = useState<TraceSnapshot[]>([])
+  const [summary, setSummary] = useState<TraceSummary | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [fetching, setFetching] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const fetchAll = useCallback(async () => {
+    setFetching(true)
+    setError(null)
+    try {
+      const [mRes, hRes, sRes] = await Promise.all([
+        fetch(`${DASHBOARD_BASE}/metrics`, { signal: AbortSignal.timeout(2000) }),
+        fetch(`${DASHBOARD_BASE}/history`, { signal: AbortSignal.timeout(2000) }),
+        fetch(`${DASHBOARD_BASE}/summary`, { signal: AbortSignal.timeout(2000) }),
+      ])
+      if (!mRes.ok) throw new Error(`metrics: HTTP ${mRes.status}`)
+      if (!hRes.ok) throw new Error(`history: HTTP ${hRes.status}`)
+      if (!sRes.ok) throw new Error(`summary: HTTP ${sRes.status}`)
+
+      const m = await mRes.json()
+      const h = await hRes.json()
+      const s = await sRes.json()
+
+      setMetrics(m)
+      setHistory(Array.isArray(h) ? h : [])
+      setSummary(s)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      setError(
+        msg.includes("Failed to fetch") || msg.includes("NetworkError")
+          ? "Dashboard tidak berjalan. Jalankan: tw dashboard"
+          : msg
+      )
+    } finally {
+      setFetching(false)
+    }
+  }, [])
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (autoRefresh) {
+      fetchAll()
+      intervalRef.current = setInterval(fetchAll, 3000)
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [autoRefresh, fetchAll])
+
+  // Mode color
+  const modeColor = (mode: string | null | undefined): string => {
+    switch (mode) {
+      case "build":
+        return "#fbbf24"
+      case "watch":
+        return "#34d399"
+      case "jit":
+        return "#60a5fa"
+      case "error":
+        return "#f87171"
+      case "idle":
+        return "#71717a"
+      default:
+        return "#52525b"
+    }
+  }
+
+  // Health color
+  const healthColor = (status: string | undefined): string => {
+    switch (status) {
+      case "healthy":
+        return "#34d399"
+      case "degraded":
+        return "#fbbf24"
+      case "unhealthy":
+        return "#f87171"
+      default:
+        return "#52525b"
+    }
+  }
+
+  // Render bar chart for build time history
+  const renderHistoryChart = () => {
+    const vals = history.map((h) => h.buildMs ?? 0).filter((v) => v > 0)
+    if (vals.length === 0) {
+      return React.createElement(
+        "div",
+        {
+          style: {
+            color: "#52525b",
+            fontSize: "11px",
+            textAlign: "center" as const,
+            padding: "12px",
+          },
+        },
+        "No build history available"
+      )
+    }
+    const max = Math.max(...vals)
+    const chartWidth = 296
+    const barWidth = Math.max(3, Math.floor(chartWidth / vals.length) - 1)
+
+    return React.createElement(
+      "div",
+      {
+        style: {
+          display: "flex",
+          alignItems: "flex-end" as const,
+          gap: "1px",
+          height: "60px",
+          padding: "0 2px",
+        },
+      },
+      vals.map((v, i) => {
+        const h = max > 0 ? Math.max(3, Math.round((v / max) * 56)) : 3
+        return React.createElement("div", {
+          key: i,
+          style: {
+            width: `${barWidth}px`,
+            height: `${h}px`,
+            background: v > 1000 ? "#f87171" : v > 500 ? "#fbbf24" : "#34d399",
+            borderRadius: "2px 2px 0 0",
+            opacity: i === vals.length - 1 ? 1 : 0.5,
+            flexShrink: 0,
+          },
+          title: `${v}ms`,
+        })
+      })
+    )
+  }
+
+  // Render pipeline breakdown bar
+  const renderPipelineBar = () => {
+    if (!metrics) return null
+    const scan = metrics.scanMs ?? 0
+    const analyze = metrics.analyzeMs ?? 0
+    const compile = metrics.compileMs ?? 0
+    const total = scan + analyze + compile
+    if (total === 0) return null
+
+    const scanPct = (scan / total) * 100
+    const analyzePct = (analyze / total) * 100
+    const compilePct = (compile / total) * 100
+
+    return React.createElement(
+      "div",
+      null,
+      React.createElement(
+        "div",
+        { style: { ...S.sectionTitle, marginBottom: "6px" } },
+        "Pipeline Breakdown"
+      ),
+      React.createElement(
+        "div",
+        {
+          style: {
+            display: "flex",
+            height: "12px",
+            borderRadius: "4px",
+            overflow: "hidden",
+            marginBottom: "6px",
+          },
+        },
+        scanPct > 0 &&
+          React.createElement("div", {
+            style: { width: `${scanPct}%`, background: "#60a5fa", minWidth: "2px" },
+            title: `Scan: ${scan}ms`,
+          }),
+        analyzePct > 0 &&
+          React.createElement("div", {
+            style: { width: `${analyzePct}%`, background: "#818cf8", minWidth: "2px" },
+            title: `Analyze: ${analyze}ms`,
+          }),
+        compilePct > 0 &&
+          React.createElement("div", {
+            style: { width: `${compilePct}%`, background: "#34d399", minWidth: "2px" },
+            title: `Compile: ${compile}ms`,
+          })
+      ),
+      React.createElement(
+        "div",
+        { style: { display: "flex", gap: "12px", fontSize: "10px" } },
+        React.createElement("span", { style: { color: "#60a5fa" } }, `Scan ${scan}ms`),
+        React.createElement("span", { style: { color: "#818cf8" } }, `Analyze ${analyze}ms`),
+        React.createElement("span", { style: { color: "#34d399" } }, `Compile ${compile}ms`)
+      )
+    )
+  }
+
+  // Error state
+  if (error && !metrics) {
+    return React.createElement(
+      "div",
+      { style: S.scrollArea },
+      React.createElement(
+        "div",
+        { style: { padding: "12px" } },
+        React.createElement(
+          "div",
+          { style: { color: "#f87171", fontSize: "11px", marginBottom: "8px" } },
+          error
+        ),
+        React.createElement(
+          "button",
+          {
+            style: { ...S.copyBtn, borderTop: "none", color: "#34d399", fontWeight: "600" },
+            onClick: fetchAll,
+            disabled: fetching,
+          },
+          fetching ? "Connecting..." : "⚡ Load from Dashboard"
+        )
+      )
+    )
+  }
+
+  // Initial load state
+  if (!metrics) {
+    return React.createElement(
+      "div",
+      { style: S.scrollArea },
+      React.createElement(
+        "div",
+        { style: { padding: "12px" } },
+        React.createElement(
+          "div",
+          {
+            style: {
+              color: "#71717a",
+              fontSize: "11px",
+              lineHeight: 1.6,
+              marginBottom: "8px",
+            },
+          },
+          "Build timeline dan pipeline events dari engine.",
+          React.createElement("br", null),
+          React.createElement(
+            "code",
+            { style: { color: "#52525b", fontSize: "10px" } },
+            "tw dashboard"
+          )
+        ),
+        React.createElement(
+          "button",
+          {
+            style: { ...S.copyBtn, borderTop: "none", color: "#34d399", fontWeight: "600" },
+            onClick: fetchAll,
+            disabled: fetching,
+          },
+          fetching ? "Connecting..." : "⚡ Load from Dashboard"
+        )
+      )
+    )
+  }
+
+  return React.createElement(
+    "div",
+    { style: S.scrollArea },
+
+    // ── Mode & Health ────────────────────────────────────────────────────
+    React.createElement(
+      "div",
+      { style: { padding: "10px 12px 6px" } },
+      React.createElement(
+        "div",
+        {
+          style: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "8px",
+          },
+        },
+        React.createElement(
+          "div",
+          { style: { display: "flex", alignItems: "center", gap: "8px" } },
+          React.createElement("div", {
+            style: {
+              width: "8px",
+              height: "8px",
+              borderRadius: "50%",
+              background: modeColor(metrics.mode),
+              boxShadow: `0 0 6px ${modeColor(metrics.mode)}`,
+            },
+          }),
+          React.createElement(
+            "span",
+            {
+              style: {
+                color: modeColor(metrics.mode),
+                fontWeight: "600",
+                fontSize: "12px",
+                textTransform: "uppercase" as const,
+              },
+            },
+            metrics.mode ?? "unknown"
+          )
+        ),
+        React.createElement(
+          "div",
+          { style: { display: "flex", gap: "4px" } },
+          React.createElement(
+            "button",
+            {
+              style: {
+                background: autoRefresh ? "#1e3a5f" : "none",
+                border: `1px solid ${autoRefresh ? "#3b82f6" : "#27272a"}`,
+                borderRadius: "4px",
+                color: autoRefresh ? "#60a5fa" : "#52525b",
+                cursor: "pointer",
+                fontSize: "10px",
+                padding: "2px 6px",
+                fontFamily: "inherit",
+                pointerEvents: "all" as const,
+              },
+              onClick: () => setAutoRefresh(!autoRefresh),
+              title: autoRefresh ? "Stop auto-refresh" : "Auto-refresh every 3s",
+            },
+            autoRefresh ? "● Live" : "○ Live"
+          ),
+          React.createElement(
+            "button",
+            {
+              style: {
+                background: "none",
+                border: "1px solid #27272a",
+                borderRadius: "4px",
+                color: "#52525b",
+                cursor: "pointer",
+                fontSize: "10px",
+                padding: "2px 6px",
+                fontFamily: "inherit",
+                pointerEvents: "all" as const,
+              },
+              onClick: fetchAll,
+              disabled: fetching,
+              title: "Refresh now",
+            },
+            "↻"
+          )
+        )
+      )
+    ),
+
+    // ── Health Status ────────────────────────────────────────────────────
+    summary &&
+      React.createElement(
+        "div",
+        { style: S.section },
+        React.createElement("div", { style: { ...S.sectionTitle, marginBottom: "6px" } }, "Health"),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Status"),
+          React.createElement(
+            "span",
+            { style: { color: healthColor(summary.health?.status), fontWeight: "600" } },
+            summary.health?.status ?? "unknown"
+          )
+        ),
+        summary.health?.issues &&
+          summary.health.issues.length > 0 &&
+          React.createElement(
+            "div",
+            { style: { marginTop: "4px" } },
+            summary.health.issues.map((issue, i) =>
+              React.createElement(
+                "div",
+                {
+                  key: i,
+                  style: {
+                    fontSize: "10px",
+                    color:
+                      issue.severity === "high"
+                        ? "#f87171"
+                        : issue.severity === "medium"
+                          ? "#fbbf24"
+                          : "#71717a",
+                    marginBottom: "2px",
+                  },
+                },
+                `• ${issue.message}`
+              )
+            )
+          )
+      ),
+
+    // ── Build Metrics ────────────────────────────────────────────────────
+    React.createElement(
+      "div",
+      { style: S.section },
+      React.createElement(
+        "div",
+        { style: { ...S.sectionTitle, marginBottom: "6px" } },
+        "Build Metrics"
+      ),
+      React.createElement(
+        "div",
+        { style: S.row },
+        React.createElement("span", { style: S.varKey }, "Build"),
+        React.createElement(
+          "span",
+          {
+            style: {
+              ...S.varValue,
+              color:
+                (metrics.buildMs ?? 0) > 1000
+                  ? "#f87171"
+                  : (metrics.buildMs ?? 0) > 500
+                    ? "#fbbf24"
+                    : "#34d399",
+            },
+          },
+          metrics.buildMs !== null ? `${metrics.buildMs}ms` : "—"
+        )
+      ),
+      React.createElement(
+        "div",
+        { style: S.row },
+        React.createElement("span", { style: S.varKey }, "Classes"),
+        React.createElement("span", { style: S.varValue }, String(metrics.classCount ?? "—"))
+      ),
+      React.createElement(
+        "div",
+        { style: S.row },
+        React.createElement("span", { style: S.varKey }, "Files"),
+        React.createElement("span", { style: S.varValue }, String(metrics.fileCount ?? "—"))
+      ),
+      metrics.cssBytes !== null &&
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "CSS"),
+          React.createElement(
+            "span",
+            { style: { ...S.varValue, color: "#818cf8" } },
+            metrics.cssBytes < 1024
+              ? `${metrics.cssBytes}B`
+              : `${(metrics.cssBytes / 1024).toFixed(1)}KB`
+          )
+        )
+    ),
+
+    // ── Pipeline Breakdown ───────────────────────────────────────────────
+    React.createElement("div", { style: S.section }, renderPipelineBar()),
+
+    // ── Pipeline Events ──────────────────────────────────────────────────
+    (metrics.eventsReceived !== undefined || metrics.batchesProcessed !== undefined) &&
+      React.createElement(
+        "div",
+        { style: S.section },
+        React.createElement(
+          "div",
+          { style: { ...S.sectionTitle, marginBottom: "6px" } },
+          "Pipeline Events"
+        ),
+        metrics.eventsReceived !== undefined &&
+          React.createElement(
+            "div",
+            { style: S.row },
+            React.createElement("span", { style: S.varKey }, "Events received"),
+            React.createElement(
+              "span",
+              { style: { color: "#a1a1aa", fontSize: "11px" } },
+              String(metrics.eventsReceived)
+            )
+          ),
+        metrics.eventsProcessed !== undefined &&
+          React.createElement(
+            "div",
+            { style: S.row },
+            React.createElement("span", { style: S.varKey }, "Events processed"),
+            React.createElement(
+              "span",
+              { style: { color: "#a1a1aa", fontSize: "11px" } },
+              String(metrics.eventsProcessed)
+            )
+          ),
+        metrics.batchesProcessed !== undefined &&
+          React.createElement(
+            "div",
+            { style: S.row },
+            React.createElement("span", { style: S.varKey }, "Batches"),
+            React.createElement(
+              "span",
+              { style: { color: "#a1a1aa", fontSize: "11px" } },
+              String(metrics.batchesProcessed)
+            )
+          ),
+        metrics.incrementalUpdates !== undefined &&
+          React.createElement(
+            "div",
+            { style: S.row },
+            React.createElement("span", { style: S.varKey }, "Incremental"),
+            React.createElement(
+              "span",
+              { style: { color: "#34d399", fontSize: "11px" } },
+              String(metrics.incrementalUpdates)
+            )
+          ),
+        metrics.fullRescans !== undefined &&
+          React.createElement(
+            "div",
+            { style: S.row },
+            React.createElement("span", { style: S.varKey }, "Full rescans"),
+            React.createElement(
+              "span",
+              { style: { color: "#fbbf24", fontSize: "11px" } },
+              String(metrics.fullRescans)
+            )
+          )
+      ),
+
+    // ── Memory ───────────────────────────────────────────────────────────
+    metrics.memoryMb &&
+      React.createElement(
+        "div",
+        { style: S.section },
+        React.createElement("div", { style: { ...S.sectionTitle, marginBottom: "6px" } }, "Memory"),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Heap used"),
+          React.createElement(
+            "span",
+            {
+              style: {
+                color: metrics.memoryMb.heapUsed > 500 ? "#f87171" : "#34d399",
+                fontWeight: "600",
+              },
+            },
+            `${metrics.memoryMb.heapUsed.toFixed(1)}MB`
+          )
+        ),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Heap total"),
+          React.createElement(
+            "span",
+            { style: { color: "#a1a1aa", fontSize: "11px" } },
+            `${metrics.memoryMb.heapTotal.toFixed(1)}MB`
+          )
+        ),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "RSS"),
+          React.createElement(
+            "span",
+            { style: { color: "#a1a1aa", fontSize: "11px" } },
+            `${metrics.memoryMb.rss.toFixed(1)}MB`
+          )
+        )
+      ),
+
+    // ── Workspace Summary ────────────────────────────────────────────────
+    summary &&
+      React.createElement(
+        "div",
+        { style: S.section },
+        React.createElement(
+          "div",
+          { style: { ...S.sectionTitle, marginBottom: "6px" } },
+          "Workspace"
+        ),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Packages"),
+          React.createElement(
+            "span",
+            { style: { color: "#a1a1aa", fontSize: "11px" } },
+            String(summary.workspace?.totalPackages ?? "—")
+          )
+        ),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Files"),
+          React.createElement(
+            "span",
+            { style: { color: "#a1a1aa", fontSize: "11px" } },
+            String(summary.workspace?.totalFiles ?? "—")
+          )
+        ),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Classes"),
+          React.createElement(
+            "span",
+            { style: { color: "#a1a1aa", fontSize: "11px" } },
+            String(summary.workspace?.totalClasses ?? "—")
+          )
+        ),
+        React.createElement(
+          "div",
+          { style: S.row },
+          React.createElement("span", { style: S.varKey }, "Cache hit rate"),
+          React.createElement(
+            "span",
+            {
+              style: {
+                color: (summary.cache?.hitRate ?? 0) > 0.8 ? "#34d399" : "#fbbf24",
+                fontSize: "11px",
+              },
+            },
+            summary.cache ? `${(summary.cache.hitRate * 100).toFixed(0)}%` : "—"
+          )
+        )
+      ),
+
+    // ── Build Time History ───────────────────────────────────────────────
+    React.createElement(
+      "div",
+      { style: S.section },
+      React.createElement(
+        "div",
+        { style: { ...S.sectionTitle, marginBottom: "6px" } },
+        `Build History (${history.length} snapshots)`
+      ),
+      renderHistoryChart()
+    ),
+
+    // ── Timestamp ────────────────────────────────────────────────────────
+    metrics.generatedAt &&
+      React.createElement(
+        "div",
+        {
+          style: {
+            padding: "6px 12px",
+            color: "#3f3f46",
+            fontSize: "10px",
+            textAlign: "center" as const,
+          },
+        },
+        `Last update: ${new Date(metrics.generatedAt).toLocaleTimeString()}`
+      )
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main DevTools component
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -862,6 +1559,7 @@ export function TwDevTools(): React.ReactElement | null {
       if (e.key === "3") setState((s) => (s.open ? { ...s, panel: "container" } : s))
       if (e.key === "4") setState((s) => (s.open ? { ...s, panel: "tokens" } : s))
       if (e.key === "5") setState((s) => (s.open ? { ...s, panel: "analyzer" } : s))
+      if (e.key === "6") setState((s) => (s.open ? { ...s, panel: "trace" } : s))
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
@@ -935,6 +1633,7 @@ export function TwDevTools(): React.ReactElement | null {
     { id: "container", label: "Container", icon: "📦" },
     { id: "tokens", label: "Tokens", icon: "🎨" },
     { id: "analyzer", label: "Analyzer", icon: "📊" },
+    { id: "trace", label: "Trace", icon: "🔬" },
   ]
 
   return React.createElement(
@@ -1058,7 +1757,8 @@ export function TwDevTools(): React.ReactElement | null {
       state.panel === "state" && React.createElement(StatePanel, null),
       state.panel === "container" && React.createElement(ContainerPanel, null),
       state.panel === "tokens" && React.createElement(TokensPanel, null),
-      state.panel === "analyzer" && React.createElement(AnalyzerPanel, null)
+      state.panel === "analyzer" && React.createElement(AnalyzerPanel, null),
+      state.panel === "trace" && React.createElement(TracePanel, null)
     ),
 
     // ── Status bar ──────────────────────────────────────────────────────
@@ -1072,8 +1772,8 @@ export function TwDevTools(): React.ReactElement | null {
         state.pinned
           ? "Click to unpin"
           : isInspecting
-            ? "Hover to inspect · Click to pin · 1-5 switch panel · Esc close"
-            : "Ctrl+Shift+D close · 1-5 switch panel"
+            ? "Hover to inspect · Click to pin · 1-6 switch panel · Esc close"
+            : "Ctrl+Shift+D close · 1-6 switch panel"
       )
     )
   )

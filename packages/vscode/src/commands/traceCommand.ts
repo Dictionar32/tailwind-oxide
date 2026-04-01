@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { EngineService } from "../services/engineService"
+import type { EngineService } from "../services/engineService"
 
 export function registerTraceCommand(engineService: EngineService) {
   return vscode.commands.registerCommand("tailwind-styled.trace", async () => {
@@ -36,7 +36,8 @@ export function registerTraceCommand(engineService: EngineService) {
           {}
         )
 
-        const parts: string[] = [`<!DOCTYPE html>
+        const parts: string[] = [
+          `<!DOCTYPE html>
 <html>
 <head>
   <style>
@@ -49,7 +50,8 @@ export function registerTraceCommand(engineService: EngineService) {
   </style>
 </head>
 <body>
-  <h1>.${className}</h1>`]
+  <h1>.${className}</h1>`,
+        ]
 
         if (result.definedAt) {
           parts.push(`

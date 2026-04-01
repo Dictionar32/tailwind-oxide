@@ -77,10 +77,10 @@ export async function runStatsCli(args: string[]): Promise<void> {
   output.writeText(`|  Files scanned:     ${String(report.totalFiles).padEnd(34)}|`)
   output.writeText(`|  Unique classes:    ${String(report.uniqueClassCount).padEnd(34)}|`)
   output.writeText(
-    `|  Est. CSS size:     ${String((totalBytes / 1024).toFixed(1) + " kB").padEnd(34)}|`
+    `|  Est. CSS size:     ${String(`${(totalBytes / 1024).toFixed(1)} kB`).padEnd(34)}|`
   )
   output.writeText(
-    `|  Duplicate waste:   ${String((duplicateBytes / 1024).toFixed(1) + " kB").padEnd(34)}|`
+    `|  Duplicate waste:   ${String(`${(duplicateBytes / 1024).toFixed(1)} kB`).padEnd(34)}|`
   )
   output.writeText(`+${bar}+`)
 
@@ -93,7 +93,7 @@ export async function runStatsCli(args: string[]): Promise<void> {
 
     for (const usage of sorted.slice(0, 10)) {
       output.writeText(
-        `  ${usage.name.padEnd(32)} ${String(usage.count + "x").padEnd(6)} ~${(
+        `  ${usage.name.padEnd(32)} ${String(`${usage.count}x`).padEnd(6)} ~${(
           usage.bytes / 1024
         ).toFixed(1)}kB`
       )

@@ -7,12 +7,11 @@
  *   import { withTailwindStyled } from "tailwind-styled-v4/next"
  */
 
-export type { TailwindStyledNextOptions } from "./withTailwindStyled"
-export { withTailwindStyled } from "./withTailwindStyled"
-
 // Re-export schemas
 export {
+  type NextAdapterOptionsInput,
   NextAdapterOptionsSchema,
   parseNextAdapterOptions,
-  type NextAdapterOptionsInput,
 } from "./schemas"
+export type { TailwindStyledNextOptions } from "./withTailwindStyled"
+export { withTailwindStyled } from "./withTailwindStyled"

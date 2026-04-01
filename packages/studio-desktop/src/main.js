@@ -41,13 +41,11 @@ function resolveStudioScript() {
 
 const STUDIO_SCRIPT = resolveStudioScript()
 
-const app = {
-  app.mainWindow: null,
-  tray: null,
-  app.studioServer: null,
-  app.currentProject: process.argv.find((a) => a.startsWith("--project="))?.split("=")[1]
-    ?? process.cwd(),
-}
+app.mainWindow = null
+app.tray = null
+app.studioServer = null
+app.currentProject = process.argv.find((a) => a.startsWith("--project="))?.split("=")[1]
+  ?? process.cwd()
 
 // ─── Start studio server ───────────────────────────────────────────────────────
 
@@ -201,7 +199,7 @@ function buildMenu() {
     { role: "help", submenu: [{ label: "Documentation", click() { shell.openExternal("https://github.com/your-org/tailwind-styled-v4") } }] },
   ]
 
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template as Electron.MenuItemConstructorOptions[]))
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 // ─── System tray ──────────────────────────────────────────────────────────────

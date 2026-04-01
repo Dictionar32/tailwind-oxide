@@ -44,12 +44,35 @@ const findForbiddenPackedFile = (files) =>
   files.find((filePath) => {
     const normalized = filePath.replaceAll("\\", "/")
     return (
+      normalized.endsWith(".node") ||
       normalized.includes("/src/") ||
       normalized.includes("index.minified.ts") ||
       normalized.includes("/_experiments/") ||
       normalized.includes("/test/package.json")
     )
   })
+
+const collectFilesRecursively = (directory) => {
+  if (!fs.existsSync(directory)) return []
+
+  const files = []
+  const stack = [directory]
+
+  while (stack.length > 0) {
+    const current = stack.pop()
+    const entries = fs.readdirSync(current, { withFileTypes: true })
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name)
+      if (entry.isDirectory()) {
+        stack.push(fullPath)
+        continue
+      }
+      files.push(fullPath)
+    }
+  }
+
+  return files
+}
 
 const checkScannerBundle = (targetPath) => {
   const scannerDistFiles = ["dist/index.js", "dist/index.cjs", "dist/worker.js", "dist/worker.cjs"]
@@ -59,6 +82,26 @@ const checkScannerBundle = (targetPath) => {
     const content = fs.readFileSync(absoluteFile, "utf8")
     if (content.includes("eval: true")) {
       throw new Error(`${targetPath} still contains 'eval: true' in ${relativeFile}`)
+    }
+  }
+}
+
+const checkAdapterBundleSafety = (targetPath) => {
+  const distDir = path.resolve(rootDir, targetPath, "dist")
+  const textFilePattern = /\.(?:cjs|js|mjs|d\.ts|map)$/i
+  const nativePattern = /\.node\b|@tailwindcss\/oxide|tailwindcss-oxide|oxide-/i
+
+  for (const absoluteFile of collectFilesRecursively(distDir)) {
+    const relativeFile = path.relative(path.resolve(rootDir, targetPath), absoluteFile)
+
+    if (absoluteFile.endsWith(".node")) {
+      throw new Error(`${targetPath} should not ship native binaries in ${relativeFile}`)
+    }
+
+    if (!textFilePattern.test(absoluteFile)) continue
+    const content = fs.readFileSync(absoluteFile, "utf8")
+    if (nativePattern.test(content)) {
+      throw new Error(`${targetPath} dist still references native bindings in ${relativeFile}`)
     }
   }
 }
@@ -74,6 +117,9 @@ for (const target of targets) {
   }
   if (target.includes("scanner")) {
     checkScannerBundle(target)
+  }
+  if (["packages/vite", "packages/next", "packages/rspack"].some((prefix) => target.includes(prefix))) {
+    checkAdapterBundleSafety(target)
   }
 }
 

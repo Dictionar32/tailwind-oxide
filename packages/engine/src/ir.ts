@@ -1,57 +1,69 @@
 export class RuleId {
   constructor(public readonly value: number) {}
-  toString() { return `R${this.value}` }
+  toString() {
+    return `R${this.value}`
+  }
 }
 
 export class SelectorId {
   constructor(public readonly value: number) {}
-  toString() { return `S${this.value}` }
+  toString() {
+    return `S${this.value}`
+  }
 }
 
 export class VariantChainId {
   constructor(public readonly value: number) {}
-  toString() { return `V${this.value}` }
+  toString() {
+    return `V${this.value}`
+  }
 }
 
 export class PropertyId {
   name?: string
   constructor(public readonly value: number) {}
-  toString() { 
+  toString() {
     // Check for custom name property first (set by traceService)
     const name = this.name
     if (typeof name === "string" && name.length > 0) {
       return name
     }
-    return propertyIdToString(this) 
+    return propertyIdToString(this)
   }
 }
 
 export class ValueId {
   name?: string
   constructor(public readonly value: number) {}
-  toString() { 
+  toString() {
     // Check for custom name property first (set by traceService)
     const name = this.name
     if (typeof name === "string" && name.length > 0) {
       return name
     }
-    return valueIdToString(this) 
+    return valueIdToString(this)
   }
 }
 
 export class LayerId {
   constructor(public readonly value: number) {}
-  toString() { return `L${this.value}` }
+  toString() {
+    return `L${this.value}`
+  }
 }
 
 export class ConditionId {
   constructor(public readonly value: number) {}
-  toString() { return `C${this.value}` }
+  toString() {
+    return `C${this.value}`
+  }
 }
 
 export class CascadeResolutionId {
   constructor(public readonly value: number) {}
-  toString() { return `R${this.value}` }
+  toString() {
+    return `R${this.value}`
+  }
 }
 
 // Registry for property and value names
@@ -182,11 +194,7 @@ export interface SourceLocation {
 
 export function createFingerprint(parts: string[]): string {
   const hash = parts.reduce(
-    (acc, part) =>
-      part.split("").reduce(
-        (h, char) => ((h << 5) - h + char.charCodeAt(0)) & h,
-        acc
-      ),
+    (acc, part) => part.split("").reduce((h, char) => ((h << 5) - h + char.charCodeAt(0)) & h, acc),
     0
   )
   return Math.abs(hash).toString(36)

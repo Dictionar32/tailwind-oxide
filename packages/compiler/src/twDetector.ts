@@ -28,26 +28,20 @@ export const IMPORT_RE = /from\s*["']tailwind-styled-v4["']/
 export const TRANSFORM_MARKER = "/* @tw-transformed */"
 
 export function hasTwUsage(source: string): boolean {
-  // Rust fast-path — single regex scan di native
   const native = getNativeBridge()
-  if (native?.hasTwUsageNative) {
-    const result = native.hasTwUsageNative(source)
-    if (result !== null && result !== undefined) return result
+  if (!native?.hasTwUsageNative) {
+    throw new Error("Native binding 'hasTwUsageNative' is required but not available.")
   }
-  // JS fallback
-  return IMPORT_RE.test(source) || source.includes("tw.")
+  return native.hasTwUsageNative(source)
 }
 
 /** Check if file was already transformed — prevents double processing (#08) */
 export function isAlreadyTransformed(source: string): boolean {
-  // Rust fast-path
   const native = getNativeBridge()
-  if (native?.isAlreadyTransformedNative) {
-    const result = native.isAlreadyTransformedNative(source)
-    if (result !== null && result !== undefined) return result
+  if (!native?.isAlreadyTransformedNative) {
+    throw new Error("Native binding 'isAlreadyTransformedNative' is required but not available.")
   }
-  // JS fallback
-  return source.includes(TRANSFORM_MARKER)
+  return native.isAlreadyTransformedNative(source)
 }
 
 export function isTwTemplateLiteral(source: string, index: number): boolean {

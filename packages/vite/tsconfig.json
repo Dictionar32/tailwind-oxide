@@ -1,8 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "dist",
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "paths": {
+      "@tailwind-styled/compiler": ["../compiler/dist/index.d.ts"],
+      "@tailwind-styled/engine": ["../engine/dist/index.d.ts"],
+      "@tailwind-styled/scanner": ["../scanner/dist/index.d.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

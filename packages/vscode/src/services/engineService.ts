@@ -1,7 +1,6 @@
-import * as path from "path"
-import * as fs from "fs"
-
-import { ScanWorkspaceResult } from "@tailwind-styled/scanner"
+import * as fs from "node:fs"
+import * as path from "node:path"
+import type { ScanWorkspaceResult } from "@tailwind-styled/scanner"
 
 export interface ScanResult extends ScanWorkspaceResult {
   classNames?: ScanClassName[]

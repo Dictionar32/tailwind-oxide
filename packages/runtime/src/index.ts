@@ -27,7 +27,7 @@ export {
   subscribeTokens,
   tokenRef,
   tokenVar,
-} from "@tailwind-styled/theme"
+} from "@tailwind-styled/theme/live-tokens"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -153,7 +153,7 @@ export function createComponent<S extends SubComponentMap = SubComponentMap>(
     return React.createElement(tag, { ...clean, ref, className: className || undefined })
   })
 
-  ;(Base as { displayName?: string }).displayName = "tw." + String(tag)
+  ;(Base as { displayName?: string }).displayName = `tw.${String(tag)}`
 
   // ── Attach subcomponent properties ────────────────────────────────────────
   if (subComponents) {
@@ -168,8 +168,7 @@ export function createComponent<S extends SubComponentMap = SubComponentMap>(
         return React.createElement(subTag, { ...clean, ref, className: className || undefined })
       })
 
-      ;(SubComp as { displayName?: string }).displayName =
-        "tw." + String(tag) + "." + String(subName)
+      ;(SubComp as { displayName?: string }).displayName = `tw.${String(tag)}.${String(subName)}`
 
       ;(Base as unknown as Record<string, unknown>)[subName] = SubComp
     }
@@ -180,12 +179,12 @@ export function createComponent<S extends SubComponentMap = SubComponentMap>(
 
 // Re-export schemas
 export {
-  SubComponentDefSchema,
-  ComponentMetadataSchema,
-  ConditionalPropsSchema,
-  parseSubComponentDef,
-  parseComponentMetadata,
-  type SubComponentDefInput,
   type ComponentMetadataInput,
+  ComponentMetadataSchema,
   type ConditionalPropsInput,
+  ConditionalPropsSchema,
+  parseComponentMetadata,
+  parseSubComponentDef,
+  type SubComponentDefInput,
+  SubComponentDefSchema,
 } from "./schemas"

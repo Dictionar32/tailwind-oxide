@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
 
-import type { TransformOptions, TransformResult } from "./astTransform"
+import { TwError } from "@tailwind-styled/shared"
+import { type TransformOptions, type TransformResult } from "./astTransform"
 import { CompileContext, type CompileEngine, type CompileInput } from "./context"
 import { adaptNativeResult, type ComponentMetadata, getNativeBridge } from "./nativeBridge"
 import { Pipeline } from "./pipeline"
@@ -11,9 +12,7 @@ export interface CoreCompileResult {
   result: TransformResult
   engine: CompileEngine
   cacheHit: boolean
-  /** Compound component metadata produced by Rust — undefined when the JS pipeline ran */
   metadata?: ComponentMetadata[]
-  /** CSS output after DSE (when deadStyleElimination option is enabled) */
   css?: string
 }
 
@@ -29,6 +28,7 @@ function makeCacheKey(input: CompileInput): string {
     filename: input.options.filename ?? input.filepath,
     deadStyleElimination: input.options.deadStyleElimination,
   }
+
   return createHash("sha1")
     .update(input.filepath)
     .update("\x1f")
@@ -58,7 +58,7 @@ function cloneCoreCompileResult(result: CoreCompileResult): CoreCompileResult {
     result: cloneTransformResult(result.result),
     engine: result.engine,
     cacheHit: result.cacheHit,
-    metadata: result.metadata ? result.metadata.map((m) => ({ ...m })) : undefined,
+    metadata: result.metadata ? result.metadata.map((item) => ({ ...item })) : undefined,
     css: result.css,
   }
 }
@@ -66,6 +66,7 @@ function cloneCoreCompileResult(result: CoreCompileResult): CoreCompileResult {
 function persistCache(key: string, value: CoreCompileResult): void {
   compileCache.set(key, { ...value, cacheHit: false })
   if (compileCache.size <= MAX_CACHE_ENTRIES) return
+
   const oldestKey = compileCache.keys().next().value
   if (oldestKey) compileCache.delete(oldestKey)
 }
@@ -74,22 +75,16 @@ function createPassthrough(source: string): TransformResult {
   return { code: source, classes: [], changed: false }
 }
 
-// ── CompileContext extension for metadata ─────────────────────────────────────
-
 interface CompileContextExtended extends CompileContext {
   metadata?: ComponentMetadata[]
 }
 
 class CompilerCore {
-  /**
-   * v5 CHANGE: Pipeline now uses ONLY native step.
-   * Previously fell back to JS pipeline if native was unavailable.
-   */
   private pipeline: Pipeline<CompileContextExtended>
 
   constructor() {
-    // v5: Only native step - throws if unavailable
-    this.pipeline = new Pipeline<CompileContextExtended>().use((ctx) => this.nativeStep(ctx))
+    this.pipeline = new Pipeline<CompileContextExtended>()
+      .use((ctx) => this.nativeStep(ctx))
   }
 
   compile(input: CompileInput): CoreCompileResult {
@@ -105,10 +100,10 @@ class CompilerCore {
     this.pipeline.run(ctx)
 
     const result = ctx.result ?? createPassthrough(input.source)
-
-    const cssOutput = ctx.options.deadStyleElimination && result.classes.length > 0
-      ? this.runDeadStyleElimination(result.classes, input.options)
-      : undefined
+    const cssOutput =
+      ctx.options.deadStyleElimination && result.classes.length > 0
+        ? this.runDeadStyleElimination(result.classes)
+        : undefined
 
     const compiled: CoreCompileResult = {
       result,
@@ -122,7 +117,7 @@ class CompilerCore {
     return cloneCoreCompileResult(compiled)
   }
 
-  private runDeadStyleElimination(classes: string[], options: TransformOptions): string {
+  private runDeadStyleElimination(classes: string[]): string {
     if (classes.length === 0) return ""
 
     const native = getNativeBridge()
@@ -132,7 +127,7 @@ class CompilerCore {
         const filesJson = JSON.stringify([{ file: "compiled", classes }])
         const analysis = native.analyzeClassesNative(filesJson, process.cwd(), 0)
 
-        if (analysis && analysis.safelist) {
+        if (analysis?.safelist) {
           const deadClasses = new Set<string>()
           const safelistSet = new Set(analysis.safelist)
 
@@ -152,35 +147,32 @@ class CompilerCore {
     return ""
   }
 
-  /**
-   * v5: Native step now THROWS if native binding is unavailable.
-   * Previously returned early to allow JS fallback.
-   */
   private nativeStep(ctx: CompileContextExtended): void {
-    // v5: Get native bridge - throws if unavailable
     const native = getNativeBridge()
-
-    // v5: Native method is required - throw if not available
     if (!native?.transformSourceNative) {
-      throw new Error(
-        `[tailwind-styled/compiler v5] transformSourceNative is required but not available.\n` +
-          `Please ensure the native module is properly built with transform support.`
+      throw new TwError(
+        "rust",
+        "NATIVE_TRANSFORM_UNAVAILABLE",
+        "FATAL: Native binding 'transformSourceNative' is required but not available.\n" +
+        "This package requires native Rust bindings.\n\n" +
+        "Resolution steps:\n" +
+        "1. Build the native Rust module: npm run build:rust"
       )
     }
 
-    // Pass only string-safe opts — index.mjs also sanitises, but be explicit
     const opts: Record<string, string> = {}
     if (ctx.options.mode) opts.mode = ctx.options.mode
-    if (ctx.options.filename ?? ctx.filepath) opts.filename = ctx.options.filename ?? ctx.filepath
+    if (ctx.options.filename ?? ctx.filepath) {
+      opts.filename = ctx.options.filename ?? ctx.filepath
+    }
 
     const raw = native.transformSourceNative(ctx.source, opts)
-
-    // null → native explicitly declined (e.g. dynamic-only file)
-    // v5: This is now an error - native should handle all files
     if (raw === null) {
-      throw new Error(
-        `[tailwind-styled/compiler v5] Native transform returned null for: ${ctx.filepath}\n` +
-          `This indicates an issue with the native module.`
+      throw new TwError(
+        "rust",
+        "NATIVE_TRANSFORM_RETURNED_NULL",
+        "FATAL: Native transformSourceNative returned null.\n" +
+        "This package requires native Rust bindings to transform source code."
       )
     }
 
@@ -189,20 +181,6 @@ class CompilerCore {
     ctx.metadata = adapted.metadata
     ctx.engine = "native"
     ctx.done = true
-  }
-
-  /**
-   * v5: JS pipeline has been removed.
-   * Previously used as fallback when native was unavailable.
-   *
-   * @throws Error always - JS pipeline is no longer supported in v5
-   * @deprecated JS pipeline was removed in v5
-   */
-  private jsStep(ctx: CompileContextExtended): void {
-    throw new Error(
-      `[tailwind-styled/compiler v5] JS pipeline is no longer supported.\n` +
-        `The native binding is required for all transformations.`
-    )
   }
 }
 

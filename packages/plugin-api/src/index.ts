@@ -1,3 +1,6 @@
+import { parsePluginManifest, parseTokenRegistration, TransformRegistrationSchema } from "./schemas"
+import type { CompoundCondition, TokenMap } from "@tailwind-styled/shared"
+
 export interface TwClassResult {
   css: string
   classes: string[]
@@ -20,7 +23,7 @@ export interface UtilityDefinition {
   [property: string]: string
 }
 
-export type CompoundCondition = Record<string, string>
+export type { CompoundCondition, TokenMap }
 
 export interface ComponentConfig {
   base: string
@@ -37,7 +40,6 @@ export interface TransformMeta {
 export type TransformFn = (config: ComponentConfig, meta: TransformMeta) => ComponentConfig
 
 export type CssHook = (css: string) => string
-export type TokenMap = Record<string, string>
 
 export interface TwContext {
   addVariant(name: string, resolver: VariantResolver): void
@@ -109,6 +111,9 @@ const transformRegistry: TwGlobalRegistry = {
   tokens: {},
 }
 
+const normalizeTokenName = (name: string): string =>
+  name.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase()
+
 export function getGlobalRegistry(): TwGlobalRegistry {
   return transformRegistry
 }
@@ -116,11 +121,13 @@ export function getGlobalRegistry(): TwGlobalRegistry {
 export function registerTransform(
   transform: (config: ComponentConfig, ctx: TransformContext) => ComponentConfig
 ): void {
+  TransformRegistrationSchema.parse(transform)
   transformRegistry.transforms.push(transform)
 }
 
 export function registerToken(name: string, value: string): void {
-  transformRegistry.tokens[name] = value
+  const parsed = parseTokenRegistration({ name, value })
+  transformRegistry.tokens[parsed.name] = parsed.value
 }
 
 export function createPluginRegistry(): PluginRegistry {
@@ -160,13 +167,15 @@ export function createPluginContext(
       registry.utilities.set(name, styles)
     },
     addToken(name, value) {
-      const normalized = name.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase()
-      registry.tokens.set(normalized, value)
+      const parsed = parseTokenRegistration({ name, value })
+      const normalized = normalizeTokenName(parsed.name)
+      registry.tokens.set(normalized, parsed.value)
       if (isLegacyRegistry) {
-        transformRegistry.tokens[normalized] = value
+        transformRegistry.tokens[normalized] = parsed.value
       }
     },
     addTransform(fn) {
+      TransformRegistrationSchema.parse(fn)
       registry.transforms.push(fn)
       if (isLegacyRegistry) {
         transformRegistry.transforms.push((config, ctx) =>
@@ -226,15 +235,14 @@ export function createTw(config: Record<string, unknown> = {}): TwContext & {
   }
 
   result.use = (plugin: TwPlugin) => {
-    plugin.setup(ctx)
-    registry.plugins.add(plugin.name)
+    const manifest = parsePluginManifest(plugin)
+    manifest.setup(ctx)
+    registry.plugins.add(manifest.name)
   }
 
   if (config.plugins && Array.isArray(config.plugins)) {
     for (const plugin of config.plugins) {
-      if (plugin && plugin.name) {
-        result.use(plugin)
-      }
+      result.use(parsePluginManifest(plugin))
     }
   }
 
@@ -243,7 +251,7 @@ export function createTw(config: Record<string, unknown> = {}): TwContext & {
 
 export function use(plugin: TwPlugin): void {
   const ctx = createPluginContext(legacyState.globalRegistry)
-  plugin.setup(ctx)
+  parsePluginManifest(plugin).setup(ctx)
 }
 
 export function presetTokens(tokens: Record<string, string>): TwPlugin {
@@ -281,13 +289,14 @@ export function presetScrollbar(): TwPlugin {
 
 // Re-export schemas
 export {
-  TwPluginOptionsSchema,
-  PluginManifestSchema,
-  TransformRegistrationSchema,
-  TokenRegistrationSchema,
-  parseTwPluginOptions,
-  parseTokenRegistration,
-  type TwPluginOptionsInput,
   type PluginManifestInput,
+  PluginManifestSchema,
+  parsePluginManifest,
+  parseTokenRegistration,
+  parseTwPluginOptions,
   type TokenRegistrationInput,
+  TokenRegistrationSchema,
+  TransformRegistrationSchema,
+  type TwPluginOptionsInput,
+  TwPluginOptionsSchema,
 } from "./schemas"

@@ -24,15 +24,21 @@ export const CommandContextSchema = z.object({
 export type CommandContextValidated = z.infer<typeof CommandContextSchema>
 
 // --- Config file schema (tailwind-styled.config.json) ---
-export const TailwindStyledConfigSchema = z.object({
-  version: z.number().int().min(1).optional(),
-  compiler: z.object({
-    engine: z.enum(["rust", "js", "none"]).optional(),
-  }).optional(),
-  css: z.object({
-    entry: z.string().optional(),
-  }).optional(),
-}).passthrough()
+export const TailwindStyledConfigSchema = z
+  .object({
+    version: z.number().int().min(1).optional(),
+    compiler: z
+      .object({
+        engine: z.enum(["rust", "js", "none"]).optional(),
+      })
+      .optional(),
+    css: z
+      .object({
+        entry: z.string().optional(),
+      })
+      .optional(),
+  })
+  .passthrough()
 export type TailwindStyledConfigValidated = z.infer<typeof TailwindStyledConfigSchema>
 
 // --- Validation helpers ---

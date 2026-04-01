@@ -1,6 +1,6 @@
 import path from "node:path"
 
-import { readFileSafe, readJsonSafe, pathExists, writeFileSafe } from "../../utils/fs"
+import { pathExists, readFileSafe, readJsonSafe, writeFileSafe } from "../../utils/fs"
 import type { CliLogger } from "../../utils/logger"
 import { runCommand } from "../../utils/process"
 

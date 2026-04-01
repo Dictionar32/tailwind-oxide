@@ -183,7 +183,11 @@ export function scanWorkspaceNative(
 export function extractClassesNative(source: string): string[] {
   const result = scannerGetBinding().extractClassesFromSource?.(source)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "SCANNER_EXTRACT_FAILED", "Native extractClassesFromSource returned null/undefined")
+    throw new TwError(
+      "rust",
+      "SCANNER_EXTRACT_FAILED",
+      "Native extractClassesFromSource returned null/undefined"
+    )
   }
   return result
 }
@@ -191,7 +195,11 @@ export function extractClassesNative(source: string): string[] {
 export function hashContentNative(content: string): string {
   const result = scannerGetBinding().hashFileContent?.(content)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "SCANNER_HASH_FAILED", "Native hashFileContent returned null/undefined")
+    throw new TwError(
+      "rust",
+      "SCANNER_HASH_FAILED",
+      "Native hashFileContent returned null/undefined"
+    )
   }
   return result
 }
@@ -214,7 +222,11 @@ export function cacheReadNative(
 ): ReturnType<NonNullable<NativeScannerBinding["cacheRead"]>> {
   const result = scannerGetBinding().cacheRead?.(cachePath)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "SCANNER_CACHE_READ_FAILED", "Native cacheRead returned null/undefined")
+    throw new TwError(
+      "rust",
+      "SCANNER_CACHE_READ_FAILED",
+      "Native cacheRead returned null/undefined"
+    )
   }
   return result
 }
@@ -225,7 +237,11 @@ export function cacheWriteNative(
 ): boolean {
   const result = scannerGetBinding().cacheWrite?.(cachePath, entries)
   if (result === null || result === undefined) {
-    throw new TwError("rust", "SCANNER_CACHE_WRITE_FAILED", "Native cacheWrite returned null/undefined")
+    throw new TwError(
+      "rust",
+      "SCANNER_CACHE_WRITE_FAILED",
+      "Native cacheWrite returned null/undefined"
+    )
   }
   return result
 }
@@ -249,7 +265,11 @@ export function cachePriorityNative(
     nowMs
   )
   if (result === null || result === undefined) {
-    throw new TwError("rust", "SCANNER_CACHE_PRIORITY_FAILED", "Native cachePriority returned null/undefined")
+    throw new TwError(
+      "rust",
+      "SCANNER_CACHE_PRIORITY_FAILED",
+      "Native cachePriority returned null/undefined"
+    )
   }
   return result
 }

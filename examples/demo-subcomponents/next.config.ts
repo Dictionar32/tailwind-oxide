@@ -1,11 +1,6 @@
-import { withTailwindStyled } from "@tailwind-styled/next"
+import { withTailwindStyled } from "tailwind-styled-v4/next"
 import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {
-  transpilePackages: ['tailwind-styled-v4'],
-  turbopack: {
-    root: __dirname,
-  },
-}
+const nextConfig: NextConfig = {}
 
-export default withTailwindStyled()(nextConfig)
+export default withTailwindStyled({ autoClientBoundary: false })(nextConfig)

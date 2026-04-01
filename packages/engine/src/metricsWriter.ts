@@ -17,12 +17,26 @@ const _log = createLogger("tw:metrics")
 export interface BuildMetrics {
   buildMs?: number
   scanMs?: number
+  analyzeMs?: number
+  compileMs?: number
   classCount?: number
   fileCount?: number
   cssBytes?: number
+  packageCount?: number
   memoryMb?: { rss: number; heapUsed: number; heapTotal: number }
-  mode?: "jit" | "build" | "watch" | "idle"
+  mode?: "jit" | "build" | "watch" | "idle" | "error"
   route?: string
+  error?: string
+  lastEventType?: string
+  eventsReceived?: number
+  eventsProcessed?: number
+  batchesProcessed?: number
+  incrementalUpdates?: number
+  fullRescans?: number
+  skippedLargeFiles?: number
+  queueMaxSize?: number
+  lastBuildMs?: number
+  avgBuildMs?: number
   generatedAt?: string
 }
 

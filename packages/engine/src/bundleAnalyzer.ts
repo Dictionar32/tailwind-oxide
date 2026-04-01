@@ -1,16 +1,5 @@
 import type { ScanWorkspaceResult } from "@tailwind-styled/scanner"
-import {
-  RuleId,
-  PropertyId,
-  ValueId,
-  LayerId,
-  ConditionId,
-  Origin,
-  Importance,
-  ConditionResult,
-  RuleIR,
-  SourceLocation,
-} from "./ir"
+import type { SourceLocation } from "./ir"
 
 export interface ClassBundleInfo {
   className: string
@@ -34,9 +23,6 @@ export interface BundleAnalysisResult {
 }
 
 export class BundleAnalyzer {
-  private classUsages: Map<string, Set<string>> = new Map()
-  private classCounts: Map<string, number> = new Map()
-
   analyzeClass(
     className: string,
     scanResult: ScanWorkspaceResult,
@@ -124,7 +110,7 @@ export class BundleAnalyzer {
     const classSelector = `.${normalizedClass}`
     const lines = css.split("\n")
     const totalSize = lines
-      .filter(line => line.includes(classSelector))
+      .filter((line) => line.includes(classSelector))
       .reduce((sum, line) => {
         const declarationStart = line.indexOf("{")
         if (declarationStart !== -1) {
@@ -171,10 +157,13 @@ export class BundleAnalyzer {
   private countClassUsage(className: string, scanResult: ScanWorkspaceResult): number {
     const normalizedClass = className.startsWith(".") ? className.slice(1) : className
     const count = scanResult.files.reduce((sum, file) => {
-      return sum + file.classes.filter(fileClass => {
-        const normalizedFileClass = fileClass.startsWith(".") ? fileClass.slice(1) : fileClass
-        return normalizedFileClass === normalizedClass
-      }).length
+      return (
+        sum +
+        file.classes.filter((fileClass) => {
+          const normalizedFileClass = fileClass.startsWith(".") ? fileClass.slice(1) : fileClass
+          return normalizedFileClass === normalizedClass
+        }).length
+      )
     }, 0)
 
     return count
@@ -223,7 +212,7 @@ export class BundleAnalyzer {
     return [...new Set(variantChains)]
   }
 
-  private extractDependencies(className: string, css: string): string[] {
+  private extractDependencies(className: string, _css: string): string[] {
     const normalizedClass = className.startsWith(".") ? className.slice(1) : className
     const parts = normalizedClass.split(":")
     const dependencies = parts.slice(0, -1).map((_, i) => parts.slice(0, i + 1).join(":"))

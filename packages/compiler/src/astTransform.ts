@@ -3,13 +3,14 @@
  */
 
 import {
+  type CompoundCondition,
   getGlobalRegistry,
   type ComponentConfig as PluginComponentConfig,
-  type CompoundCondition,
 } from "@tailwind-styled/plugin-api"
 import { normalizeClasses } from "./classMerger"
 import { hoistComponents } from "./componentHoister"
 import { analyzeFile, injectClientDirective, type RscAnalysis } from "./rscAnalyzer"
+import { TransformOptionsSchema } from "./schemas"
 import { hasTwUsage, isAlreadyTransformed, isDynamic, TRANSFORM_MARKER } from "./twDetector"
 import { compileVariants, generateVariantCode, parseObjectConfig } from "./variantCompiler"
 
@@ -89,22 +90,25 @@ const renderVariantComponent = (
   const dataAttr = addDataAttr ? `, "data-tw": "${fnName}"` : ""
 
   const vKeys = variantKeys.map((k) => `"${k}"`).join(", ")
-  const destructure = variantKeys.length > 0
-    ? `var _vp = {}; [${vKeys}].forEach(function(k){ _vp[k] = props[k]; delete _rest[k]; });`
-    : ""
+  const destructure =
+    variantKeys.length > 0
+      ? `var _vp = {}; [${vKeys}].forEach(function(k){ _vp[k] = props[k]; delete _rest[k]; });`
+      : ""
 
-  const variantLookup = variantKeys.length > 0
-    ? variantKeys
-        .map(
-          (k) =>
-            `(__vt_${id}["${k}"] && __vt_${id}["${k}"][_vp["${k}"] ?? ${JSON.stringify(defaults[k] ?? "")}] || "")`
-        )
-        .join(", ")
-    : ""
+  const variantLookup =
+    variantKeys.length > 0
+      ? variantKeys
+          .map(
+            (k) =>
+              `(__vt_${id}["${k}"] && __vt_${id}["${k}"][_vp["${k}"] ?? ${JSON.stringify(defaults[k] ?? "")}] || "")`
+          )
+          .join(", ")
+      : ""
 
-  const classParts = variantKeys.length > 0
-    ? `[${JSON.stringify(base)}, ${variantLookup}, _rest.className]`
-    : `[${JSON.stringify(base)}, _rest.className]`
+  const classParts =
+    variantKeys.length > 0
+      ? `[${JSON.stringify(base)}, ${variantLookup}, _rest.className]`
+      : `[${JSON.stringify(base)}, _rest.className]`
 
   return `React.forwardRef(function ${fnName}(props, ref) {
   var _rest = Object.assign({}, props);
@@ -128,10 +132,12 @@ interface SubComponentBlock {
 }
 
 const shortHash = (input: string): string => {
-  return input.split("").reduce(
-    (acc, char) => (Math.imul(acc, 33) + char.charCodeAt(0)) >>> 0,
-    5381
-  ).toString(16).padStart(6, "0").slice(-6)
+  return input
+    .split("")
+    .reduce((acc, char) => (Math.imul(acc, 33) + char.charCodeAt(0)) >>> 0, 5381)
+    .toString(16)
+    .padStart(6, "0")
+    .slice(-6)
 }
 
 const parseSubcomponentBlocks = (
@@ -139,9 +145,9 @@ const parseSubcomponentBlocks = (
   componentName: string
 ): { baseContent: string; subComponents: SubComponentBlock[] } => {
   const matches = [...template.matchAll(SUB_BLOCK_RE)]
-  
+
   const baseContent = matches.reduce((acc, match) => acc.replace(match[0], ""), template)
-  
+
   const subComponents = matches
     .map((match) => {
       const [, subName, subClassesRaw] = match
@@ -150,13 +156,19 @@ const parseSubcomponentBlocks = (
 
       const subTag = (() => {
         switch (subName) {
-          case "label": return "label"
-          case "input": return "input"
+          case "label":
+            return "label"
+          case "input":
+            return "input"
           case "img":
-          case "image": return "img"
-          case "header": return "header"
-          case "footer": return "footer"
-          default: return "span"
+          case "image":
+            return "img"
+          case "header":
+            return "header"
+          case "footer":
+            return "footer"
+          default:
+            return "span"
         }
       })()
 
@@ -224,18 +236,14 @@ const isVariantRecord = (value: unknown): value is Record<string, Record<string,
   return isObjectRecord(value) && Object.values(value).every((entry) => isStringRecord(entry))
 }
 
-const isCompoundVariantsArray = (
-  value: unknown
-): value is CompoundVariantConfig[] => {
+const isCompoundVariantsArray = (value: unknown): value is CompoundVariantConfig[] => {
   return (
     Array.isArray(value) &&
     value.every(
       (entry) =>
         isObjectRecord(entry) &&
         typeof entry.class === "string" &&
-        Object.entries(entry).every(
-          ([key, item]) => key === "class" || typeof item === "string"
-        )
+        Object.entries(entry).every(([key, item]) => key === "class" || typeof item === "string")
     )
   )
 }
@@ -243,8 +251,7 @@ const isCompoundVariantsArray = (
 const hasReactImport = (source: string): boolean => {
   return (
     source.includes("import React") ||
-    source.includes("from 'react'") ||
-    source.includes('from "react"')
+    /import\s+\{[^}]*\bReact\b[^}]*\}\s*from\s+['"]react['"]/.test(source)
   )
 }
 
@@ -271,7 +278,16 @@ const findAfterImports = (source: string): number => {
 // Main transform — RSC-Aware pipeline (Zero Let!)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const transformSource = (source: string, opts: TransformOptions = {}): TransformResult => {
+export const transformSource = (source: string, rawOpts: TransformOptions = {}): TransformResult => {
+  // ── Boundary validation: validate transform options with Zod ──
+  const optsParse = TransformOptionsSchema.safeParse(rawOpts)
+  if (!optsParse.success) {
+    const issues = optsParse.error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join("; ")
+    console.warn(`[tailwind-styled] Invalid transform options: ${issues}`)
+    return { code: source, classes: [], changed: false }
+  }
+  const opts = optsParse.data
+
   const {
     mode = "zero-runtime",
     autoClientBoundary = true,
@@ -351,7 +367,9 @@ const processAllTransformations = (
 
   // Build assign map for template matching
   const assignMap = new Map<number, string>()
-  const assignMatches = [...initialCode.matchAll(/(?:const|let|var)\s+(\w+)\s*=\s*tw\.(?:server\.)?(\w+)`/g)]
+  const assignMatches = [
+    ...initialCode.matchAll(/(?:const|let|var)\s+(\w+)\s*=\s*tw\.(?:server\.)?(\w+)`/g),
+  ]
   for (const am of assignMatches) {
     const twPos = am.index + am[0].indexOf("tw.")
     assignMap.set(twPos, am[1])
@@ -381,7 +399,9 @@ const processAllTransformations = (
 
       const rendered = (() => {
         if (subComponents.length > 0 && compName) {
-          return renderCompoundComponent(tag, classes ?? "", compName, subComponents, { addDataAttr })
+          return renderCompoundComponent(tag, classes ?? "", compName, subComponents, {
+            addDataAttr,
+          })
         }
         return renderStaticComponent(tag, classes ?? "", {
           addDataAttr,
@@ -424,31 +444,35 @@ const processAllTransformations = (
       }
 
       const registry = getGlobalRegistry()
-      const config = registry.transforms.length > 0
-        ? registry.transforms.reduce<ComponentConfig>((currentConfig, transform) => {
-            const componentName = `Tw${tag}`
-            try {
-              const transformed = transform(currentConfig, { componentName, tag })
-              if (transformed && typeof transformed === "object") {
-                return {
-                  base: typeof transformed.base === "string" ? transformed.base : currentConfig.base,
-                  variants: isVariantRecord(transformed.variants) ? transformed.variants : currentConfig.variants,
-                  compoundVariants: isCompoundVariantsArray(transformed.compoundVariants)
-                    ? transformed.compoundVariants
-                    : currentConfig.compoundVariants,
-                  defaultVariants: isStringRecord(transformed.defaultVariants)
-                    ? transformed.defaultVariants
-                    : currentConfig.defaultVariants,
+      const config =
+        registry.transforms.length > 0
+          ? registry.transforms.reduce<ComponentConfig>((currentConfig, transform) => {
+              const componentName = `Tw${tag}`
+              try {
+                const transformed = transform(currentConfig, { componentName, tag })
+                if (transformed && typeof transformed === "object") {
+                  return {
+                    base:
+                      typeof transformed.base === "string" ? transformed.base : currentConfig.base,
+                    variants: isVariantRecord(transformed.variants)
+                      ? transformed.variants
+                      : currentConfig.variants,
+                    compoundVariants: isCompoundVariantsArray(transformed.compoundVariants)
+                      ? transformed.compoundVariants
+                      : currentConfig.compoundVariants,
+                    defaultVariants: isStringRecord(transformed.defaultVariants)
+                      ? transformed.defaultVariants
+                      : currentConfig.defaultVariants,
+                  }
+                }
+              } catch (error) {
+                if (process.env.NODE_ENV !== "production") {
+                  console.warn("[tailwind-styled] plugin transform error:", error)
                 }
               }
-            } catch (error) {
-              if (process.env.NODE_ENV !== "production") {
-                console.warn("[tailwind-styled] plugin transform error:", error)
-              }
-            }
-            return currentConfig
-          }, initialConfig)
-        : initialConfig
+              return currentConfig
+            }, initialConfig)
+          : initialConfig
 
       const nextBase = normalizeClasses(config.base) ?? ""
       const nextVariants = config.variants
@@ -514,10 +538,19 @@ const processAllTransformations = (
   var _c = [${JSON.stringify(extra)}, props.className].filter(Boolean).join(" ");
   return React.createElement(${compName}, Object.assign({}, props, { ref, className: _c }));
 })`
-        : `React.forwardRef(function _TwExt_${compName}(props, ref) {
-  var _c = [${JSON.stringify(extra)}, props.className].filter(Boolean).join(" ");
-  return React.createElement(${compName}, Object.assign({}, props, { ref, className: _c }));
-})`
+        : `(function() {
+  var _ext = React.forwardRef(function _TwExt_${compName}(props, ref) {
+    var _c = [${JSON.stringify(extra)}, props.className].filter(Boolean).join(" ");
+    return React.createElement(${compName}, Object.assign({}, props, { ref, className: _c }));
+  });
+  var _keys = Object.keys(${compName});
+  for (var _i = 0; _i < _keys.length; _i++) {
+    if (_keys[_i] !== "displayName" && _keys[_i] !== "length" && _keys[_i] !== "name") {
+      _ext[_keys[_i]] = ${compName}[_keys[_i]];
+    }
+  }
+  return _ext;
+})()`
 
       const newCode = acc.code.replace(fullMatch, replacement)
       return {
@@ -552,13 +585,13 @@ const processAllTransformations = (
       return code
     },
     // Step 2: Add React import if needed
-    (code: string) => (afterWrapExtend.needsReact && !hasReactImport(initialCode))
-      ? `import React from "react";\n${code}`
-      : code,
+    (code: string) =>
+      afterWrapExtend.needsReact && !hasReactImport(initialCode)
+        ? `import React from "react";\n${code}`
+        : code,
     // Step 3: Inject client directive
-    (code: string) => (autoClientBoundary && rscAnalysis.needsClientDirective)
-      ? injectClientDirective(code)
-      : code,
+    (code: string) =>
+      autoClientBoundary && rscAnalysis.needsClientDirective ? injectClientDirective(code) : code,
     // Step 4: Clean up unused imports
     (code: string) => {
       if (!preserveImports) {

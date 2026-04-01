@@ -2,20 +2,21 @@ import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import {
-  analyzeWorkspace as runWorkspaceAnalysis,
   type AnalyzerReport,
   type AnalyzerSemanticReport,
+  analyzeWorkspace as runWorkspaceAnalysis,
 } from "@tailwind-styled/analyzer"
-import { generateCssForClasses, mergeClassesStatic } from "@tailwind-styled/compiler"
+import { generateCssForClasses, mergeClassesStatic } from "@tailwind-styled/compiler/internal"
 import {
   type ScanWorkspaceOptions,
   type ScanWorkspaceResult,
   scanWorkspaceAsync,
 } from "@tailwind-styled/scanner"
-import { createLogger } from "@tailwind-styled/shared"
+import { createLogger, TwError, wrapUnknownError } from "@tailwind-styled/shared"
 
 import { applyIncrementalChange } from "./incremental"
 import { EngineMetricsCollector, type EngineMetricsSnapshot } from "./metrics"
+import { writeMetrics } from "./metricsWriter"
 import {
   type EnginePlugin,
   runAfterBuild,
@@ -27,12 +28,13 @@ import {
   runOnError,
   runTransformClasses,
 } from "./plugin-api"
+import { parseEngineOptions, parseEngineWatchOptions } from "./schemas"
 import { type WorkspaceWatcher, watchWorkspace } from "./watch"
 
 const DEFAULT_LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024
 const DEFAULT_FLUSH_DEBOUNCE_MS = 100
 const DEFAULT_MAX_EVENTS_PER_FLUSH = 100
-const DEFAULT_WATCH_EVENT_TYPE: EngineBuildWatchEventType = "change"
+const _DEFAULT_WATCH_EVENT_TYPE: EngineBuildWatchEventType = "change"
 
 const configState = {
   cachedTailwindConfig: undefined as Record<string, unknown> | undefined,
@@ -73,11 +75,26 @@ export interface BuildResult {
   /** Analyzer semantic report - present when analyze: true in options */
   analysis?: {
     unusedClasses: string[]
-    classConflicts: Array<{ className: string; files: string[]; classes?: string[]; message?: string }>
+    classConflicts: Array<{
+      className: string
+      files: string[]
+      classes?: string[]
+      message?: string
+    }>
     classUsage: Record<string, number>
     semantic?: AnalyzerSemanticReport
     report: AnalyzerReport
   }
+}
+
+interface BuildExecutionMetrics {
+  analyzeMs: number
+  compileMs: number
+}
+
+interface BuildExecution {
+  result: BuildResult
+  metrics: BuildExecutionMetrics
 }
 
 type EngineBuildWatchEventType = "initial" | "change" | "unlink" | "full-rescan"
@@ -116,7 +133,7 @@ async function loadTailwindConfigFromPath(
 
   const configPath = path.resolve(root, tailwindConfigPath)
   if (!fs.existsSync(configPath)) {
-    throw new Error(`tailwindConfigPath not found: ${configPath}`)
+    throw TwError.fromIo("CONFIG_NOT_FOUND", `tailwindConfigPath not found: ${configPath}`)
   }
 
   const imported = await import(pathToFileURL(configPath).href)
@@ -161,23 +178,28 @@ async function buildFromScan(
   root: string,
   options: EngineOptions,
   tailwindConfig?: Record<string, unknown>
-): Promise<BuildResult> {
+): Promise<BuildExecution> {
   const plugins = options.plugins ?? []
   const context = { root, timestamp: Date.now() }
 
   await runBeforeBuild(plugins, scan, context)
+  const compileStartedAt = Date.now()
   const transformedClasses = await runTransformClasses(plugins, scan.uniqueClasses, context)
   const mergedClassList = mergeClassesStatic(transformedClasses.join(" "))
 
-  const css = options.compileCss !== false && mergedClassList.length > 0
-    ? await generateCssForClasses(
-        mergedClassList.split(/\s+/).filter(Boolean),
-        tailwindConfig,
-        root
-      )
-    : ""
+  const css =
+    options.compileCss !== false && mergedClassList.length > 0
+      ? await generateCssForClasses(
+          mergedClassList.split(/\s+/).filter(Boolean),
+          tailwindConfig,
+          root
+        )
+      : ""
 
+  const compileMs = Date.now() - compileStartedAt
+  const analyzeStartedAt = Date.now()
   const analysis = options.analyze ? await tryRunAnalyzer(root, options) : undefined
+  const analyzeMs = options.analyze ? Date.now() - analyzeStartedAt : 0
 
   const result: BuildResult = {
     scan,
@@ -186,27 +208,92 @@ async function buildFromScan(
     analysis,
   }
 
-  return runAfterBuild(plugins, result, context)
+  return {
+    result: await runAfterBuild(plugins, result, context),
+    metrics: {
+      analyzeMs,
+      compileMs,
+    },
+  }
 }
 
-export async function createEngine(options: EngineOptions = {}): Promise<TailwindStyledEngine> {
+function countWorkspacePackages(root: string): number {
+  const packagesDir = path.join(root, "packages")
+  if (!fs.existsSync(packagesDir)) return 0
+
+  try {
+    return fs
+      .readdirSync(packagesDir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() && fs.existsSync(path.join(packagesDir, entry.name, "package.json"))
+      ).length
+  } catch {
+    return 0
+  }
+}
+
+function writeDashboardMetrics(
+  root: string,
+  mode: "build" | "watch" | "error",
+  result: BuildResult | null,
+  metrics: Partial<{
+    buildMs: number
+    scanMs: number
+    analyzeMs: number
+    compileMs: number
+    lastEventType: string
+    error: string
+  }> &
+    Partial<EngineMetricsSnapshot>
+): void {
+  writeMetrics(
+    {
+      mode,
+      buildMs: metrics.buildMs,
+      scanMs: metrics.scanMs,
+      analyzeMs: metrics.analyzeMs,
+      compileMs: metrics.compileMs,
+      classCount: result?.scan.uniqueClasses.length ?? 0,
+      fileCount: result?.scan.totalFiles ?? 0,
+      cssBytes: result ? Buffer.byteLength(result.css, "utf8") : 0,
+      packageCount: countWorkspacePackages(root),
+      error: metrics.error,
+      lastEventType: metrics.lastEventType,
+      eventsReceived: metrics.eventsReceived,
+      eventsProcessed: metrics.eventsProcessed,
+      batchesProcessed: metrics.batchesProcessed,
+      incrementalUpdates: metrics.incrementalUpdates,
+      fullRescans: metrics.fullRescans,
+      skippedLargeFiles: metrics.skippedLargeFiles,
+      queueMaxSize: metrics.queueMaxSize,
+      lastBuildMs: metrics.lastBuildMs,
+      avgBuildMs: metrics.avgBuildMs,
+    },
+    root
+  )
+}
+
+export async function createEngine(rawOptions: EngineOptions = {}): Promise<TailwindStyledEngine> {
+  // ── Boundary validation: validate options with Zod before entering domain logic ──
+  const options = parseEngineOptions(rawOptions)
+
   const root = options.root ?? process.cwd()
   const resolvedRoot = path.resolve(root)
 
-  const plugins = options.plugins ?? []
+  const plugins = (rawOptions as EngineOptions).plugins ?? []
 
   const getTailwindConfig = async (): Promise<Record<string, unknown> | undefined> => {
     if (configState.isLoaded()) return configState.getConfig()
-    const config = await loadTailwindConfigFromPath(
-      resolvedRoot,
-      options.tailwindConfigPath
-    )
+    const config = await loadTailwindConfigFromPath(resolvedRoot, options.tailwindConfigPath)
     configState.setLoaded(config)
     return config
   }
 
   const reportEngineError = async (error: unknown): Promise<Error> => {
-    const normalized = error instanceof Error ? error : new Error(String(error))
+    const normalized = error instanceof TwError
+      ? error
+      : wrapUnknownError("compile", "ENGINE_ERROR", error)
     const context = { root: resolvedRoot, timestamp: Date.now() }
     try {
       await runOnError(plugins, normalized, context)
@@ -252,17 +339,41 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
     analyzeWorkspace: doAnalyze,
     generateSafelist: doGenerateSafelist,
     async build(): Promise<BuildResult> {
+      const scanStartedAt = Date.now()
       const scan = await doScan()
+      const scanMs = Date.now() - scanStartedAt
       try {
-        return await buildFromScan(scan, resolvedRoot, options, await getTailwindConfig())
+        const buildStartedAt = Date.now()
+        const execution = await buildFromScan(
+          scan,
+          resolvedRoot,
+          options,
+          await getTailwindConfig()
+        )
+        const buildMs = Date.now() - buildStartedAt
+        writeDashboardMetrics(resolvedRoot, "build", execution.result, {
+          buildMs,
+          scanMs,
+          analyzeMs: execution.metrics.analyzeMs,
+          compileMs: execution.metrics.compileMs,
+        })
+        return execution.result
       } catch (error) {
-        throw await reportEngineError(error)
+        const normalized = await reportEngineError(error)
+        writeDashboardMetrics(resolvedRoot, "error", null, {
+          scanMs,
+          error: normalized.message,
+        })
+        throw normalized
       }
     },
     async watch(
       onEvent: (event: EngineWatchEvent) => void,
-      watchOptions: EngineWatchOptions = {}
+      rawWatchOptions: EngineWatchOptions = {}
     ): Promise<{ close(): void }> {
+      // ── Boundary validation: validate watch options with Zod ──
+      const watchOptions = parseEngineWatchOptions(rawWatchOptions)
+
       const flushDebounceMs = watchOptions.debounceMs ?? DEFAULT_FLUSH_DEBOUNCE_MS
       const maxEventsPerFlush = watchOptions.maxEventsPerFlush ?? DEFAULT_MAX_EVENTS_PER_FLUSH
       const largeFileThreshold =
@@ -272,8 +383,12 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
       const watchContext = { root: resolvedRoot, timestamp: Date.now() }
       await runBeforeWatch(plugins, watchContext)
 
+      const initialScanStartedAt = Date.now()
+      const initialScan = await doScan()
+      const initialScanMs = Date.now() - initialScanStartedAt
+
       const watchState = {
-        currentScan: await doScan(),
+        currentScan: initialScan,
         timer: null as NodeJS.Timeout | null,
         setTimer(t: NodeJS.Timeout | null) {
           this.timer = t
@@ -287,12 +402,32 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
       }
 
       try {
+        const initialBuildStartedAt = Date.now()
+        const execution = await buildFromScan(
+          watchState.currentScan,
+          resolvedRoot,
+          options,
+          tailwindConfig
+        )
+        const initialBuildMs = Date.now() - initialBuildStartedAt
+        writeDashboardMetrics(resolvedRoot, "watch", execution.result, {
+          buildMs: initialBuildMs,
+          scanMs: initialScanMs,
+          analyzeMs: execution.metrics.analyzeMs,
+          compileMs: execution.metrics.compileMs,
+          lastEventType: "initial",
+        })
         onEvent({
           type: "initial",
-          result: await buildFromScan(watchState.currentScan, resolvedRoot, options, tailwindConfig),
+          result: execution.result,
         })
       } catch (error) {
         const normalized = await reportEngineError(error)
+        writeDashboardMetrics(resolvedRoot, "error", null, {
+          scanMs: initialScanMs,
+          error: normalized.message,
+          lastEventType: "initial",
+        })
         onEvent({ type: "error", error: normalized.message })
         throw normalized
       }
@@ -302,10 +437,12 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
 
       const scheduleFlush = (): void => {
         if (watchState.timer) return
-        watchState.setTimer(setTimeout(() => {
-          watchState.clearTimer()
-          void flushBatch()
-        }, flushDebounceMs))
+        watchState.setTimer(
+          setTimeout(() => {
+            watchState.clearTimer()
+            void flushBatch()
+          }, flushDebounceMs)
+        )
       }
 
       const shouldForceFullRescan = (event: {
@@ -331,10 +468,11 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
         const batch = queue.splice(0, maxEventsPerFlush)
         metrics.markBatchProcessed(batch.length)
 
-        const forceRescan = batch.some(event => shouldForceFullRescan(event))
+        const forceRescan = batch.some((event) => shouldForceFullRescan(event))
         const lastEvent = batch[batch.length - 1]
 
         const eventTypeState = { emittedType: lastEvent.type as EngineBuildWatchEventType }
+        const scanStartedAt = Date.now()
 
         try {
           if (forceRescan) {
@@ -360,24 +498,48 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
           eventTypeState.emittedType = "full-rescan"
         }
 
+        const scanMs = Date.now() - scanStartedAt
+
         try {
           const started = Date.now()
-          const result = await buildFromScan(watchState.currentScan, resolvedRoot, options, tailwindConfig)
-          metrics.markBuildDuration(Date.now() - started)
+          const execution = await buildFromScan(
+            watchState.currentScan,
+            resolvedRoot,
+            options,
+            tailwindConfig
+          )
+          const buildMs = Date.now() - started
+          metrics.markBuildDuration(buildMs)
+          const snapshot = metrics.snapshot()
+          writeDashboardMetrics(resolvedRoot, "watch", execution.result, {
+            scanMs,
+            buildMs,
+            analyzeMs: execution.metrics.analyzeMs,
+            compileMs: execution.metrics.compileMs,
+            lastEventType: eventTypeState.emittedType,
+            ...snapshot,
+          })
 
           onEvent({
             type: eventTypeState.emittedType,
             filePath: lastEvent.filePath,
-            result,
-            metrics: metrics.snapshot(),
+            result: execution.result,
+            metrics: snapshot,
           })
         } catch (error) {
           const normalized = await reportEngineError(error)
+          const snapshot = metrics.snapshot()
+          writeDashboardMetrics(resolvedRoot, "error", null, {
+            scanMs,
+            error: normalized.message,
+            lastEventType: eventTypeState.emittedType,
+            ...snapshot,
+          })
           onEvent({
             type: "error",
             filePath: lastEvent.filePath,
             error: normalized.message,
-            metrics: metrics.snapshot(),
+            metrics: snapshot,
           })
         }
 
@@ -417,17 +579,16 @@ export async function createEngine(options: EngineOptions = {}): Promise<Tailwin
   }
 }
 
-// Re-export schemas
-export {
-  EngineOptionsSchema,
-  EngineWatchOptionsSchema,
-  BuildResultSchema,
-  parseEngineOptions,
-  parseEngineWatchOptions,
-  type EngineOptionsInput,
-  type EngineWatchOptionsInput,
-  type BuildResultInput,
-} from "./schemas"
-
 // Re-export internal API (including IR types)
 export * from "./internal"
+// Re-export schemas
+export {
+  type BuildResultInput,
+  BuildResultSchema,
+  type EngineOptionsInput,
+  EngineOptionsSchema,
+  type EngineWatchOptionsInput,
+  EngineWatchOptionsSchema,
+  parseEngineOptions,
+  parseEngineWatchOptions,
+} from "./schemas"

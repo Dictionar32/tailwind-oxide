@@ -1,17 +1,15 @@
 import {
-  RuleId,
-  PropertyId,
-  RuleIR,
-  PropertyBucketIR,
-  CascadeResolutionIR,
   CascadeResolutionId,
-  StyleGraphIR,
-  ResolutionReason,
-  ResolutionCause,
+  type CascadeResolutionIR,
   CascadeStage,
   ConditionResult,
-  Origin,
-  LayerId,
+  type PropertyBucketIR,
+  type PropertyId,
+  type ResolutionCause,
+  type ResolutionReason,
+  type RuleId,
+  type RuleIR,
+  type StyleGraphIR,
 } from "./ir"
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -27,7 +25,7 @@ const generateResolutionId = (): CascadeResolutionId => {
   return id
 }
 
-const resetResolutionIdGenerator = (): void => {
+const _resetResolutionIdGenerator = (): void => {
   resolutionIdState.counter = 0
 }
 
@@ -132,7 +130,7 @@ export function resolveProperty(rules: RuleIR[]): CascadeResolutionIR {
   const winner = activeRules[0]
   const losers = activeRules.slice(1)
 
-  const resolutionReasons = losers.map((loser) => ({
+  const _resolutionReasons = losers.map((loser) => ({
     loser,
     reason: buildResolutionReason(winner, loser),
   }))
@@ -149,6 +147,7 @@ export function resolveProperty(rules: RuleIR[]): CascadeResolutionIR {
   }
 }
 
+// biome-ignore lint: kept for documentation
 interface RuleWithProperty {
   rule: RuleIR
   propertyId: PropertyId

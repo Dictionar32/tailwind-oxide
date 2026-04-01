@@ -1,10 +1,25 @@
 import assert from "node:assert/strict"
 import { spawn } from "node:child_process"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import { test } from "node:test"
 
 const packageDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+
+test("dashboard module exports metrics state without starting the server", async () => {
+  const mod = await import(pathToFileURL(path.join(packageDir, "dist/index.js")).href)
+
+  assert.equal(typeof mod.updateMetrics, "function")
+  assert.equal(typeof mod.getMetricsSummary, "function")
+  assert.equal(typeof mod.resetHistory, "function")
+  assert.equal(Array.isArray(mod.history), true)
+  mod.updateMetrics({ mode: "watch" })
+  assert.equal(mod.currentMetrics.mode, "watch")
+  mod.updateMetrics({ mode: "error", error: "boom", buildMs: 2500, scanMs: 1200 })
+  assert.equal(mod.getMetricsSummary().health.status, "unhealthy")
+  mod.resetHistory()
+  assert.equal(mod.history.length, 0)
+})
 
 async function waitFor(condition, timeoutMs = 5000) {
   const startedAt = Date.now()
@@ -44,9 +59,12 @@ test("dashboard server boots and exposes health and metrics endpoints", async (t
 
   const health = await fetch(`http://127.0.0.1:${port}/health`).then((response) => response.json())
   const metrics = await fetch(`http://127.0.0.1:${port}/metrics`).then((response) => response.json())
+  const summary = await fetch(`http://127.0.0.1:${port}/summary`).then((response) => response.json())
 
-  assert.deepEqual(health, { ok: true })
+  assert.equal(health.ok, true)
+  assert.equal(typeof health.status, "string")
   assert.equal(metrics.mode, "idle")
   assert.equal(typeof metrics.generatedAt, "string")
+  assert.equal(typeof summary.health.status, "string")
   assert.equal(stderr, "")
 })

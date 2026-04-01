@@ -68,9 +68,6 @@ const createParserBindingLoader = () => {
 
   const getBinding = (): NativeParserBinding | null => {
     if (_state.binding !== undefined) return _state.binding
-    if (process.env.TWS_NO_NATIVE === "1" || process.env.TWS_NO_RUST === "1") {
-      return (_state.binding = null)
-    }
     // Guard: skip entirely in browser environment
     if (typeof process === "undefined" || typeof process.cwd !== "function") {
       return (_state.binding = null)

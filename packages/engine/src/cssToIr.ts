@@ -1,19 +1,18 @@
 import {
-  RuleId,
-  SelectorId,
-  VariantChainId,
-  PropertyId,
-  ValueId,
-  LayerId,
   ConditionId,
-  Origin,
-  Importance,
   ConditionResult,
-  RuleIR,
-  SourceLocation,
   createFingerprint,
+  Importance,
+  LayerId,
+  Origin,
+  PropertyId,
+  RuleId,
+  type RuleIR,
   registerPropertyName,
   registerValueName,
+  SelectorId,
+  ValueId,
+  VariantChainId,
 } from "./ir"
 
 export interface ParseCssToIrOptions {
@@ -109,6 +108,7 @@ function parseSelector(selectorText: string): ParsedSelector {
   const baseClassNoDot = baseClassRaw.startsWith(".") ? baseClassRaw.slice(1) : baseClassRaw
   const escapedColon = /\\:/g
   const baseClassClean = baseClassNoDot.replace(escapedColon, "\x00")
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: null byte used as temporary placeholder
   const baseClass = baseClassClean.split(":")[0].replace(/\x00/g, ":")
 
   const parts = baseClassClean.split(":")
@@ -124,8 +124,8 @@ function parseSelector(selectorText: string): ParsedSelector {
 
     if (variantRegex.test(part)) {
       variants.push(part)
-    } else if (pseudoRegex.test(":" + part)) {
-      pseudoClasses.push(":" + part)
+    } else if (pseudoRegex.test(`:${part}`)) {
+      pseudoClasses.push(`:${part}`)
     } else {
       variants.push(part)
     }

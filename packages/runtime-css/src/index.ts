@@ -1,4 +1,3 @@
-export { TwCssInjector, useTwClasses } from "./CssInjector"
 export {
   batchedInject,
   flushBatchedCss,
@@ -7,3 +6,4 @@ export {
   resetBatchedCss,
   syncInject,
 } from "./batchedInjector"
+export { TwCssInjector, useTwClasses } from "./CssInjector"

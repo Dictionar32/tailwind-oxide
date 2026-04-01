@@ -1,17 +1,15 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { createRequire } from "node:module"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
-const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, "../../..")
 process.chdir(ROOT)
 
-const { createEngine } = require(path.resolve(__dirname, "../dist/index.cjs"))
+const { createEngine } = await import(pathToFileURL(path.resolve(__dirname, "../dist/index.js")))
 
 function createTempProject() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "tw-engine-test-"))
@@ -100,6 +98,25 @@ test("plugin onError is called when build lifecycle throws", async () => {
 
   await assert.rejects(() => engine.build(), /beforeBuild failed/)
   assert.deepEqual(seen, ["beforeBuild failed"])
+})
+
+test("build writes dashboard metrics snapshot to .tw-cache/metrics.json", async () => {
+  const root = createTempProject()
+  writeSource(root, `export const x = <div className=\"text-red-500\" />`)
+
+  const engine = await createEngine({ root })
+  const result = await engine.build()
+  const metricsPath = path.join(root, ".tw-cache", "metrics.json")
+
+  assert.ok(result.css.length >= 0)
+  assert.equal(fs.existsSync(metricsPath), true)
+
+  const metrics = JSON.parse(fs.readFileSync(metricsPath, "utf8"))
+  assert.equal(metrics.mode, "build")
+  assert.equal(typeof metrics.buildMs, "number")
+  assert.equal(typeof metrics.scanMs, "number")
+  assert.equal(metrics.fileCount >= 1, true)
+  assert.equal(metrics.classCount >= 1, true)
 })
 
 

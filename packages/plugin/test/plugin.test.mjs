@@ -93,6 +93,13 @@ describe("@tailwind-styled/plugin createTwPlugin()", () => {
 
     assert.equal(observed, "#445566")
   })
+
+  test("invalid plugin options fail fast", () => {
+    assert.throws(
+      () => plugin.createTwPlugin({ debug: "yes" }),
+      /plugin options are invalid/
+    )
+  })
 })
 
 describe("@tailwind-styled/plugin plugin-api passthrough", () => {

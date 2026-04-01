@@ -4,13 +4,12 @@
  */
 import { test, describe, beforeEach } from "node:test"
 import assert from "node:assert/strict"
-import { createRequire } from "node:module"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 import path from "node:path"
 
-const require = createRequire(import.meta.url)
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..")
-const batch = require(path.join(ROOT, "packages/runtime-css/dist/batchedInjector.cjs"))
+const batch = await import(pathToFileURL(path.join(ROOT, "packages/runtime-css/dist/batchedInjector.js")))
+const injector = await import(pathToFileURL(path.join(ROOT, "packages/runtime-css/dist/CssInjector.js")))
 
 describe("batchedInjector", () => {
   // Reset state sebelum setiap test
@@ -74,8 +73,6 @@ describe("batchedInjector", () => {
 })
 
 describe("CssInjector", () => {
-  const injector = require(path.join(ROOT, "packages/runtime-css/dist/CssInjector.cjs"))
-
   test("TwCssInjector export tersedia", () => {
     assert.ok(
       typeof injector.TwCssInjector === "function" ||

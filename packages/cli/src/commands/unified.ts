@@ -1,5 +1,5 @@
-import { createCommand } from "./create"
 import { coreCommands } from "./core"
+import { createCommand } from "./create"
 import { dashboardCommand } from "./dashboard"
 import { deployCommand } from "./deploy"
 import { miscCommands } from "./misc"

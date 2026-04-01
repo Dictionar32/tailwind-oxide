@@ -1,262 +1,212 @@
 /**
- * tailwind-styled-v4 v3 — Public Types
- *
- * New in v3:
- *   - StateConfig: data-attr reactive states
- *   - ContainerConfig: @container query support
- *   - HtmlTagName: explicit union (fixes DTS bundler collapse issue)
+ * tailwind-styled-v4 — Core Types
  */
 
-import type React from "react"
-import type { JSX } from "react"
+// ── HTML Tags ────────────────────────────────────────────────────────────────
+export type HtmlTagName = keyof HTMLElementTagNameMap
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ComponentConfig — tw.button({ base, variants, state, container, ... })
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Variant Types ────────────────────────────────────────────────────────────
+export type VariantValue = string | number | boolean | undefined
 
-/** Reactive state config — generates data-attr CSS selectors */
-export type StateConfig = {
-  readonly [stateName: string]: string
+export type VariantLiterals = string | number | boolean
+
+export type VariantProps = Record<string, VariantValue>
+
+export type VariantMatrix = Record<string, Array<string | number | boolean>>
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type InferVariantProps<T = any> = {
+  [K in keyof T]?: keyof T[K]
 }
 
-/** Container query breakpoints */
-export type ContainerConfig = {
-  /** @container (min-width: Xpx) */
-  readonly [breakpoint: string]: string | { readonly minWidth?: string; readonly maxWidth?: string; readonly classes: string }
+// ── Component Config ─────────────────────────────────────────────────────────
+export interface ComponentConfig {
+  base?: string
+  variants?: Record<string, Record<string, string>>
+  defaultVariants?: Record<string, string>
+  compoundVariants?: Array<{ class: string; [key: string]: string }>
+  state?: Record<string, Record<string, string>>
+  container?: Record<string, string>
+  containerName?: string
 }
 
-export type ComponentConfig = {
-  readonly base?: string
-  readonly variants?: Readonly<Record<string, Readonly<Record<string, string>>>>
-  readonly compoundVariants?: ReadonlyArray<{ readonly class: string; readonly [key: string]: unknown }>
-  readonly defaultVariants?: Readonly<Record<string, string>>
-  /** Reactive state: { active: "bg-blue-500", disabled: "opacity-50" } */
-  readonly state?: StateConfig
-  /** Container query: { sm: "flex-col", md: "flex-row" } */
-  readonly container?: ContainerConfig
-  /** Named container for @container queries */
-  readonly containerName?: string
+// ── Container Config ─────────────────────────────────────────────────────────
+export interface ContainerConfig {
+  base?: string
+  queries?: Record<string, string>
+  defaultQuery?: string
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// UPGRADE #3 — Precise variant type inference
-// ─────────────────────────────────────────────────────────────────────────────
-
-export type VariantLiterals<V extends Record<string, string>> = keyof V & string
-
-export type InferVariantProps<C extends ComponentConfig> =
-  C["variants"] extends Record<string, Record<string, string>>
-    ? {
-        [K in keyof C["variants"]]?: VariantLiterals<C["variants"][K]>
-      }
-    : // Record<string, never> kills all props on intersection — use empty object type
-      Record<never, never>
-
-export type StyledComponentProps<
-  P extends object,
-  C extends ComponentConfig = ComponentConfig,
-> = P & InferVariantProps<C> & { className?: string }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SubComponent types
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** Type for sub-components (e.g., Button.icon, Card.header) */
-export type TwSubComponent<P extends object = Record<string, unknown>> =
-  React.ForwardRefExoticComponent<P & React.RefAttributes<unknown>>
-
-/** Map of sub-component names to their types */
-export type SubComponentMap = Record<string, TwSubComponent>
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TwStyledComponent
-// ─────────────────────────────────────────────────────────────────────────────
-
-export type TwStyledComponent<
-  P extends object = Record<string, unknown>,
-  S extends SubComponentMap = SubComponentMap,
-> = React.ForwardRefExoticComponent<P & React.RefAttributes<unknown>> & {
-  extend(strings: TemplateStringsArray, ...exprs: unknown[]): TwStyledComponent<P, S>
-  withVariants(config: Partial<ComponentConfig>): TwStyledComponent<P, S>
-  /** Attach a CSS animation. Requires @tailwind-styled/animate v5 async API. */
-  animate(opts: import("@tailwind-styled/animate").AnimateOptions): Promise<TwStyledComponent<P, S>>
-  /** Access sub-components (e.g., Button.icon, Card.header) - defined at runtime via template literal */
-  <K extends string>(key: K): K extends keyof S ? S[K] : React.ReactElement
-  /** Runtime sub-components - added by compiler */
-  [key: string]: unknown
+// ── State Config ─────────────────────────────────────────────────────────────
+export interface StateConfig {
+  base?: string
+  states?: Record<string, Record<string, string>>
+  defaultStates?: Record<string, boolean>
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// cv() return type
-// ─────────────────────────────────────────────────────────────────────────────
+// ── CV (Class Variant) Function ──────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CvFn<C = any> = any
 
-export type CvFn<C extends ComponentConfig> = (
-  props?: InferVariantProps<C> & { className?: string } & Readonly<Record<string, unknown>>
-) => string
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tag factory types
-// ─────────────────────────────────────────────────────────────────────────────
-
-type Interpolation<P extends object> =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | ((props: P) => string | number | boolean | null | undefined)
-
-export type TwTagFactory<E extends keyof JSX.IntrinsicElements = "div", S extends SubComponentMap = SubComponentMap> = {
-  (
-    strings: TemplateStringsArray,
-    ...exprs: Interpolation<JSX.IntrinsicElements[E]>[]
-  ): TwStyledComponent<JSX.IntrinsicElements[E], S>
-  <P extends object>(
-    strings: TemplateStringsArray,
-    ...exprs: Interpolation<JSX.IntrinsicElements[E] & P>[]
-  ): TwStyledComponent<JSX.IntrinsicElements[E] & P, S>
-  <C extends ComponentConfig>(
-    config: C
-  ): TwStyledComponent<JSX.IntrinsicElements[E] & InferVariantProps<C>, S>
-  (config: ComponentConfig): TwStyledComponent<JSX.IntrinsicElements[E], S>
+// ── Styled Component Props ───────────────────────────────────────────────────
+export interface StyledComponentProps {
+  className?: string
+  as?: HtmlTagName
+  [key: string]: VariantValue
 }
 
-// Non-intrinsic tag factory for custom components (non-HTML elements)
+// ── Sub Component Map ────────────────────────────────────────────────────────
+export type SubComponentMap = Record<string, unknown>
+
+// ── Tw Object ────────────────────────────────────────────────────────────────
+export interface TwObject {
+  tag: HtmlTagName
+  config: ComponentConfig
+}
+
+// ── Tw Styled Component ──────────────────────────────────────────────────────
+export interface TwStyledComponent<T = string> {
+  (props: StyledComponentProps & Record<string, unknown>): unknown
+  displayName?: string
+  extend?: (strings: TemplateStringsArray) => TwStyledComponent<T>
+  withVariants?: (config: Partial<ComponentConfig>) => TwStyledComponent<T>
+  [key: string]: any
+}
+
+// ── Tw Sub Component ─────────────────────────────────────────────────────────
+export interface TwSubComponent<P = unknown> {
+  (props: P): unknown
+  displayName?: string
+}
+
+// ── Tw Tag Factory ───────────────────────────────────────────────────────────
+export type TwTagFactory = {
+  [K in HtmlTagName]: (config?: ComponentConfig) => TwStyledComponent<K>
+}
+
+// ── Tw Tag Factory Any ───────────────────────────────────────────────────────
 export type TwTagFactoryAny = {
-  (strings: TemplateStringsArray, ...exprs: Interpolation<Record<string, unknown>>[]): TwStyledComponent<Record<string, unknown>>
-  <P extends object>(strings: TemplateStringsArray, ...exprs: Interpolation<P>[]): TwStyledComponent<P>
-  <C extends ComponentConfig>(config: C): TwStyledComponent<Record<string, unknown>>
-  (config: ComponentConfig): TwStyledComponent<Record<string, unknown>>
+  [key: string]: (config?: ComponentConfig) => TwStyledComponent
 }
 
-export type TwComponentFactory<C extends React.ComponentType<Record<string, unknown>>, S extends SubComponentMap = SubComponentMap> = {
-  (
-    strings: TemplateStringsArray,
-    ...exprs: Interpolation<React.ComponentPropsWithRef<C>>[]
-  ): TwStyledComponent<React.ComponentPropsWithRef<C>, S>
-  <Config extends ComponentConfig>(
-    config: Config
-  ): TwStyledComponent<React.ComponentPropsWithRef<C> & InferVariantProps<Config>, S>
+// ── Tw Component Factory ────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TwComponentFactory<T = any> = any
+
+// ── Tw Server Object ────────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TwServerObject = any
+
+// ── Storybook utilities ──────────────────────────────────────────────────────
+export function enumerateVariantProps(
+  matrix: VariantMatrix
+): Array<Record<string, string | number | boolean>> {
+  const keys = Object.keys(matrix)
+  if (keys.length === 0) return [{}]
+
+  const result: Array<Record<string, string | number | boolean>> = []
+
+  function walk(index: number, current: Record<string, string | number | boolean>) {
+    if (index >= keys.length) {
+      result.push({ ...current })
+      return
+    }
+    const key = keys[index]!
+    for (const value of matrix[key] ?? []) {
+      current[key] = value
+      walk(index + 1, current)
+    }
+  }
+
+  walk(0, {})
+  return result
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HtmlTagName — explicit union (fixes DTS bundler collapsing JSX.IntrinsicElements)
-// ─────────────────────────────────────────────────────────────────────────────
+export function generateArgTypes(config: ComponentConfig): Record<string, unknown> {
+  if (!config.variants) return {}
 
-export type HtmlTagName =
-  | "div"
-  | "section"
-  | "article"
-  | "aside"
-  | "header"
-  | "footer"
-  | "main"
-  | "nav"
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6"
-  | "p"
-  | "span"
-  | "strong"
-  | "em"
-  | "b"
-  | "i"
-  | "s"
-  | "u"
-  | "small"
-  | "mark"
-  | "sub"
-  | "sup"
-  | "blockquote"
-  | "q"
-  | "cite"
-  | "abbr"
-  | "address"
-  | "time"
-  | "code"
-  | "pre"
-  | "kbd"
-  | "samp"
-  | "var"
-  | "ul"
-  | "ol"
-  | "li"
-  | "dl"
-  | "dt"
-  | "dd"
-  | "figure"
-  | "figcaption"
-  | "details"
-  | "summary"
-  | "table"
-  | "thead"
-  | "tbody"
-  | "tfoot"
-  | "tr"
-  | "th"
-  | "td"
-  | "caption"
-  | "colgroup"
-  | "col"
-  | "img"
-  | "picture"
-  | "video"
-  | "audio"
-  | "source"
-  | "track"
-  | "canvas"
-  | "svg"
-  | "path"
-  | "circle"
-  | "rect"
-  | "line"
-  | "polyline"
-  | "polygon"
-  | "ellipse"
-  | "g"
-  | "defs"
-  | "use"
-  | "symbol"
-  | "text"
-  | "tspan"
-  | "form"
-  | "input"
-  | "textarea"
-  | "select"
-  | "option"
-  | "optgroup"
-  | "button"
-  | "label"
-  | "fieldset"
-  | "legend"
-  | "output"
-  | "progress"
-  | "meter"
-  | "datalist"
-  | "a"
-  | "area"
-  | "map"
-  | "iframe"
-  | "embed"
-  | "object"
-  | "hr"
-  | "br"
-  | "wbr"
-  | "dialog"
-  | "menu"
-  | "template"
-  | "slot"
+  const argTypes: Record<string, unknown> = {}
 
-export type TwServerObject = {
-  [K in HtmlTagName]: K extends keyof JSX.IntrinsicElements ? TwTagFactory<K> : TwTagFactory<"div">
+  for (const [variantKey, variantValues] of Object.entries(config.variants)) {
+    const options = Object.keys(variantValues)
+    const defaultValue = config.defaultVariants?.[variantKey]
+
+    argTypes[variantKey] = {
+      control: { type: "select" },
+      options,
+      defaultValue,
+      description: `Variant: **${variantKey}**`,
+      table: {
+        type: { summary: options.join(" | ") },
+        defaultValue: defaultValue ? { summary: defaultValue } : undefined,
+        category: "Variants",
+      },
+    }
+  }
+
+  return argTypes
 }
 
-export type TwObject = {
-  [K in keyof JSX.IntrinsicElements]: TwTagFactory<K>
-} & {
-  <C extends React.ComponentType<Record<string, unknown>>>(component: C): TwComponentFactory<C>
-  server: TwServerObject
+export function generateDefaultArgs(config: ComponentConfig): Record<string, string> {
+  return { ...(config.defaultVariants ?? undefined) }
+}
+
+export function withTailwindStyled(
+  StoryFn: () => unknown,
+  context: {
+    args?: Record<string, unknown>
+    parameters?: { tailwindStyled?: { wrapperClass?: string; padding?: string } }
+  }
+): unknown {
+  const wrapperClass = context.parameters?.tailwindStyled?.wrapperClass ?? ""
+  const padding = context.parameters?.tailwindStyled?.padding ?? "p-8"
+
+  if (typeof document !== "undefined") {
+    const wrapper = document.createElement("div")
+    wrapper.className = [padding, wrapperClass].filter(Boolean).join(" ")
+    return wrapper
+  }
+
+  return StoryFn()
+}
+
+export function createVariantStoryArgs(config: ComponentConfig): {
+  combinations: Array<Record<string, string | number | boolean>>
+  matrix: VariantMatrix
+} {
+  if (!config.variants) return { combinations: [{}], matrix: {} }
+
+  const matrix: VariantMatrix = {}
+  for (const [key, values] of Object.entries(config.variants)) {
+    matrix[key] = Object.keys(values)
+  }
+
+  return {
+    combinations: enumerateVariantProps(matrix),
+    matrix,
+  }
+}
+
+export function getVariantClass(config: ComponentConfig, props: Record<string, string>): string {
+  const classes: string[] = []
+
+  if (config.base) classes.push(config.base)
+
+  if (config.variants) {
+    for (const [key, values] of Object.entries(config.variants)) {
+      const val = props[key] ?? config.defaultVariants?.[key]
+      if (val && values[val]) classes.push(values[val])
+    }
+  }
+
+  if (config.compoundVariants) {
+    for (const compound of config.compoundVariants) {
+      const { class: cls, ...conditions } = compound
+      if (Object.entries(conditions).every(([k, v]) => props[k] === v)) {
+        classes.push(cls)
+      }
+    }
+  }
+
+  return classes.join(" ")
 }

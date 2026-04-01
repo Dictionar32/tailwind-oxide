@@ -1,7 +1,7 @@
 import { CliUsageError } from "../utils/errors"
 import { runCommand, runCommandAsJson } from "../utils/process"
-import type { CommandDefinition } from "./types"
 import { resolveScript } from "./helpers"
+import type { CommandDefinition } from "./types"
 
 export const registryCommand: CommandDefinition = {
   name: "registry",

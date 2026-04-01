@@ -9,22 +9,22 @@ import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
 import { createRequire } from "node:module"
-import { fileURLToPath } from "node:url"
+import { fileURLToPath, pathToFileURL } from "node:url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
 
-const loadBuiltModule = (relativePath, label) => {
+const loadBuiltModule = async (relativePath, label) => {
   try {
-    return require(path.resolve(__dirname, relativePath))
+    return await import(pathToFileURL(path.resolve(__dirname, relativePath)))
   } catch {
     console.warn(`[singleton-cache-reset test] ${label} dist not found - run \`cd packages/compiler && npm run build\` first`)
     process.exit(0)
   }
 }
 
-const publicApi = loadBuiltModule("../dist/index.cjs", "compiler public")
-const internalApi = loadBuiltModule("../dist/internal.cjs", "compiler internal")
+const publicApi = await loadBuiltModule("../dist/index.js", "compiler public")
+const internalApi = await loadBuiltModule("../dist/internal.js", "compiler internal")
 
 const {
   getIncrementalEngine,

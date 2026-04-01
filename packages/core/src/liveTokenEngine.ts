@@ -17,4 +17,4 @@ export {
   subscribeTokens,
   tokenRef,
   tokenVar,
-} from "@tailwind-styled/theme"
+} from "@tailwind-styled/theme/live-tokens"

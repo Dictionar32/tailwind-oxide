@@ -5,7 +5,7 @@ export default defineConfig({
     index:  "src/index.ts",
     loader: "src/loader.ts",
   },
-  format: ["cjs", "esm"],
+  format: ["esm"],
   dts: true,
   clean: true,
   // Hanya runtime Node built-ins & Tailwind yang external.

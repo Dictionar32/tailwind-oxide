@@ -1,5 +1,5 @@
 import * as vscode from "vscode"
-import { EngineService, TraceHoverResult } from "../services/engineService"
+import type { EngineService, TraceHoverResult } from "../services/engineService"
 
 const TAILWIND_CLASS_REGEX =
   /(?<=class[=:]["'`]([^"'`]*?\s+)?)[a-zA-Z][a-zA-Z0-9:/-]*(?=[^"'`]*?["'`])/g
@@ -9,7 +9,7 @@ export function createHoverProvider(engineService: EngineService): vscode.HoverP
     provideHover(
       document: vscode.TextDocument,
       position: vscode.Position,
-      token: vscode.CancellationToken
+      _token: vscode.CancellationToken
     ): vscode.ProviderResult<vscode.Hover> {
       return (async () => {
         try {
