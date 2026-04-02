@@ -76,6 +76,18 @@ export async function runCliMain(options: CliMainOptions): Promise<void> {
   const argv = options.argv ?? process.argv
   const input = parseCliInput(argv.slice(2))
 
+  // Redirect console logs to stderr in JSON mode BEFORE anything else
+  if (input.json) {
+    const _origLog = console.log
+    const _origWarn = console.warn
+    const _origDebug = console.debug
+    const toStderr = (...args: unknown[]) => process.stderr.write(args.map(a => typeof a === "string" ? a : String(a)).join(" ") + "\n")
+    console.log = toStderr
+    console.warn = toStderr
+    console.debug = toStderr
+    process.on("exit", () => { console.log = _origLog; console.warn = _origWarn; console.debug = _origDebug })
+  }
+
   if (input.verbose) process.env.TWS_VERBOSE = "1"
   if (input.debug) process.env.TWS_DEBUG = "1"
 

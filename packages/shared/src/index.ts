@@ -18,6 +18,8 @@ export type HtmlTagName = keyof HTMLElementTagNameMap
 
 export type CompoundCondition = Record<string, string | number | boolean>
 
+export type VariantMatrix = Record<string, Array<string | number | boolean>>
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Logging
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,16 +35,16 @@ export function createLogger(namespace: string): Logger {
   const prefix = `[${namespace}]`
   return {
     warn(...args: unknown[]) {
-      console.warn(prefix, ...args)
+      process.stderr.write(`${prefix} ${args.map(a => typeof a === "string" ? a : String(a)).join(" ")}\n`)
     },
     debug(...args: unknown[]) {
-      console.error(prefix, ...args)
+      process.stderr.write(`${prefix} ${args.map(a => typeof a === "string" ? a : String(a)).join(" ")}\n`)
     },
     error(...args: unknown[]) {
-      console.error(prefix, ...args)
+      process.stderr.write(`${prefix} ${args.map(a => typeof a === "string" ? a : String(a)).join(" ")}\n`)
     },
     log(...args: unknown[]) {
-      console.log(prefix, ...args)
+      process.stderr.write(`${prefix} ${args.map(a => typeof a === "string" ? a : String(a)).join(" ")}\n`)
     },
   }
 }
@@ -298,3 +300,24 @@ export {
   createTraceSnapshot,
   getPipelinePercentages,
 } from "./trace"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Performance Telemetry
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type { BuildTelemetry, TelemetryStats } from "./telemetry"
+export { TelemetryCollector, telemetry } from "./telemetry"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Error Codes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type { ErrorCode } from "./error-codes"
+export { ERROR_CODES, getSuggestion, formatErrorCode } from "./error-codes"
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tailwind Compatibility
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type { TailwindInfo } from "./compatibility"
+export { detectTailwind, assertTailwindV4, getTailwindVersion, isTailwindV4 } from "./compatibility"
