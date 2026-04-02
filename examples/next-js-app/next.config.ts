@@ -13,4 +13,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withTailwindStyled( {autoClientBoundary:false} )(nextConfig)
+export default withTailwindStyled({ autoClientBoundary: true })(nextConfig)

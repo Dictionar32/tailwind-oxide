@@ -190,7 +190,7 @@
     "build:dev": "npm run build:packages && tsup --config tsup.config.ts --sourcemap --watch",
     "build:release": "npm run build:packages && tsup --config tsup.config.ts --no-sourcemap",
     "verify:builds": "npm run build && npm run test:examples",
-    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "clean": "rm -rf dist && turbo run clean --continue",
     "dev": "tsup --config tsup.config.ts --watch",
     "test": "turbo run test --continue",
     "test:examples": "node examples/test-packages.mjs",

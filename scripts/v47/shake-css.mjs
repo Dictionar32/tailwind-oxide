@@ -52,7 +52,17 @@ const sourceDirAbs = path.resolve(process.cwd(), sourceDir)
 
 if (scanWorkspace) {
   try {
+    // Redirect scanner logs to stderr to keep stdout clean for JSON output
+    const origLog = console.log
+    const origWarn = console.warn
+    const origDebug = console.debug
+    console.log = (...args) => process.stderr.write(args.join(' ') + '\n')
+    console.warn = (...args) => process.stderr.write(args.join(' ') + '\n')
+    console.debug = (...args) => process.stderr.write(args.join(' ') + '\n')
     const result = scanWorkspace(sourceDirAbs)
+    console.log = origLog
+    console.warn = origWarn
+    console.debug = origDebug
     for (const cls of result.uniqueClasses) usedClasses.add(cls)
   } catch { /* fall through to JS */ }
 }

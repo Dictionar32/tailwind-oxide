@@ -1,8 +1,9 @@
-const fs = require("node:fs")
-const path = require("node:path")
+import fs from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
-const root = __dirname
-const outDir = path.join(root, "generated")
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const outDir = path.join(__dirname, "generated")
 const argCount = process.argv.find((arg) => arg.startsWith("--files="))
 const total = Number(argCount ? argCount.split("=")[1] : process.env.FIXTURE_FILE_COUNT ?? 10000)
 
@@ -14,9 +15,7 @@ for (let i = 0; i < total; i += 1) {
   fs.mkdirSync(group, { recursive: true })
   fs.writeFileSync(
     path.join(group, `Comp${i}.tsx`),
-    `export const Comp${i}=({active,color})=> <div className={active ? \"bg-blue-500 text-white\" : ` +
-      "`bg-${color}-500 text-black`" +
-      `}>${i}</div>;`,
+    `export const Comp${i}=({active,color})=> <div className={active ? "bg-blue-500 text-white" : \`bg-\${color}-500 text-black\`}>${i}</div>;`,
     "utf8",
   )
 }

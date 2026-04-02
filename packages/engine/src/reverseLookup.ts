@@ -27,6 +27,7 @@ interface ParsedRule {
 
 export class ReverseLookup {
   private parsedCache: Map<string, ParsedRule[]> = new Map()
+  private static readonly MAX_CACHE_SIZE = 1000
 
   private parseCSS(css: string): ParsedRule[] {
     const cached = this.parsedCache.get(css)
@@ -105,10 +106,15 @@ export class ReverseLookup {
           }
         }
 
-        selectorRegex.lastIndex = lineEnd - 1
       }
 
       columnState.offset = lineEnd
+    }
+
+    // Evict oldest entry if cache is full
+    if (this.parsedCache.size >= ReverseLookup.MAX_CACHE_SIZE) {
+      const firstKey = this.parsedCache.keys().next().value
+      if (firstKey !== undefined) this.parsedCache.delete(firstKey)
     }
 
     this.parsedCache.set(css, rules)
@@ -116,18 +122,16 @@ export class ReverseLookup {
   }
 
   private findClosingBrace(css: string, start: number): number {
-    const braceState = { depth: 1 }
-    for (const [i, char] of css
-      .slice(start + 1)
-      .split("")
-      .entries()) {
-      if (char === "{") braceState.depth++
+    let depth = 1
+    for (let pos = start + 1; pos < css.length; pos++) {
+      const char = css[pos]
+      if (char === "{") depth++
       else if (char === "}") {
-        braceState.depth--
-        if (braceState.depth === 0) return start + 1 + i
+        depth--
+        if (depth === 0) return pos
       }
     }
-    return start
+    return css.length
   }
 
   private calculateSpecificity(className: string): number {
@@ -145,8 +149,7 @@ export class ReverseLookup {
     const rules = this.parseCSS(css)
     const normalizedProperty = cssProperty.toLowerCase()
     const normalizedValue = cssValue.toLowerCase().trim()
-
-    const propertyMap = new Map<string, ClassUsage[]>()
+    const usages: ClassUsage[] = []
 
     for (const rule of rules) {
       if (rule.property.toLowerCase() !== normalizedProperty) {
@@ -158,30 +161,20 @@ export class ReverseLookup {
         continue
       }
 
-      const existingClass = propertyMap.get(rule.property) || []
-
-      const classUsage: ClassUsage = {
+      usages.push({
         className: rule.className,
         source: rule.source,
         specificity: rule.specificity,
         isOverride: rule.isOverride || false,
         variants: rule.variants,
-      }
-
-      existingClass.push(classUsage)
-      propertyMap.set(rule.property, existingClass)
-    }
-
-    const results: ReverseLookupResult[] = []
-    for (const [property, usages] of propertyMap) {
-      results.push({
-        property,
-        value: cssValue,
-        usedInClasses: usages,
       })
     }
 
-    return results
+    if (usages.length === 0) {
+      return []
+    }
+
+    return [{ property: normalizedProperty, value: cssValue, usedInClasses: usages }]
   }
 
   fromBundle(className: string, css: string): RuleIR[] {
@@ -255,45 +248,32 @@ export class ReverseLookup {
     const rules = this.parseCSS(css)
     const normalizedProperty = property.toLowerCase()
 
-    const propertyMap = new Map<string, Map<string, ClassUsage>>()
+    const valueMap = new Map<string, ClassUsage[]>()
 
     for (const rule of rules) {
       if (rule.property.toLowerCase() !== normalizedProperty) {
         continue
       }
 
-      if (!propertyMap.has(rule.property)) {
-        propertyMap.set(rule.property, new Map())
+      const classUsage: ClassUsage = {
+        className: rule.className,
+        source: rule.source,
+        specificity: rule.specificity,
+        isOverride: rule.isOverride || false,
+        variants: rule.variants,
       }
 
-      const propMap = propertyMap.get(rule.property)!
-
-      if (!propMap.has(rule.value)) {
-        const classUsage: ClassUsage = {
-          className: rule.className,
-          source: rule.source,
-          specificity: rule.specificity,
-          isOverride: rule.isOverride || false,
-          variants: rule.variants,
-        }
-        propMap.set(rule.value, classUsage)
+      let usages = valueMap.get(rule.value)
+      if (!usages) {
+        usages = []
+        valueMap.set(rule.value, usages)
       }
+      usages.push(classUsage)
     }
 
     const results: ReverseLookupResult[] = []
-    for (const [prop, valueMap] of propertyMap) {
-      for (const [value, usage] of valueMap) {
-        const existing = results.find((r) => r.property === prop && r.value === value)
-        if (existing) {
-          existing.usedInClasses.push(usage)
-        } else {
-          results.push({
-            property: prop,
-            value,
-            usedInClasses: [usage],
-          })
-        }
-      }
+    for (const [value, usedInClasses] of valueMap) {
+      results.push({ property: normalizedProperty, value, usedInClasses })
     }
 
     return results

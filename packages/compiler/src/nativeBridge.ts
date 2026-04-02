@@ -211,8 +211,8 @@ const createBridgeLoader = () => {
           bridgeState.current = adaptRawNativeBinding(mod)
           return bridgeState.current
         }
-      } catch {
-        // skip invalid fallback candidates
+      } catch (err) {
+        log(`fallback candidate ${candidate} failed to load: ${(err as Error).message ?? err}`)
       }
     }
 

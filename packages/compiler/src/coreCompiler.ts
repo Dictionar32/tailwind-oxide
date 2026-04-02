@@ -141,7 +141,9 @@ class CompilerCore {
             return ""
           }
         }
-      } catch {}
+      } catch (err) {
+        console.debug("[deadStyleElimination] native analyze failed, skipping:", (err as Error).message ?? err)
+      }
     }
 
     return ""
