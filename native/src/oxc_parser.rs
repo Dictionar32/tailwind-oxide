@@ -108,8 +108,8 @@ static RE_TW_WRAP: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?s)\btw\(\w+\)`([^`]
 static RE_BASE_FIELD: Lazy<Regex> =
     Lazy::new(|| Regex::new(r#"base\s*:\s*["'`]([^"'`]+)["'`]"#).unwrap());
 static RE_VARIANTS_LEAF: Lazy<Regex> = Lazy::new(|| {
-    // Ambil semua string value di dalam variants: { ... }
-    Regex::new(r#"(?:sm|md|lg|xl|default|primary|secondary|ghost|outline|solid|success|warning|danger|error|\w+)\s*:\s*["'`]([^"'`]+)["'`]"#).unwrap()
+    // Match any key: "value" pattern in variant objects — filtered by is_tw_class downstream
+    Regex::new(r#"\w+\s*:\s*["'`]([^"'`]+)["'`]"#).unwrap()
 });
 static RE_CLASSNAME: Lazy<Regex> =
     Lazy::new(|| Regex::new(r#"(?:className|class)=["']([^"']+)["']"#).unwrap());
@@ -238,9 +238,10 @@ fn run_structural_pass(source: &str) -> (Vec<String>, bool, Vec<String>) {
     let ret = Parser::new(&allocator, &cleaned, st).parse();
 
     let mut v = StructuralVisitor::new();
-    // SAFETY: semua data yang diambil visitor adalah owned String,
-    // tidak ada referensi ke AST yang keluar dari fungsi ini.
-    let prog: &'static Program<'static> = unsafe { std::mem::transmute(&ret.program) };
+    // SAFETY: All data extracted by the visitor is owned String,
+    // no references to the AST escape this function.
+    // The allocator lives alongside ret, so the borrow is valid for the function scope.
+    let prog: &Program = unsafe { &*(&ret.program as *const Program) };
     v.visit_program(prog);
     drop(ret);
 
@@ -265,12 +266,11 @@ pub fn extract_classes_oxc(source: &str, _filename: &str) -> OxcExtractResult {
 
     // Dedup + filter
     let mut seen = std::collections::HashSet::new();
-    let classes: Vec<String> = raw_classes
+    let mut classes: Vec<String> = raw_classes
         .into_iter()
         .filter(|c| is_tw_class(c) && seen.insert(c.clone()))
-        .collect::<std::collections::BTreeSet<_>>()
-        .into_iter()
         .collect();
+    classes.sort();
 
     OxcExtractResult {
         classes,

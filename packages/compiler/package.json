@@ -44,7 +44,7 @@
   "devDependencies": {
     "@types/node": "^20",
     "tsup": "^8",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "scripts": {
     "build": "tsup src/index.ts src/internal.ts --format esm --dts --out-dir dist --clean",

@@ -7,7 +7,6 @@
 /// - Nested component parsing via AST traversal
 /// - Type-safe component identification
 /// - Better cache invalidation based on AST changes
-
 use once_cell::sync::Lazy;
 use oxc_allocator::Allocator;
 use oxc_parser::{Parser, ParserReturn};
@@ -17,12 +16,13 @@ use std::path::Path;
 
 /// Result of AST-based template extraction
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub struct AstTemplateMatch {
     pub tag: String,
     pub content: String,
+    #[allow(dead_code)] // Used for RSC-aware transforms in future
     pub is_server: bool,
     pub position: usize,
+    #[allow(dead_code)] // Used for precise replacement positioning in future
     pub length: usize,
 }
 
@@ -35,10 +35,7 @@ static RE_TEMPLATE_VALIDATION: Lazy<Regex> =
 /// Returns (templates, is_server_component, parse_error_flag)
 /// is_server_component: true if no 'use client' directive found
 /// ─ OPTIMIZATION (Phase 3.2): AST-based extraction with error recovery
-#[allow(dead_code)]
-pub fn extract_templates_from_ast(
-    source: &str,
-) -> (Vec<AstTemplateMatch>, bool, bool) {
+pub fn extract_templates_from_ast(source: &str) -> (Vec<AstTemplateMatch>, bool, bool) {
     let allocator = Allocator::default();
     // ─ SourceType detection based on file content
     let has_jsx = source.contains("jsx") || source.contains("<") || source.contains(">");
@@ -50,7 +47,7 @@ pub fn extract_templates_from_ast(
     } else {
         "test.js"
     };
-    
+
     let source_type = SourceType::from_path(Path::new(filename))
         .unwrap_or_default()
         .with_module(true);

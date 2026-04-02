@@ -20,10 +20,11 @@ export class VariantChainId {
 }
 
 export class PropertyId {
-  name?: string
-  constructor(public readonly value: number) {}
+  constructor(
+    public readonly value: number,
+    public readonly name?: string,
+  ) {}
   toString() {
-    // Check for custom name property first (set by traceService)
     const name = this.name
     if (typeof name === "string" && name.length > 0) {
       return name
@@ -33,10 +34,11 @@ export class PropertyId {
 }
 
 export class ValueId {
-  name?: string
-  constructor(public readonly value: number) {}
+  constructor(
+    public readonly value: number,
+    public readonly name?: string,
+  ) {}
   toString() {
-    // Check for custom name property first (set by traceService)
     const name = this.name
     if (typeof name === "string" && name.length > 0) {
       return name

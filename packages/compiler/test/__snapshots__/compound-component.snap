@@ -1,0 +1,23 @@
+/* @tw-transformed */
+import React from "react";
+const Card = (function() {
+  var _base = React.forwardRef(function _Tw_Card(props, ref) {
+  var _c = props.className;
+  var _r = Object.assign({}, props);
+  delete _r.className;
+  return React.createElement("div", Object.assign({ ref }, _r, { className: ["rounded-lg shadow", _c].filter(Boolean).join(" ") }));
+});
+  _base.icon = React.forwardRef(function _Tw_Card_icon(props, ref) {
+    var _c = props.className;
+    var _r = Object.assign({}, props);
+    delete _r.className;
+    return React.createElement("span", Object.assign({ ref }, _r, { className: ["Card_icon_HASH6", _c].filter(Boolean).join(" ") }));
+  });
+  _base.body = React.forwardRef(function _Tw_Card_body(props, ref) {
+    var _c = props.className;
+    var _r = Object.assign({}, props);
+    delete _r.className;
+    return React.createElement("span", Object.assign({ ref }, _r, { className: ["Card_body_HASH6", _c].filter(Boolean).join(" ") }));
+  });
+  return _base;
+})()

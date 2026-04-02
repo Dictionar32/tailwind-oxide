@@ -1,5 +1,8 @@
 /**
  * tailwind-styled-v4 - Turbopack Loader
+ *
+ * Router-aware: auto-detects App Router vs Pages Router
+ * and adjusts options accordingly.
  */
 
 import { runLoaderTransform } from "@tailwind-styled/compiler/internal"
@@ -15,19 +18,28 @@ interface TurbopackLoaderOptions {
   preserveImports?: boolean | string
 }
 
+function parseBool(val: boolean | string | undefined): boolean {
+  if (typeof val === "boolean") return val
+  if (typeof val === "string") return val === "true"
+  return false
+}
+
+function detectRouter(resourcePath: string): "app" | "pages" | "unknown" {
+  if (/[/\\]app[/\\]/.test(resourcePath)) return "app"
+  if (/[/\\]pages[/\\]/.test(resourcePath)) return "pages"
+  return "unknown"
+}
+
 export default function turbopackLoader(
   this: TurbopackContext,
   source: string,
   options: TurbopackLoaderOptions = {}
 ): string {
-  const parseBool = (val: boolean | string | undefined): boolean => {
-    if (typeof val === "boolean") return val
-    if (typeof val === "string") return val === "true"
-    return false
-  }
+  const router = detectRouter(this.resourcePath)
 
   const addDataAttr = parseBool(options.addDataAttr)
-  const autoClientBoundary = parseBool(options.autoClientBoundary)
+  const autoClientBoundary =
+    router === "app" ? true : parseBool(options.autoClientBoundary)
   const hoist = parseBool(options.hoist)
 
   const directiveMatch = source.match(/^\s*"use (client|server)"\s*;?\s*\n/)

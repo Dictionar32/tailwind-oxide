@@ -2,17 +2,12 @@
  * tailwind-styled-v4 — Core Types
  */
 
-// ── HTML Tags ────────────────────────────────────────────────────────────────
-export type HtmlTagName = keyof HTMLElementTagNameMap
+// ── Shared types (re-exported for backward compatibility) ─────────────────────
+import type { HtmlTagName, VariantMatrix, VariantValue } from "@tailwind-styled/shared"
+export type { HtmlTagName, VariantProps, VariantValue, VariantMatrix } from "@tailwind-styled/shared"
 
 // ── Variant Types ────────────────────────────────────────────────────────────
-export type VariantValue = string | number | boolean | undefined
-
 export type VariantLiterals = string | number | boolean
-
-export type VariantProps = Record<string, VariantValue>
-
-export type VariantMatrix = Record<string, Array<string | number | boolean>>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InferVariantProps<T = any> = {

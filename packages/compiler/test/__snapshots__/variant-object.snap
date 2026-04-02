@@ -1,0 +1,17 @@
+/* @tw-transformed */
+import React from "react";
+
+const __vt_c1 = {
+  "size": {
+    "sm": "text-sm",
+    "lg": "text-lg"
+  }
+};
+const __vc_c1 = [];
+const __vd_c1 = {};
+const Btn = React.forwardRef(function _TwV_button_c1(props, ref) {
+  var _rest = Object.assign({}, props);
+  delete _rest.className;
+  var _vp = {}; ["size"].forEach(function(k){ _vp[k] = props[k]; delete _rest[k]; });
+  return React.createElement("button", Object.assign({ ref }, _rest, { className: ["px-4 py-2", (__vt_c1["size"] && __vt_c1["size"][_vp["size"] ?? ""] || ""), _rest.className].filter(Boolean).join(" ") }));
+})

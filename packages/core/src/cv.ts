@@ -25,6 +25,23 @@ import type { ComponentConfig, CvFn, InferVariantProps } from "./types"
 export function cv<C extends ComponentConfig>(config: C): CvFn<C> {
   const { base = "", variants = {}, compoundVariants = [], defaultVariants = {} } = config
 
+  // Dev-mode: validate defaultVariants keys exist in variants
+  if (process.env.NODE_ENV !== "production") {
+    for (const dk of Object.keys(defaultVariants)) {
+      if (!(dk in variants)) {
+        console.warn(`[tailwind-styled] defaultVariants["${dk}"] not defined in variants`)
+      }
+    }
+  }
+
+  // Dev-mode: pre-build valid value sets for runtime validation
+  const validValues: Record<string, Set<string>> | null =
+    process.env.NODE_ENV !== "production"
+      ? Object.fromEntries(
+          Object.entries(variants).map(([k, v]) => [k, new Set(Object.keys(v))])
+        )
+      : null
+
   return (
     props: InferVariantProps<C> & { className?: string } & Readonly<
         Record<string, unknown>
@@ -35,6 +52,18 @@ export function cv<C extends ComponentConfig>(config: C): CvFn<C> {
     // Process single-value variants
     for (const key in variants) {
       const val = (props as Record<string, unknown>)[key] ?? defaultVariants[key]
+
+      // Dev-mode: warn on invalid variant value
+      if (process.env.NODE_ENV !== "production" && validValues && val !== undefined) {
+        const strVal = String(val)
+        if (!validValues[key]!.has(strVal)) {
+          console.warn(
+            `[tailwind-styled] Invalid variant: ${key}="${strVal}". ` +
+              `Valid: ${Array.from(validValues[key]!).join(", ")}`
+          )
+        }
+      }
+
       if (
         val !== undefined &&
         (variants as Record<string, Record<string, string>>)[key]?.[String(val)]

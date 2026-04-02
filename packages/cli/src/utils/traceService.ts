@@ -114,16 +114,10 @@ const createIdGenerator = () => {
 
   const generateRuleId = (): RuleId => new RuleId(_counters.ruleId++)
   const generateSelectorId = (): RuleId => new RuleId(_counters.selectorId++)
-  const generatePropertyId = (propertyName: string): PropertyId => {
-    const id = new PropertyId(_counters.propertyId++)
-    id.name = propertyName
-    return id
-  }
-  const generateValueId = (valueName: string): ValueId => {
-    const id = new ValueId(_counters.valueId++)
-    id.name = valueName
-    return id
-  }
+  const generatePropertyId = (propertyName: string): PropertyId =>
+    new PropertyId(_counters.propertyId++, propertyName)
+  const generateValueId = (valueName: string): ValueId =>
+    new ValueId(_counters.valueId++, valueName)
   const generateLayerId = (): LayerId => new LayerId(_counters.layerId++)
   const generateConditionId = (): ConditionId => new ConditionId(_counters.conditionId++)
   const getNextInsertionOrder = (): number => _counters.insertionOrder++

@@ -8,7 +8,8 @@
  *   - enumerateVariantProps: buat semua kombinasi variant untuk testing
  */
 
-export type VariantMatrix = Record<string, Array<string | number | boolean>>
+import type { VariantMatrix } from "@tailwind-styled/shared"
+export type { VariantMatrix } from "@tailwind-styled/shared"
 
 export interface ComponentConfig {
   base?: string

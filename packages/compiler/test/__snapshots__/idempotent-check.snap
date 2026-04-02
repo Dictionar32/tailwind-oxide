@@ -1,0 +1,8 @@
+/* @tw-transformed */
+import React from "react";
+const Box = React.forwardRef(function _Tw_Box(props, ref) {
+  var _c = props.className;
+  var _r = Object.assign({}, props);
+  delete _r.className;
+  return React.createElement("div", Object.assign({ ref }, _r, { className: ["bg-white", _c].filter(Boolean).join(" ") }));
+})

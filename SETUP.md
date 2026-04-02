@@ -6,8 +6,8 @@
 npm install          # install semua core dependencies
 npm run build        # build workspace (rust + packages)
 npm run test         # verifikasi tests utama
-npm run lint         # verifikasi lint utama
-npm run dev         # verifikasi lint utama
+npm run lint         # verifikasi lint
+npm run dev          # start development mode
 ```
 
 ## Setup otomatis (direkomendasikan)

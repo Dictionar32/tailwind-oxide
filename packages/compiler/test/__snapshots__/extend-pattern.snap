@@ -1,0 +1,21 @@
+/* @tw-transformed */
+import React from "react";
+const Base = React.forwardRef(function _Tw_Base(props, ref) {
+  var _c = props.className;
+  var _r = Object.assign({}, props);
+  delete _r.className;
+  return React.createElement("div", Object.assign({ ref }, _r, { className: ["flex", _c].filter(Boolean).join(" ") }));
+})
+const Extended = (function() {
+  var _ext = React.forwardRef(function _TwExt_Base(props, ref) {
+    var _c = ["bg-blue-500", props.className].filter(Boolean).join(" ");
+    return React.createElement(Base, Object.assign({}, props, { ref, className: _c }));
+  });
+  var _keys = Object.keys(Base);
+  for (var _i = 0; _i < _keys.length; _i++) {
+    if (_keys[_i] !== "displayName" && _keys[_i] !== "length" && _keys[_i] !== "name") {
+      _ext[_keys[_i]] = Base[_keys[_i]];
+    }
+  }
+  return _ext;
+})()

@@ -20,22 +20,6 @@ export function getPlatformExtension(): PlatformExtension {
   }
 }
 
-export function checkNativeDisabled(): { disabled: boolean; reason: string | null } {
-  if (process.env.TWS_NO_NATIVE === "1" || process.env.TWS_NO_NATIVE === "true") {
-    return {
-      disabled: true,
-      reason: "Native bindings disabled via TWS_NO_NATIVE=1",
-    }
-  }
-  if (process.env.TWS_NO_RUST === "1" || process.env.TWS_NO_RUST === "true") {
-    return {
-      disabled: true,
-      reason: "Native bindings disabled via TWS_NO_RUST=1",
-    }
-  }
-  return { disabled: false, reason: null }
-}
-
 export interface NativeBindingLoadError {
   path: string
   message: string
@@ -171,13 +155,6 @@ export function loadNativeBinding<T>(
 export function loadNativeBindingOrThrow<T>(
   options: LoadNativeBindingOptions<T> & { bindingName: string }
 ): T {
-  const disabledCheck = checkNativeDisabled()
-  if (disabledCheck.disabled) {
-    throw new Error(
-      `Native binding '${options.bindingName}' cannot be loaded.\n${disabledCheck.reason}`
-    )
-  }
-
   const { bindingName, ...loadOptions } = options
   const { binding, loadErrors } = loadNativeBinding<T>(loadOptions)
 
@@ -188,7 +165,7 @@ export function loadNativeBindingOrThrow<T>(
   const lines = [
     `FATAL: Native binding '${bindingName}' not found.`,
     "",
-    "This package requires native Rust bindings.",
+    "This package requires native Rust bindings. There is no JavaScript fallback.",
     "The binding was not found in any of these paths:",
     ...loadOptions.candidates.map((p) => `  - ${p}`),
     "",
@@ -213,9 +190,6 @@ export function loadNativeBindingOrThrow<T>(
     "",
     "3. Override with environment variable:",
     "   TWS_NATIVE_PATH=/path/to/tailwind_styled_parser.node",
-    "",
-    "4. Disable native bindings (use JS fallback):",
-    "   TWS_NO_NATIVE=1",
     "",
     "For CI/CD environments, ensure Rust toolchain is installed and",
     "'npm run build:rust' is executed before running tests or building."

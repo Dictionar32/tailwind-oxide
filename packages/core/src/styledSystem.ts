@@ -203,13 +203,13 @@ export function createStyledSystem<
   C extends Record<string, SystemComponentConfig> = Record<string, SystemComponentConfig>,
 >(config: StyledSystemConfig<T, C>): StyledSystemInstance<T, C> {
   const prefix = config.prefix ?? "sys"
-  const tokens = (config.tokens ?? {}) as unknown as T
+  const tokens = (config.tokens ?? {}) as T
   const componentDefs = config.components ?? ({} as C)
   const shouldInject = config.injectTokens !== false
 
   // Inject tokens into :root on first call (client only)
   if (shouldInject && typeof window !== "undefined") {
-    injectTokensToRoot(tokens as unknown as SystemTokenMap, prefix)
+    injectTokensToRoot(tokens as SystemTokenMap, prefix)
   }
 
   // Cache resolved component configs
@@ -218,7 +218,7 @@ export function createStyledSystem<
   for (const [name, compCfg] of Object.entries(componentDefs)) {
     resolvedConfigs.set(
       name,
-      resolveComponentConfig(compCfg, tokens as unknown as SystemTokenMap, prefix)
+      resolveComponentConfig(compCfg, tokens as SystemTokenMap, prefix)
     )
   }
 
@@ -230,7 +230,7 @@ export function createStyledSystem<
 
     factories[name] = (overrides?: Partial<SystemComponentConfig>) => {
       const baseResolved = resolvedConfigs.get(name)!
-      const runtimeTag = tag as unknown as React.ElementType
+      const runtimeTag = tag as React.ElementType
 
       if (!overrides || Object.keys(overrides).length === 0) {
         return createComponent(runtimeTag, baseResolved)
@@ -239,7 +239,7 @@ export function createStyledSystem<
       // Merge overrides into resolved config
       const overrideResolved = resolveComponentConfig(
         overrides as SystemComponentConfig,
-        tokens as unknown as SystemTokenMap,
+        tokens as SystemTokenMap,
         prefix
       )
 
@@ -276,7 +276,7 @@ export function createStyledSystem<
   function rawToken(path: string): string | undefined {
     const [group, name] = path.split(".")
     if (!group || !name) return undefined
-    return (tokens as unknown as SystemTokenMap)[group]?.[name]
+    return (tokens as SystemTokenMap)[group]?.[name]
   }
 
   function setTokens(updates: Partial<{ [G in keyof T]: Partial<T[G]> }>): void {
@@ -297,12 +297,12 @@ export function createStyledSystem<
     for (const [group, map] of Object.entries(updates)) {
       if (!tokens[group as keyof T]) continue
       for (const [name, value] of Object.entries(map as Record<string, string>)) {
-        ;(tokens as unknown as SystemTokenMap)[group][name] = value
+        ;(tokens as SystemTokenMap)[group][name] = value
       }
     }
 
     const lines: string[] = [":root {"]
-    for (const [group, map] of Object.entries(tokens as unknown as SystemTokenMap)) {
+    for (const [group, map] of Object.entries(tokens as SystemTokenMap)) {
       for (const [name, value] of Object.entries(map)) {
         lines.push(`  ${tokenVarName(prefix, group, name)}: ${value};`)
       }
@@ -321,5 +321,5 @@ export function createStyledSystem<
     setTokens,
     getConfig,
     tokens,
-  }) as unknown as StyledSystemInstance<T, C>
+  }) as StyledSystemInstance<T, C>
 }

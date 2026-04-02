@@ -83,8 +83,8 @@ function attachExtend<P extends object>(
         key !== "animate" &&
         key !== "displayName"
       ) {
-        ;(extended as unknown as Record<string, unknown>)[key] = (
-          component as unknown as Record<string, unknown>
+        ;(extended as Record<string, unknown>)[key] = (
+          component as Record<string, unknown>
         )[key]
       }
     }
@@ -166,7 +166,7 @@ export function createComponent<P extends object = Record<string, unknown>>(
       })
     })
 
-    const component = baseComponent as unknown as TwStyledComponent<P>
+    const component = baseComponent as TwStyledComponent<P>
     component.displayName = `tw.${tagLabel}`
     return attachExtend<P>(component, tag, base, config)
   }
@@ -184,7 +184,7 @@ export function createComponent<P extends object = Record<string, unknown>>(
     })
   })
 
-  const component = baseComponent as unknown as TwStyledComponent<P>
+  const component = baseComponent as TwStyledComponent<P>
   component.displayName = `tw.${tagLabel}`
   return attachExtend<P>(component, tag, base, config)
 }

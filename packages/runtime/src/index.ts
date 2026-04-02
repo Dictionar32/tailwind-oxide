@@ -174,7 +174,7 @@ export function createComponent<S extends SubComponentMap = SubComponentMap>(
     }
   }
 
-  return Base as unknown as StyledComponent<S>
+  return Base as StyledComponent<S>
 }
 
 // Re-export schemas

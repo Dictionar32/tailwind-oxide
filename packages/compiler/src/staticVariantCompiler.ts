@@ -36,12 +36,13 @@
  */
 
 import { twMerge } from "tailwind-merge"
+import type { CompoundCondition } from "@tailwind-styled/shared"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type CompoundCondition = Record<string, string>
+export type { CompoundCondition }
 
 export interface StaticVariantConfig {
   componentId: string

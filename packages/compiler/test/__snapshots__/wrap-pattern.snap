@@ -1,0 +1,12 @@
+/* @tw-transformed */
+import React from "react";
+const Comp = React.forwardRef(function _Tw_Comp(props, ref) {
+  var _c = props.className;
+  var _r = Object.assign({}, props);
+  delete _r.className;
+  return React.createElement("div", Object.assign({ ref }, _r, { className: ["p-4", _c].filter(Boolean).join(" ") }));
+})
+const Wrapped = React.forwardRef(function _TwWrap_Comp(props, ref) {
+  var _c = ["mt-4", props.className].filter(Boolean).join(" ");
+  return React.createElement(Comp, Object.assign({}, props, { ref, className: _c }));
+})

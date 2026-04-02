@@ -112,7 +112,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "tsup": "^8",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "scripts": {
     "build": "tsup",

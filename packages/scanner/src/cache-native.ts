@@ -82,3 +82,42 @@ export function filePriority(
     nowMs
   )
 }
+
+export interface CacheStats {
+  totalEntries: number
+  totalClasses: number
+  totalSizeBytes: number
+  avgClassesPerEntry: number
+  mostUsedClasses: Array<{ class: string; count: number }>
+}
+
+export function computeCacheStats(entries: NativeCacheEntry[]): CacheStats {
+  if (entries.length === 0) {
+    return { totalEntries: 0, totalClasses: 0, totalSizeBytes: 0, avgClassesPerEntry: 0, mostUsedClasses: [] }
+  }
+
+  const classCounts = new Map<string, number>()
+  let totalClasses = 0
+  let totalSize = 0
+
+  for (const entry of entries) {
+    totalClasses += entry.classes.length
+    totalSize += entry.size
+    for (const cls of entry.classes) {
+      classCounts.set(cls, (classCounts.get(cls) ?? 0) + 1)
+    }
+  }
+
+  const mostUsedClasses = [...classCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([cls, count]) => ({ class: cls, count }))
+
+  return {
+    totalEntries: entries.length,
+    totalClasses,
+    totalSizeBytes: totalSize,
+    avgClassesPerEntry: totalClasses / entries.length,
+    mostUsedClasses,
+  }
+}

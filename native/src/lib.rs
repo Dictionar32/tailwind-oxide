@@ -208,7 +208,6 @@ fn build_component_name_index(source: &str) -> HashMap<String, usize> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Decides whether to use AST-based or regex-based template extraction
 // based on file characteristics
-#[allow(dead_code)]
 fn should_use_ast_for_templates(source: &str) -> bool {
     // Use AST when:
     // 1. File is large enough to amortize parsing cost (>5KB)
@@ -413,59 +412,117 @@ pub fn transform_source(source: String, opts: Option<HashMap<String, String>>) -
     // ─ OPTIMIZATION (Phase 1.3): Build component name index once, O(1) lookups in loop
     let comp_name_index = build_component_name_index(&source);
 
-    // STEP 1: tw.tag`classes`
+    // STEP 1: tw.tag`classes`  —  Hybrid AST/regex extraction
     {
         let snap = code.clone();
-        // ─ OPTIMIZATION (Phase 1.1): Pre-allocate replacements vector
         let mut replacements: Vec<(String, String)> = Vec::new();
 
-        for cap in RE_TEMPLATE.captures_iter(&snap) {
-            let full_match = cap[0].to_string();
-            let tag = cap[2].to_string();
-            let content = cap[3].to_string();
+        // ─ OPTIMIZATION (Phase 3): Hybrid AST/regex routing
+        if should_use_ast_for_templates(&source) {
+            // AST path: parse once, extract structurally
+            let (ast_templates, _, had_error) = ast_optimizer::extract_templates_from_ast(&snap);
+            if !had_error {
+                for tmpl in ast_templates {
+                    if is_dynamic(&tmpl.content) {
+                        continue;
+                    }
 
-            if is_dynamic(&content) {
-                continue;
+                    let comp_name = comp_name_index
+                        .iter()
+                        .filter(|(_, &pos)| pos < tmpl.position)
+                        .max_by_key(|(_, &pos)| pos)
+                        .map(|(name, _)| name.clone())
+                        .unwrap_or_else(|| format!("Tw_{}", tmpl.tag));
+
+                    let (base_content, sub_comps) =
+                        parse_subcomponent_blocks(&tmpl.content, &comp_name);
+                    let base_classes_vec = normalise_classes(&base_content);
+                    let base_classes = base_classes_vec.join(" ");
+
+                    all_classes.extend(base_classes_vec.clone());
+                    for sub in &sub_comps {
+                        all_classes.extend(normalise_classes(&sub.classes));
+                    }
+
+                    let hash = short_hash(&format!("{}_{}", comp_name, base_classes));
+                    let base_scoped = format!("{}_{}", comp_name, hash);
+                    let meta = build_metadata_json(&comp_name, &tmpl.tag, &base_scoped, &sub_comps);
+                    all_metadata.push(meta);
+
+                    let fn_name = format!("_Tw_{}", comp_name);
+                    let replacement = if sub_comps.is_empty() {
+                        render_static_component(&tmpl.tag, &base_classes, &fn_name)
+                    } else {
+                        render_compound_component(
+                            &tmpl.tag,
+                            &base_classes,
+                            &fn_name,
+                            &sub_comps,
+                            &comp_name,
+                        )
+                    };
+
+                    // Reconstruct the full match: tw.tag`content`
+                    let full_match = format!("tw.{}`{}`", tmpl.tag, tmpl.content);
+                    replacements.push((full_match, replacement));
+                }
+                if !replacements.is_empty() {
+                    changed = true;
+                    needs_react = true;
+                }
             }
+        }
 
-            // ─ OPTIMIZATION (Phase 1.3): Use pre-built index instead of O(n×m) regex scan
-            // Find nearest component name before this template by looking in index
-            let comp_name = {
-                let template_pos = snap.find(&full_match).unwrap_or(0);
-                comp_name_index
-                    .iter()
-                    .filter(|(_, &pos)| pos < template_pos)
-                    .max_by_key(|(_, &pos)| pos)
-                    .map(|(name, _)| name.clone())
-                    .unwrap_or_else(|| format!("Tw_{}", tag))
-            };
+        // Regex fallback (or primary path for small files / AST errors)
+        if replacements.is_empty() {
+            for cap in RE_TEMPLATE.captures_iter(&snap) {
+                let full_match = cap[0].to_string();
+                let tag = cap[2].to_string();
+                let content = cap[3].to_string();
 
-            let (base_content, sub_comps) = parse_subcomponent_blocks(&content, &comp_name);
+                if is_dynamic(&content) {
+                    continue;
+                }
 
-            let base_classes_vec = normalise_classes(&base_content);
-            let base_classes = base_classes_vec.join(" ");
+                // ─ OPTIMIZATION (Phase 1.3): Use pre-built index instead of O(n×m) regex scan
+                // Find nearest component name before this template by looking in index
+                let comp_name = {
+                    let template_pos = snap.find(&full_match).unwrap_or(0);
+                    comp_name_index
+                        .iter()
+                        .filter(|(_, &pos)| pos < template_pos)
+                        .max_by_key(|(_, &pos)| pos)
+                        .map(|(name, _)| name.clone())
+                        .unwrap_or_else(|| format!("Tw_{}", tag))
+                };
 
-            all_classes.extend(base_classes_vec.clone());
-            for sub in &sub_comps {
-                all_classes.extend(normalise_classes(&sub.classes));
+                let (base_content, sub_comps) = parse_subcomponent_blocks(&content, &comp_name);
+
+                let base_classes_vec = normalise_classes(&base_content);
+                let base_classes = base_classes_vec.join(" ");
+
+                all_classes.extend(base_classes_vec.clone());
+                for sub in &sub_comps {
+                    all_classes.extend(normalise_classes(&sub.classes));
+                }
+
+                let hash = short_hash(&format!("{}_{}", comp_name, base_classes));
+                let base_scoped = format!("{}_{}", comp_name, hash);
+
+                let meta = build_metadata_json(&comp_name, &tag, &base_scoped, &sub_comps);
+                all_metadata.push(meta);
+
+                let fn_name = format!("_Tw_{}", comp_name);
+                let replacement = if sub_comps.is_empty() {
+                    render_static_component(&tag, &base_classes, &fn_name)
+                } else {
+                    render_compound_component(&tag, &base_classes, &fn_name, &sub_comps, &comp_name)
+                };
+
+                replacements.push((full_match, replacement));
+                changed = true;
+                needs_react = true;
             }
-
-            let hash = short_hash(&format!("{}_{}", comp_name, base_classes));
-            let base_scoped = format!("{}_{}", comp_name, hash);
-
-            let meta = build_metadata_json(&comp_name, &tag, &base_scoped, &sub_comps);
-            all_metadata.push(meta);
-
-            let fn_name = format!("_Tw_{}", comp_name);
-            let replacement = if sub_comps.is_empty() {
-                render_static_component(&tag, &base_classes, &fn_name)
-            } else {
-                render_compound_component(&tag, &base_classes, &fn_name, &sub_comps, &comp_name)
-            };
-
-            replacements.push((full_match, replacement));
-            changed = true;
-            needs_react = true;
         }
 
         for (from, to) in replacements {
@@ -1457,8 +1514,8 @@ pub struct ScanResult {
 /// ─ OPTIMIZATION (Phase 2): Parallel file processing with rayon
 #[napi]
 pub fn scan_workspace(root: String, extensions: Option<Vec<String>>) -> napi::Result<ScanResult> {
-    use std::path::Path;
     use crate::thread_pool::SCAN_THREAD_POOL;
+    use std::path::Path;
 
     let exts: Vec<String> = extensions.unwrap_or_else(|| {
         vec![

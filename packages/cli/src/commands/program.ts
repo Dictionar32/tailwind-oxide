@@ -8,6 +8,7 @@ import { runScanCli } from "../scan"
 import { runSetupCli } from "../setup"
 import { runStatsCli } from "../stats"
 import { resolveCommandHelp } from "../utils/runtime"
+import { boundaryCommand } from "./boundary"
 import { createCommand } from "./create"
 import { dashboardCommand } from "./dashboard"
 import { deployCommand } from "./deploy"
@@ -545,6 +546,19 @@ export function buildMainProgram(context: CommandContext): Command {
       const args: string[] = [className]
       if (options.cwd) args.push(`--cwd=${options.cwd}`)
       await runWhyCli(contextArgs(args, context), context)
+    })
+
+  program
+    .command("boundary [target]")
+    .description("Analyze RSC boundary (server/client components)")
+    .aliases(["b"])
+    .option("--cwd <path>", "Working directory")
+    .action(async (target: string | undefined, ...actionArgs) => {
+      const options = actionCommand(actionArgs).opts()
+      const args: string[] = []
+      if (target) args.push(target)
+      if (options.cwd) args.push(`--cwd=${options.cwd}`)
+      await boundaryCommand.run(contextArgs(args, context), context)
     })
 
   return program

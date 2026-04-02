@@ -38,9 +38,7 @@ interface NextWebpackConfig {
 }
 
 interface NextConfigWithTurbopack {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   webpack?: ((...args: any[]) => any) | null | undefined
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   turbopack?: Record<string, unknown>
   [key: string]: unknown
 }
@@ -66,6 +64,21 @@ const resolveLoaderPath = (basename: string): string => {
   }
 
   return path.resolve(runtimeDir, `${basename}.js`)
+}
+
+function checkNextVersion(): void {
+  try {
+    const pkgPath = require.resolve("next/package.json")
+    const { version } = require(pkgPath)
+    const major = Number.parseInt(version.split(".")[0], 10)
+    if (major < 15) {
+      console.warn(
+        `[tailwind-styled] Next.js ${version} detected. Recommended: 15+ for full Turbopack support.`
+      )
+    }
+  } catch {
+    // next not resolvable — skip check
+  }
 }
 
 const DEFAULT_INCLUDE = /\.[jt]sx?$/
@@ -123,6 +136,7 @@ const applyWebpackRule = (
 }
 
 export function withTailwindStyled(options: TailwindStyledNextOptions = {}) {
+  checkNextVersion()
   const normalizedOptions = parseNextAdapterOptions(options)
   const webpackLoaderPath = resolveLoaderPath("webpackLoader")
   const turbopackLoaderPath = resolveLoaderPath("turbopackLoader")

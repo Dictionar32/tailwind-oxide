@@ -68,7 +68,7 @@
     "@types/node": "^20",
     "@types/vscode": "^1.75.0",
     "tsup": "^8",
-    "typescript": "^5"
+    "typescript": "^6"
   },
   "dependencies": {
     "@tailwind-styled/engine": "^5.0.4",

@@ -147,7 +147,7 @@ export function createTraceSnapshot(data: Record<string, unknown>): TraceSnapsho
     scanMs: (data.scanMs as number) ?? null,
     analyzeMs: (data.analyzeMs as number) ?? null,
     compileMs: (data.compileMs as number) ?? null,
-    memoryMb: (data.memoryMb as any) ?? null,
+    memoryMb: (data.memoryMb as { rss: number; heapUsed: number; heapTotal: number } | null) ?? null,
     classCount: (data.classCount as number) ?? null,
     fileCount: (data.fileCount as number) ?? null,
     cssBytes: (data.cssBytes as number) ?? null,

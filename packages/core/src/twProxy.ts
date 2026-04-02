@@ -213,7 +213,7 @@ for (const tag of HTML_TAGS) {
   serverFactories[tag] = makeServerTag(tag as React.ElementType)
 }
 
-export const server: TwServerObject = serverFactories as unknown as TwServerObject
+export const server: TwServerObject = serverFactories as TwServerObject
 
 // ─────────────────────────────────────────────────────────────────────────────
 // tw — main export

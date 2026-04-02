@@ -1,0 +1,8 @@
+/* @tw-transformed */
+import React from "react";
+const ServerBox = /* @server-only */ React.forwardRef(function _Tw_ServerBox(props, ref) {
+  var _c = props.className;
+  var _r = Object.assign({}, props);
+  delete _r.className;
+  return React.createElement("div", Object.assign({ ref }, _r, { className: ["flex p-4", _c].filter(Boolean).join(" ") }));
+})

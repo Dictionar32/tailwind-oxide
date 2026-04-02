@@ -21,9 +21,6 @@ export const WRAP_RE = /\btw\((\w+)\)`((?:[^`\\]|\\.)*)`/g
 /** Card.extend`...` */
 export const EXTEND_RE = /(\w+)\.extend`((?:[^`\\]|\\.)*)`/g
 
-/** import { tw } from "tailwind-styled-v4" */
-export const IMPORT_RE = /from\s*["']tailwind-styled-v4["']/
-
 /** Transform already-applied marker — idempotency guard (#08) */
 export const TRANSFORM_MARKER = "/* @tw-transformed */"
 

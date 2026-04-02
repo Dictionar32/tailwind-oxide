@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "src",
     "allowJs": true,
     "checkJs": false,
     "module": "commonjs",

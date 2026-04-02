@@ -34,7 +34,7 @@ export function withSubComponents<T extends object>(
     const entry = getSubComponent(name)
     if (entry) result[name] = entry.component
   }
-  return result as unknown as T & Record<string, React.FC<SubComponentProps>>
+  return result as T & Record<string, React.FC<SubComponentProps>>
 }
 
 registerSubComponent({

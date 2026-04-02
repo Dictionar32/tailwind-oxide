@@ -23,8 +23,9 @@
 
 import { type ParsedComponentConfig, parseComponentConfig } from "./astParser"
 import { normalizeClasses } from "./classMerger"
+import type { CompoundCondition } from "@tailwind-styled/shared"
 
-export type CompoundCondition = Record<string, string | number | boolean>
+export type { CompoundCondition }
 
 export interface CompiledVariants {
   base: string

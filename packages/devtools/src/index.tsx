@@ -92,7 +92,7 @@ function findNearestTwElement(el: HTMLElement): HTMLElement | null {
 }
 
 function getAtomicMap(classes: string[]): Record<string, string> {
-  const registry = (window as any).__TW_REGISTRY__ as Record<string, string> | undefined
+  const registry = window.__TW_REGISTRY__
   if (!registry) return {}
   const map: Record<string, string> = {}
   for (const cls of classes) {
@@ -112,7 +112,7 @@ function getActiveStates(el: HTMLElement): Record<string, string> {
 }
 
 function getStateNames(el: HTMLElement): string[] {
-  const registry = (window as any).__TW_STATE_REGISTRY__ as Map<string, any> | undefined
+  const registry = window.__TW_STATE_REGISTRY__ as Map<string, { states: string[] }> | undefined
   if (!registry) return []
   for (const [id, entry] of registry) {
     if (el.classList.contains(id)) return entry.states
@@ -121,11 +121,11 @@ function getStateNames(el: HTMLElement): string[] {
 }
 
 function getContainerBps(el: HTMLElement): string[] {
-  const registry = (window as any).__TW_CONTAINER_REGISTRY__ as Map<string, any> | undefined
+  const registry = window.__TW_CONTAINER_REGISTRY__ as Map<string, { breakpoints: Array<{ minWidth: string }> }> | undefined
   if (!registry) return []
   for (const [id, entry] of registry) {
     if (el.classList.contains(id)) {
-      return entry.breakpoints.map((bp: any) => bp.minWidth)
+      return entry.breakpoints.map((bp) => bp.minWidth)
     }
   }
   return []
@@ -285,7 +285,7 @@ function StatePanel() {
 
   useEffect(() => {
     const refresh = () => {
-      const reg = (window as any).__TW_STATE_REGISTRY__ as Map<string, any> | undefined
+      const reg = window.__TW_STATE_REGISTRY__
       setEntries(reg ? Array.from(reg.values()) : [])
     }
     refresh()
@@ -368,7 +368,7 @@ function ContainerPanel() {
 
   useEffect(() => {
     const refresh = () => {
-      const reg = (window as any).__TW_CONTAINER_REGISTRY__ as Map<string, any> | undefined
+      const reg = window.__TW_CONTAINER_REGISTRY__
       setEntries(reg ? Array.from(reg.values()) : [])
     }
     refresh()
@@ -450,10 +450,11 @@ function TokensPanel() {
   const [tokens, setTokens_] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    const engine = (window as any).__TW_TOKEN_ENGINE__
+    const engine = window.__TW_TOKEN_ENGINE__
     if (!engine) return
 
     setTokens_(engine.getTokens())
+    if (!engine.subscribe) return
     const unsub = engine.subscribe((t: Record<string, string>) => setTokens_({ ...t }))
     return unsub
   }, [])
@@ -515,7 +516,7 @@ function TokensPanel() {
                 cursor: "pointer",
               },
               onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                const engine = (window as any).__TW_TOKEN_ENGINE__
+                const engine = window.__TW_TOKEN_ENGINE__
                 if (engine) engine.setToken(name, e.target.value)
               },
             })
@@ -533,7 +534,7 @@ function TokensPanel() {
                 fontFamily: "monospace",
               },
               onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-                const engine = (window as any).__TW_TOKEN_ENGINE__
+                const engine = window.__TW_TOKEN_ENGINE__
                 if (engine) engine.setToken(name, e.target.value)
               },
             })
@@ -617,9 +618,9 @@ function AnalyzerPanel() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
 
-      const stateReg = (window as any).__TW_STATE_REGISTRY__ as Map<string, any> | undefined
-      const containerReg = (window as any).__TW_CONTAINER_REGISTRY__ as Map<string, any> | undefined
-      const tokenEngine = (window as any).__TW_TOKEN_ENGINE__
+      const stateReg = window.__TW_STATE_REGISTRY__
+      const containerReg = window.__TW_CONTAINER_REGISTRY__
+      const tokenEngine = window.__TW_TOKEN_ENGINE__
 
       setResults({
         duplicates,

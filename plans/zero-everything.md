@@ -1377,6 +1377,71 @@ PS C:\Users\User\Documents\demoPackageNpm\focus\tailwind-styled-v4.5-platform-mo
 >> grep -rn "css-in-js\|styled-components" packages/ --include="*.ts"
 packages/cli/src/migrate.ts:62:    output = output.replace(/tailwind-styled-components/g, () => {
 packages/cli/src/migrateWizard.ts:37:    message: "Migrasi import tailwind-styled-components -> tailwind-styled-v4?",
+
+
+
+// ================================================================
+// SESSION: Unsafe Type Assertions + Type Consolidation + Phase 3
+// Date: 2026-04-02
+// ================================================================
+
+## Unsafe Type Assertions Audit & Fix
+
+### Before → After
+- `as any`:           33+ → 0   (eliminated)
+- `as unknown as`:    17  → 2   (only genuine: twProxy.ts:234, runtime/index.ts:173)
+- `window as any`:    10+ → 0   (eliminated)
+- `@ts-ignore`:       0   → 0   (clean)
+- `console.log/warn`: 76  → 76  (52 CLI, 24 user-facing — appropriate)
+
+### Files Changed
+- `packages/shared/src/global.d.ts` — CREATED: centralized Window.__TW_*__ augmentations
+- `packages/devtools/package.json` — Added @tailwind-styled/shared dependency
+- `packages/devtools/src/index.tsx` — Eliminated all 10+ window as any casts
+- `packages/core/src/styledSystem.ts` — Removed 8 tokens as unknown as SystemTokenMap
+- `packages/core/src/createComponent.ts` — Removed 4 as unknown as casts
+- `packages/core/src/twProxy.ts` — Simplified serverFactories cast
+- `packages/core/src/registry.ts` — Simplified withSubComponents return cast
+- `packages/runtime/src/index.ts` — Simplified return cast (kept 1 necessary as unknown as)
+- `packages/shared/src/trace.ts` — Replaced as any with nested type assertion
+
+## Type Consolidation (Phase 1 & 2)
+
+### Duplicates Eliminated
+- `VariantValue`:    shared + core/types → shared only
+- `VariantProps`:    shared + core/types → shared only
+- `HtmlTagName`:     shared + core/types → shared only
+- `CompoundCondition`: shared + compiler/variantCompiler + staticVariantCompiler → shared only
+- `VariantMatrix`:   core/types + storybook-addon → shared only
+
+### Files Changed
+- `packages/shared/src/index.ts` — Added VariantMatrix type
+- `packages/core/src/types.ts` — Import from shared, re-export for backward compat
+- `packages/compiler/src/variantCompiler.ts` — Import CompoundCondition from shared
+- `packages/compiler/src/staticVariantCompiler.ts` — Import CompoundCondition from shared
+- `packages/storybook-addon/src/index.ts` — Import VariantMatrix from shared
+- `packages/storybook-addon/package.json` — Added @tailwind-styled/shared dependency
+
+## Phase 3: AST Optimizer Integration (Rust)
+
+### Changes
+- `native/src/lib.rs`:
+  - Removed #[allow(dead_code)] from should_use_ast_for_templates()
+  - Refactored transform_source() STEP 1 into hybrid AST/regex path
+  - AST path for >5KB files with 3+ templates
+  - Regex fallback for small files or AST errors
+- `native/src/ast_optimizer.rs`:
+  - Removed #[allow(dead_code)] from AstTemplateMatch struct and extract_templates_from_ast()
+
+### Results
+- Tests: 62 → 67 (+5 AST tests)
+- Cargo warnings: 1 → 0
+- AST module: dead code → integrated into transform pipeline
+
+## Verification
+- TypeScript: tsc --noEmit CLEAN
+- Rust: cargo check 0 warnings
+- Rust tests: 67/67 passed
 PS C:\Users\User\Documents\demoPackageNpm\focus\tailwind-styled-v4.5-platform-modify-v3_fixed (1)\library> 
 
 
