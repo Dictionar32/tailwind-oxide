@@ -193,15 +193,15 @@ const createBridgeLoader = () => {
       return bridgeState.current
     }
 
-    // Fallback strategy: try to accept raw .node bindings from native folder
+    // Try to load raw .node bindings from native folder
     // by wrapping snake_case exported functions into the compiler native bridge API.
-    const fallbackRequire = createRequire(path.join(runtimeDir, "noop.cjs"))
+    const candidateRequire = createRequire(path.join(runtimeDir, "noop.cjs"))
 
     for (const candidate of candidates) {
       try {
-        const mod = fallbackRequire(candidate)
+        const mod = candidateRequire(candidate)
         if (isValidCompilerBridge(mod)) {
-          log(`native bridge loaded successfully from fallback candidate ${candidate}`)
+          log(`native bridge loaded successfully from candidate ${candidate}`)
           bridgeState.current = mod
           return bridgeState.current
         }
@@ -212,7 +212,7 @@ const createBridgeLoader = () => {
           return bridgeState.current
         }
       } catch (err) {
-        log(`fallback candidate ${candidate} failed to load: ${(err as Error).message ?? err}`)
+        log(`candidate ${candidate} failed to load: ${(err as Error).message ?? err}`)
       }
     }
 
