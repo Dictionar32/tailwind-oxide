@@ -21,10 +21,11 @@
       "@tailwind-styled/rspack": ["packages/rspack/src/index.ts"],
       "@tailwind-styled/vue": ["packages/vue/src/index.ts"],
       "@tailwind-styled/svelte": ["packages/svelte/src/index.ts"],
+      "@tailwind-styled/devtools": ["packages/devtools/src/index.tsx"],
       "@tailwind-styled/animate": ["packages/animate/src/index.ts"],
       "create-tailwind-styled": ["packages/cli/src/index.ts"]
     }
   },
   "include": ["packages/*/src/**/*.ts", "packages/*/src/**/*.tsx"],
-  "exclude": ["packages/*/src/**/*.test.ts", "packages/*/src/**/*.test.tsx", "packages/*/src/**/index.minified.ts"]
+  "exclude": ["packages/*/src/**/*.test.ts", "packages/*/src/**/*.test.tsx", "packages/_experiments/**"]
 }
